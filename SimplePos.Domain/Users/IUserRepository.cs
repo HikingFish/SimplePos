@@ -1,4 +1,4 @@
-namespace SimplePos.Auth.Domain.Users
+namespace SimplePos.Domain.Users
 {
     public interface IUserRepository
     {

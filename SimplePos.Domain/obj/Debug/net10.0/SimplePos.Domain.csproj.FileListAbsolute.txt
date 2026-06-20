@@ -1,0 +1,12 @@
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/bin/Debug/net10.0/SimplePos.Domain.deps.json
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/bin/Debug/net10.0/SimplePos.Domain.dll
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/bin/Debug/net10.0/SimplePos.Domain.pdb
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.GeneratedMSBuildEditorConfig.editorconfig
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.AssemblyInfoInputs.cache
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.AssemblyInfo.cs
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.csproj.CoreCompileInputs.cache
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.sourcelink.json
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.dll
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/refint/SimplePos.Domain.dll
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/SimplePos.Domain.pdb
+/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/Debug/net10.0/ref/SimplePos.Domain.dll

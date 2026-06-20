@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Auth.Domain/SimplePos.Auth.Domain.csproj": {}
+    "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/SimplePos.Auth.Domain.csproj": {}
   },
   "projects": {
-    "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Auth.Domain/SimplePos.Auth.Domain.csproj": {
+    "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/SimplePos.Auth.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Auth.Domain/SimplePos.Auth.Domain.csproj",
+        "projectUniqueName": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/SimplePos.Auth.Domain.csproj",
         "projectName": "SimplePos.Auth.Domain",
-        "projectPath": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Auth.Domain/SimplePos.Auth.Domain.csproj",
+        "projectPath": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/SimplePos.Auth.Domain.csproj",
         "packagesPath": "/Users/cheong/.nuget/packages/",
-        "outputPath": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Auth.Domain/obj/",
+        "outputPath": "/Users/cheong/Projects/SimplePos.Auth/SimplePos.Domain/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/cheong/.nuget/NuGet/NuGet.Config"
