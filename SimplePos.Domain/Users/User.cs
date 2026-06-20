@@ -51,41 +51,16 @@ namespace SimplePos.Domain.Users
             Active = true;
         }
 
-        public void UpdateEmail(string newEmail)
+        public void UpdateUserInfo(string newEmail, string newPhoneNumber, string newUserPosition)
         {
             if (string.IsNullOrWhiteSpace(newEmail))
             {
-                throw new ArgumentException("New email cannot be empty.");
+                throw new ArgumentException("Email cannot be empty.");
             }
 
             Email = newEmail;
-        }
-        public void UpdatePhoneNumber(string newPhoneNumber)
-        {
-            if (string.IsNullOrWhiteSpace(newPhoneNumber))
-            {
-                throw new ArgumentException("New phone number cannot be empty.");
-            }
-
             PhoneNumber = newPhoneNumber;
-        }
-        public void UpdateUserPosition(string newUserPosition)
-        {
-            if (string.IsNullOrWhiteSpace(newUserPosition))
-            {
-                throw new ArgumentException("New user position cannot be empty.");
-            }
-
             UserPosition = newUserPosition;
-        }
-        public void UpdateUsername(string newUsername)
-        {
-            if (string.IsNullOrWhiteSpace(newUsername))
-            {
-                throw new ArgumentException("New username cannot be empty.");
-            }
-
-            Username = newUsername;
         }
         public void UpdatePassword(string newHashedPassword)
         {
