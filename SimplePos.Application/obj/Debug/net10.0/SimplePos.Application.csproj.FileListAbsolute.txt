@@ -1,0 +1,12 @@
+/Users/cheong/Projects/SimplePos/SimplePos.Application/bin/Debug/net10.0/SimplePos.Application.deps.json
+/Users/cheong/Projects/SimplePos/SimplePos.Application/bin/Debug/net10.0/SimplePos.Application.dll
+/Users/cheong/Projects/SimplePos/SimplePos.Application/bin/Debug/net10.0/SimplePos.Application.pdb
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.AssemblyInfoInputs.cache
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.AssemblyInfo.cs
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.csproj.CoreCompileInputs.cache
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.sourcelink.json
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.dll
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/refint/SimplePos.Application.dll
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/SimplePos.Application.pdb
+/Users/cheong/Projects/SimplePos/SimplePos.Application/obj/Debug/net10.0/ref/SimplePos.Application.dll

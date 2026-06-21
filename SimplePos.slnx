@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="SimplePos.Application/SimplePos.Application.csproj" />
   <Project Path="SimplePos.Domain/SimplePos.Domain.csproj" />
 </Solution>

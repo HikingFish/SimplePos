@@ -3,26 +3,26 @@ namespace SimplePos.Domain.Users
     public class User
     {
         public Guid UserId { get; private set; }
-        public Guid CompanyId { get; private set;}
+        public Guid OutletId { get; private set;}
         public string Username { get; private set; } = string.Empty;
         public string HashedPassword { get; private set; } = string.Empty;
         public string Email { get; private set; } = string.Empty;
         public string? PhoneNumber { get; private set; } = string.Empty;
         public string? UserPosition { get; private set; } = string.Empty;
-        public bool Active { get; private set; }
+        public bool IsActive { get; private set; }
         public DateTime? DateTimeLastLogin { get; private set; }
         public DateTime DateTimeCreated { get; private set; }
         
-        public User(Guid CompanyId, string Username, string HashedPassword, string Email, string PhoneNumber, string UserPosition)
+        public User(Guid OutletId, string Username, string HashedPassword, string Email, string PhoneNumber, string UserPosition)
         {
             UserId = Guid.NewGuid();
-            this.CompanyId = CompanyId;
+            this.OutletId = OutletId;
             this.Username = Username;
             this.HashedPassword = HashedPassword;
             this.Email = Email;
             this.PhoneNumber = PhoneNumber;
             this.UserPosition = UserPosition;
-            Active = true;
+            IsActive = true;
             DateTimeLastLogin = null;
             DateTimeCreated = DateTime.UtcNow;
         }
@@ -32,26 +32,7 @@ namespace SimplePos.Domain.Users
             DateTimeLastLogin = DateTime.UtcNow;
         }
 
-        public void DeactivateAccount()
-        {
-            if (!Active)
-            {
-                throw new InvalidOperationException("Account is already inactive.");
-            }
-
-            Active = false;
-        }
-
-        public void ActivateAccount()
-        {
-            if (Active)
-            {
-                throw new InvalidOperationException("Account is already active.");
-            }
-            Active = true;
-        }
-
-        public void UpdateUserInfo(string newEmail, string newPhoneNumber, string newUserPosition)
+        public void UpdateUserInfo(string newEmail, string newPhoneNumber, string newUserPosition, bool newIsActive)
         {
             if (string.IsNullOrWhiteSpace(newEmail))
             {
@@ -61,6 +42,7 @@ namespace SimplePos.Domain.Users
             Email = newEmail;
             PhoneNumber = newPhoneNumber;
             UserPosition = newUserPosition;
+            IsActive = newIsActive;
         }
         public void UpdatePassword(string newHashedPassword)
         {
