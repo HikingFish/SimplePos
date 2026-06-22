@@ -7,5 +7,8 @@ namespace SimplePos.Domain.Outlets
         Task<IEnumerable<Outlet>> GetOutletsByCompanyIdAsync(Guid companyId);
         Task UpdateOutletAsync(Outlet outlet);
         Task DeleteOutletAsync(Guid outletId);
+        Task SoftDeleteOutletAsync(Guid outletId);
+        Task UpdateOutletLastOnlineAsync(Guid outletId);
+        Task UpdateOutletActiveStatusAsync(Guid outletId, bool isActive);
     }
 }

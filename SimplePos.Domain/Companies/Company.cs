@@ -5,27 +5,39 @@ namespace SimplePos.Domain.Companies
     public class Company
     {
         public Guid CompanyId { get; private set; }
-        public string Name { get; private set; } = string.Empty;
-        public string Address { get; private set; } = string.Empty;
+        public string Name { get; private set; } 
+        public Address CompanyAddress { get; private set; } 
         public EmailAddress Email { get; private set; }
-        public string PhoneNumber { get; private set; } = string.Empty;
+        public string PhoneNumber { get; private set; }
         public DateTime DateTimeCreated { get; private set; }
         public DateTime DateTimeLastOnline { get; private set; }
         public bool IsActive{ get; private set; }
         public bool SoftDeleted { get; private set; }
 
         private Company() { }
+        private Company(Guid companyId, string name, Address companyAddress, EmailAddress email, string phoneNumber, DateTime dateTimeCreated, DateTime dateTimeLastOnline, bool isActive, bool softDeleted)
+        {
+            CompanyId = companyId;
+            Name = name;
+            CompanyAddress = companyAddress;
+            Email = email;
+            PhoneNumber = phoneNumber;
+            DateTimeCreated = dateTimeCreated;
+            DateTimeLastOnline = dateTimeLastOnline;
+            IsActive = isActive;
+            SoftDeleted = softDeleted;
+        }
 
-        public static Company Create(string name, string address, string phoneNumber, EmailAddress email)
+        public static Company Create(string name, Address companyAddress, string phoneNumber, EmailAddress email)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new DomainException("Company name cannot be empty.");
             }
 
-            if (string.IsNullOrWhiteSpace(address))
+            if (companyAddress == null)
             {
-                throw new DomainException("Company address cannot be empty.");
+                throw new DomainException("Company address cannot be null.");
             }
 
             if (email == null)
@@ -37,9 +49,9 @@ namespace SimplePos.Domain.Companies
 
             var company = new Company
             {
-                CompanyId = Guid.NewGuid(),
+                CompanyId = Guid.CreateVersion7(),
                 Name = name,
-                Address = address,
+                CompanyAddress = companyAddress,
                 Email = email,
                 PhoneNumber = phoneNumber,
                 DateTimeCreated = now,
@@ -51,24 +63,28 @@ namespace SimplePos.Domain.Companies
             return company;
         }
 
-        public void UpdateCompanyInfo(string newName, string newAddress, string newPhoneNumber)
+        public void UpdateCompanyInfo(string newName, Address newAddress, string newPhoneNumber)
         {
+            EnsureNotSoftDeleted();
+
             if (string.IsNullOrWhiteSpace(newName))
             {
                 throw new DomainException("Company name cannot be empty.");
             }
 
-            if (string.IsNullOrWhiteSpace(newAddress))
+            if (newAddress == null)
             {
-                throw new DomainException("Company address cannot be empty.");
+                throw new DomainException("Company address cannot be null.");
             }
 
             Name = newName;
-            Address = newAddress;
+            CompanyAddress = newAddress;
             PhoneNumber = newPhoneNumber;
         }
         public void UpdateEmail(EmailAddress newEmail)
         {
+            EnsureNotSoftDeleted();
+
             if (newEmail == null)
             {
                 throw new DomainException("Company email cannot be null.");
@@ -78,6 +94,8 @@ namespace SimplePos.Domain.Companies
         }
         public void UpdateToActiveStatus()
         {
+            EnsureNotSoftDeleted();
+
             if (IsActive)
             {
                 throw new DomainException("Company is already active.");
@@ -87,6 +105,8 @@ namespace SimplePos.Domain.Companies
         }
         public void UpdateToNotActiveStatus()
         {
+            EnsureNotSoftDeleted();
+
             if (!IsActive)
             {
                 throw new DomainException("Company is already inactive.");
@@ -96,17 +116,24 @@ namespace SimplePos.Domain.Companies
         }
         public void UpdateLastOnline()
         {
+            EnsureNotSoftDeleted();
             DateTimeLastOnline = DateTime.UtcNow;
         }
 
         public void SoftDelete()
         {
-            if (SoftDeleted)
-            {
-                throw new DomainException("Company is already soft deleted.");
-            }
+            EnsureNotSoftDeleted();
 
             SoftDeleted = true;
+            IsActive = false;
+        }
+
+        private void EnsureNotSoftDeleted()
+        {
+            if (SoftDeleted)
+            {
+                throw new DomainException("Operation cannot be performed on a soft deleted company.");
+            }
         }
     }
 }

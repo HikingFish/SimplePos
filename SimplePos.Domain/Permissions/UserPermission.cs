@@ -4,11 +4,16 @@ namespace SimplePos.Domain.Permissions
     {
         public Guid UserId { get; private set; }
         public Guid PermissionId { get; private set; }
-
-        public UserPermission(Guid userId, Guid permissionId)
+        private UserPermission() { }
+        private UserPermission(Guid userId, Guid permissionId)
         {
             UserId = userId;
             PermissionId = permissionId;
+        }
+
+        public static UserPermission Create(Guid userId, Guid permissionId)
+        {
+            return new UserPermission(userId, permissionId);
         }
     }
 }

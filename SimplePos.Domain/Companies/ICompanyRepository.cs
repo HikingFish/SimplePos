@@ -9,5 +9,8 @@ namespace SimplePos.Domain.Companies
         Task<IEnumerable<Company>> GetAllCompaniesAsync();
         Task UpdateCompanyAsync(Company company);
         Task DeleteCompanyAsync(Guid companyId);
+        Task SoftDeleteCompanyAsync(Guid companyId);
+        Task UpdateCompanyLastOnlineAsync(Guid companyId);
+        Task UpdateCompanyActiveStatusAsync(Guid companyId, bool isActive);
     }
 }
