@@ -1,3 +1,5 @@
+using SimplePos.Domain.Common;
+
 namespace SimplePos.Domain.Permissions
 {
     public class Permission
@@ -14,6 +16,11 @@ namespace SimplePos.Domain.Permissions
 
         public static Permission Create(string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new DomainException("Permission name cannot be empty.");
+            }
+
             return new Permission(name);
         }
     }

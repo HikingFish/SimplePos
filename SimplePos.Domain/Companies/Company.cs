@@ -48,17 +48,17 @@ namespace SimplePos.Domain.Companies
             var now = DateTime.UtcNow;
 
             var company = new Company
-            {
-                CompanyId = Guid.CreateVersion7(),
-                Name = name,
-                CompanyAddress = companyAddress,
-                Email = email,
-                PhoneNumber = phoneNumber,
-                DateTimeCreated = now,
-                DateTimeLastOnline = now,
-                IsActive = true,
-                SoftDeleted = false
-            };
+            (
+                Guid.CreateVersion7(),
+                name,
+                companyAddress,
+                email,
+                phoneNumber,
+                now,
+                now,
+                true,
+                false
+            );
 
             return company;
         }

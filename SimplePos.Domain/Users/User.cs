@@ -89,7 +89,7 @@ namespace SimplePos.Domain.Users
         {
             if (SoftDeleted)
             {
-                throw new InvalidOperationException("User is already soft deleted.");
+                throw new DomainException("User is already soft deleted.");
             }
 
             SoftDeleted = true;
@@ -100,7 +100,7 @@ namespace SimplePos.Domain.Users
         {
             if (SoftDeleted)
             {
-                throw new InvalidOperationException("Operation cannot be performed on a soft deleted user.");
+                throw new DomainException("Operation cannot be performed on a soft deleted user.");
             }
         }
     }
