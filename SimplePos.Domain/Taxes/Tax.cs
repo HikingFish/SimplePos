@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Taxes
 {
@@ -21,54 +22,58 @@ namespace SimplePos.Domain.Taxes
             IsActive = true;
         }
 
-        public static Tax Create(Guid companyId, string taxName, decimal taxRate)
+        public static Result<Tax> Create(Guid companyId, string taxName, decimal taxRate)
         {
             if (string.IsNullOrWhiteSpace(taxName))
             {
-                throw new DomainException("Tax name cannot be empty.");
+                return Result<Tax>.Failure(TaxError.TaxNameEmpty);
             }
 
             if (taxRate < 0)
             {
-                throw new DomainException("Tax rate cannot be negative.");
+                return Result<Tax>.Failure(TaxError.TaxRateNegative);
             }
 
-            return new Tax(companyId, taxName, taxRate);
+            return Result<Tax>.Success(new Tax(companyId, taxName, taxRate));
         }
 
-        public void UpdateTaxInfo(string newTaxName, decimal newTaxRate)
+        public Result UpdateTaxInfo(string newTaxName, decimal newTaxRate)
         {
             if (string.IsNullOrWhiteSpace(newTaxName))
             {
-                throw new DomainException("Tax name cannot be empty.");
+                return Result.Failure(TaxError.TaxNameEmpty);
             }
 
             if (newTaxRate < 0)
             {
-                throw new DomainException("Tax rate cannot be negative.");
+                return Result.Failure(TaxError.TaxRateNegative);
             }
 
             TaxName = newTaxName;
             TaxRate = newTaxRate;
+            return Result.Success();
         }
-        public void Deactivate()
+
+        public Result Deactivate()
         {
             if (!IsActive)
             {
-                throw new DomainException("Tax is already deactivated.");
+                return Result.Failure(TaxError.AlreadyDeactivated);
             }
 
             IsActive = false;
+            return Result.Success();
         }
 
-        public void Activate()
+        public Result Activate()
         {
             if (IsActive)
             {
-                throw new DomainException("Tax is already activated.");
+                return Result.Failure(TaxError.AlreadyActivated);
             }
 
             IsActive = true;
+            return Result.Success();
         }
     }
 }

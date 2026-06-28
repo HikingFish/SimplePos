@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Products
 {
@@ -6,6 +7,7 @@ namespace SimplePos.Domain.Products
     {
         public Guid ProductId { get; private set; }
         public Guid CompanyId { get; private set; }
+        public Guid CategoryId { get; private set; }
         public string SKU { get; private set; } 
         public string ProductName { get; private set; } 
         public decimal CostPrice { get; private set; }
@@ -29,130 +31,161 @@ namespace SimplePos.Domain.Products
             SoftDeleted = false;
         }
 
-        public static Product Create(Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
+        public static Result<Product> Create(Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
         {
             if (string.IsNullOrWhiteSpace(productName))
             {
-                throw new DomainException("Product name cannot be empty.");
+                return Result<Product>.Failure(ProductError.ProductNameEmpty);
             }
 
             if (string.IsNullOrWhiteSpace(sku))
             {
-                throw new DomainException("SKU cannot be empty.");
+                return Result<Product>.Failure(ProductError.SkuEmpty);
             }
 
             if (costPrice < 0)
             {
-                throw new DomainException("Cost price cannot be negative.");
+                return Result<Product>.Failure(ProductError.CostPriceNegative);
             }
 
             if (basePrice < 0)
             {
-                throw new DomainException("Base price cannot be negative.");
+                return Result<Product>.Failure(ProductError.BasePriceNegative);
             }
 
-            return new Product(companyId, sku, productName, costPrice, basePrice);
+            return Result<Product>.Success(new Product(companyId, sku, productName, costPrice, basePrice));
         }
 
-        public void UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)
+        public Result UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (string.IsNullOrWhiteSpace(newProductName))
             {
-                throw new DomainException("Product name cannot be empty.");
+                return Result.Failure(ProductError.ProductNameEmpty);
             }
 
             if (string.IsNullOrWhiteSpace(newSKU))
             {
-                throw new DomainException("SKU cannot be empty.");
+                return Result.Failure(ProductError.SkuEmpty);
             }
 
             if (newCostPrice < 0)
             {
-                throw new DomainException("Cost price cannot be negative.");
+                return Result.Failure(ProductError.CostPriceNegative);
             }
 
             if (newBasePrice < 0)
             {
-                throw new DomainException("Base price cannot be negative.");
+                return Result.Failure(ProductError.BasePriceNegative);
             }
 
             SKU = newSKU;
             ProductName = newProductName;
             CostPrice = newCostPrice;
             BasePrice = newBasePrice;
+            return Result.Success();
         }
 
-        public void UpdateToActiveStatus()
+        public Result UpdateToActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (IsActive)
             {
-                throw new DomainException("Product is already active.");
+                return Result.Failure(ProductError.AlreadyActive);
             }
 
             IsActive = true;
+            return Result.Success();
         }
 
-        public void UpdateToNotActiveStatus()
+        public Result UpdateToNotActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (!IsActive)
             {
-                throw new DomainException("Product is already inactive.");
+                return Result.Failure(ProductError.AlreadyInactive);
             }
 
             IsActive = false;
+            return Result.Success();
         }
 
-        public void AddProductTax(ProductTax productTax)
+        public Result AddProductTax(ProductTax productTax)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (productTax == null)
             {
-                throw new DomainException("Product tax cannot be null.");
+                return Result.Failure(ProductError.ProductTaxNull);
             }
 
             if (_productTaxes.Any(pt => pt.TaxId == productTax.TaxId))
             {
-                throw new DomainException("This tax is already associated with the product.");
+                return Result.Failure(ProductError.TaxAlreadyAssociated);
             }
 
             _productTaxes.Add(productTax);
+            return Result.Success();
         }
 
-        public void RemoveProductTax(Guid taxId)
+        public Result RemoveProductTax(Guid taxId)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             ProductTax productTax = _productTaxes.FirstOrDefault(pt => pt.TaxId == taxId);
 
             if (productTax == null)
             {
-                throw new DomainException("This tax is not associated with the product.");
+                return Result.Failure(ProductError.TaxNotAssociated);
             }
 
             _productTaxes.Remove(productTax);
+            return Result.Success();
         }
 
-        private void EnsureNotSoftDeleted()
+        private Result EnsureNotSoftDeleted()
         {
             if (SoftDeleted)
             {
-                throw new DomainException("Operation cannot be performed on a soft-deleted product.");
+                return Result.Failure(ProductError.SoftDeleted);
             }
+            return Result.Success();
         }
 
-        public void SoftDelete()
+        public Result SoftDelete()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             SoftDeleted = true;
             IsActive = false;
+            return Result.Success();
         }
     }
 }

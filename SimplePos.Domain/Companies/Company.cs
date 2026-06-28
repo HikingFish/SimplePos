@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Companies
 {
@@ -28,21 +29,21 @@ namespace SimplePos.Domain.Companies
             SoftDeleted = softDeleted;
         }
 
-        public static Company Create(string name, Address companyAddress, string phoneNumber, EmailAddress email)
+        public static Result<Company> Create(string name, Address companyAddress, string phoneNumber, EmailAddress email)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new DomainException("Company name cannot be empty.");
+                return Result<Company>.Failure(CompanyError.CompanyNameEmpty);
             }
 
             if (companyAddress == null)
             {
-                throw new DomainException("Company address cannot be null.");
+                return Result<Company>.Failure(CompanyError.CompanyAddressNull);
             }
 
             if (email == null)
             {
-                throw new DomainException("Company email cannot be null.");
+                return Result<Company>.Failure(CompanyError.CompanyEmailNull);
             }
 
             var now = DateTime.UtcNow;
@@ -60,80 +61,111 @@ namespace SimplePos.Domain.Companies
                 false
             );
 
-            return company;
+            return Result<Company>.Success(company);
         }
 
-        public void UpdateCompanyInfo(string newName, Address newAddress, string newPhoneNumber)
+        public Result UpdateCompanyInfo(string newName, Address newAddress, string newPhoneNumber)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (string.IsNullOrWhiteSpace(newName))
             {
-                throw new DomainException("Company name cannot be empty.");
+                return Result.Failure(CompanyError.CompanyNameEmpty);
             }
 
             if (newAddress == null)
             {
-                throw new DomainException("Company address cannot be null.");
+                return Result.Failure(CompanyError.CompanyAddressNull);
             }
 
             Name = newName;
             CompanyAddress = newAddress;
             PhoneNumber = newPhoneNumber;
+            return Result.Success();
         }
-        public void UpdateEmail(EmailAddress newEmail)
+        public Result UpdateEmail(EmailAddress newEmail)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (newEmail == null)
             {
-                throw new DomainException("Company email cannot be null.");
+                return Result.Failure(CompanyError.CompanyEmailNull);
             }
 
             Email = newEmail;
+            return Result.Success();
         }
-        public void UpdateToActiveStatus()
+        public Result UpdateToActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (IsActive)
             {
-                throw new DomainException("Company is already active.");
+                return Result.Failure(CompanyError.AlreadyActive);
             }
 
             IsActive = true;
+            return Result.Success();
         }
-        public void UpdateToNotActiveStatus()
+        public Result UpdateToNotActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (!IsActive)
             {
-                throw new DomainException("Company is already inactive.");
+                return Result.Failure(CompanyError.AlreadyInactive);
             }
 
             IsActive = false;
+            return Result.Success();
         }
-        public void UpdateLastOnline()
+        public Result UpdateLastOnline()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
             DateTimeLastOnline = DateTime.UtcNow;
+            return Result.Success();
         }
 
-        public void SoftDelete()
+        public Result SoftDelete()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             SoftDeleted = true;
             IsActive = false;
+            return Result.Success();
         }
 
-        private void EnsureNotSoftDeleted()
+        private Result EnsureNotSoftDeleted()
         {
             if (SoftDeleted)
             {
-                throw new DomainException("Operation cannot be performed on a soft deleted company.");
+                return Result.Failure(CompanyError.SoftDeleted);
             }
+            return Result.Success();
         }
     }
 }

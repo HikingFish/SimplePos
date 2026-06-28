@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Users
 {
@@ -32,76 +33,93 @@ namespace SimplePos.Domain.Users
             SoftDeleted = false;
         }
 
-        public static User Create(Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
+        public static Result<User> Create(Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
         {
             if (string.IsNullOrWhiteSpace(Username))
             {
-                throw new DomainException("Username cannot be empty.");
+                return Result<User>.Failure(UserError.UsernameEmpty);
             }
 
             if (string.IsNullOrWhiteSpace(HashedPassword))
             {
-                throw new DomainException("Password cannot be empty.");
+                return Result<User>.Failure(UserError.PasswordEmpty);
             }
 
             if (Email == null)
             {
-                throw new DomainException("Email cannot be empty.");
+                return Result<User>.Failure(UserError.EmailEmpty);
             }
 
-            return new User(OutletId, Username, HashedPassword, Email, PhoneNumber, UserPosition);
+            return Result<User>.Success(new User(OutletId, Username, HashedPassword, Email, PhoneNumber, UserPosition));
         }
 
-        public void UpdateLastLogin()
+        public Result UpdateLastLogin()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             DateTimeLastLogin = DateTime.UtcNow;
+            return Result.Success();
         }
 
-        public void UpdateUserInfo(EmailAddress newEmail, string newPhoneNumber, string newUserPosition, bool newIsActive)
+        public Result UpdateUserInfo(EmailAddress newEmail, string newPhoneNumber, string newUserPosition, bool newIsActive)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (newEmail == null)
             {
-                throw new DomainException("Email cannot be empty.");
+                return Result.Failure(UserError.EmailEmpty);
             }
 
             Email = newEmail;
             PhoneNumber = newPhoneNumber;
             UserPosition = newUserPosition;
             IsActive = newIsActive;
+            return Result.Success();
         }
-        public void UpdatePassword(string newHashedPassword)
+        public Result UpdatePassword(string newHashedPassword)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (string.IsNullOrWhiteSpace(newHashedPassword))
             {
-                throw new DomainException("New password cannot be empty.");
+                return Result.Failure(UserError.NewPasswordEmpty);
             }
 
             HashedPassword = newHashedPassword;
+            return Result.Success();
         }
 
-        public void SoftDelete()
+        public Result SoftDelete()
         {
             if (SoftDeleted)
             {
-                throw new DomainException("User is already soft deleted.");
+                return Result.Failure(UserError.AlreadySoftDeleted);
             }
 
             SoftDeleted = true;
             IsActive = false;
+            return Result.Success();
         }
 
-        public void EnsureNotSoftDeleted()
+        private Result EnsureNotSoftDeleted()
         {
             if (SoftDeleted)
             {
-                throw new DomainException("Operation cannot be performed on a soft deleted user.");
+                return Result.Failure(UserError.SoftDeleted);
             }
+            return Result.Success();
         }
     }
 }

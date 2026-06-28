@@ -1,52 +1,56 @@
-using System.ComponentModel.Design;
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
-using SimplePos.Domain.Companies;
 
-namespace SimplePos.Domain.Category
+namespace SimplePos.Domain.Payments
 {
-    public class Category
+    public class PaymentMethod
     {
-        public Guid CategoryId;
-        public Guid CompanyId;
-        public string Name;
-        public bool IsActive;
-        public bool SoftDeleted;
+        public Guid PaymentMethodId { get; private set; }
+        public Guid CompanyId { get; private set; }
+        public string Name { get; private set; }
+        public bool IsActive { get; private set; }
+        public bool SoftDeleted { get; private set; }
 
-        private Category() { }
+        private PaymentMethod(){}
 
-        private Category(Guid companyId, string name)
+        private PaymentMethod(Guid companyId, string name)
         {
-            CategoryId = Guid.CreateVersion7();
+            PaymentMethodId = Guid.CreateVersion7();
             CompanyId = companyId;
             Name = name;
             IsActive = true;
             SoftDeleted = false;
         }
 
-        public static Result<Category> CreateCategory(Guid companyId, string name)
+        public static Result<PaymentMethod> Create(Guid companyId, string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return Result<Category>.Failure(CategoryError.CategoryNameEmpty);
-            }
-
             if (companyId == Guid.Empty)
             {
-                return Result<Category>.Failure(CategoryError.CompanyIdEmpty);
+                return Result<PaymentMethod>.Failure(PaymentMethodError.CompanyIdEmpty);
             }
 
-            return Result<Category>.Success(new Category(companyId, name)); 
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return Result<PaymentMethod>.Failure(PaymentMethodError.NameEmpty);
+            }
+
+            return Result<PaymentMethod>.Success(new PaymentMethod(companyId, name));
         }
-        public Result UpdateCategoryInfo(string newName)
+
+        public Result UpdateName(string newName)
         {
             var statusResult = EnsureNotSoftDeleted();
             if (!statusResult.IsSuccess)
             {
-                return Result.Failure(CategoryError.CategoryNameEmpty);
+                return statusResult;
             }
+
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                return Result.Failure(PaymentMethodError.NameEmpty);
+            }
+
             Name = newName;
-            
             return Result.Success();
         }
 
@@ -57,6 +61,12 @@ namespace SimplePos.Domain.Category
             {
                 return statusResult;
             }
+
+            if (IsActive)
+            {
+                return Result.Failure(PaymentMethodError.AlreadyActive);
+            }
+
             IsActive = true;
             return Result.Success();
         }
@@ -68,6 +78,12 @@ namespace SimplePos.Domain.Category
             {
                 return statusResult;
             }
+
+            if (!IsActive)
+            {
+                return Result.Failure(PaymentMethodError.AlreadyInactive);
+            }
+
             IsActive = false;
             return Result.Success();
         }
@@ -75,19 +91,21 @@ namespace SimplePos.Domain.Category
         public Result SoftDelete()
         {
             var statusResult = EnsureNotSoftDeleted();
-            if (statusResult.IsSuccess)
+            if (!statusResult.IsSuccess)
             {
                 return statusResult;
             }
+
             SoftDeleted = true;
             IsActive = false;
             return Result.Success();
         }
+
         private Result EnsureNotSoftDeleted()
         {
             if (SoftDeleted)
             {
-                return Result.Failure(CategoryError.SoftDeleted);
+                return Result.Failure(PaymentMethodError.SoftDeleted);
             }
             return Result.Success();
         }

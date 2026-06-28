@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Outlets
 {
@@ -27,84 +28,110 @@ namespace SimplePos.Domain.Outlets
             SoftDeleted = softDeleted;
         }
 
-        public static Outlet Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
+        public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new DomainException("Outlet name cannot be empty.");
+                return Result<Outlet>.Failure(OutletError.OutletNameEmpty);
             }
 
             if (outletAddress == null)
             {
-                throw new DomainException("Outlet address cannot be null.");
+                return Result<Outlet>.Failure(OutletError.OutletAddressNull);
             }
 
-            return new Outlet(companyId, name, outletAddress, phoneNumber, true, false);
+            return Result<Outlet>.Success(new Outlet(companyId, name, outletAddress, phoneNumber, true, false));
         }
 
-        public void UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)
+        public Result UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (string.IsNullOrWhiteSpace(newName))
             {
-                throw new DomainException("Outlet name cannot be empty.");
+                return Result.Failure(OutletError.OutletNameEmpty);
             }
 
             if (newAddress == null)
             {
-                throw new DomainException("Outlet address cannot be null.");
+                return Result.Failure(OutletError.OutletAddressNull);
             }
 
             Name = newName;
             OutletAddress = newAddress;
             PhoneNumber = newPhoneNumber;
+            return Result.Success();
         }
 
-        public void UpdateLastOnline()
+        public Result UpdateLastOnline()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
             DateTimeLastOnline = DateTime.UtcNow;
+            return Result.Success();
         }
 
-        public void UpdateToActiveStatus()
+        public Result UpdateToActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (IsActive)
             {
-                throw new DomainException("Outlet is already active.");
+                return Result.Failure(OutletError.AlreadyActive);
             }
 
             IsActive = true;
+            return Result.Success();
         }
 
-        public void UpdateToNotActiveStatus()
+        public Result UpdateToNotActiveStatus()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             if (!IsActive)
             {
-                throw new DomainException("Outlet is already inactive.");
+                return Result.Failure(OutletError.AlreadyInactive);
             }
 
             IsActive = false;
+            return Result.Success();
         }
 
-        public void SoftDelete()
+        public Result SoftDelete()
         {
-            EnsureNotSoftDeleted();
+            var statusResult = EnsureNotSoftDeleted();
+            if (!statusResult.IsSuccess)
+            {
+                return statusResult;
+            }
 
             SoftDeleted = true;
             IsActive = false;
+            return Result.Success();
         }
 
-        private void EnsureNotSoftDeleted()
+        private Result EnsureNotSoftDeleted()
         {
             if (SoftDeleted)
             {
-                throw new DomainException("Operation cannot be performed on a soft deleted outlet.");
+                return Result.Failure(OutletError.SoftDeleted);
             }
+            return Result.Success();
         }
     }
 }

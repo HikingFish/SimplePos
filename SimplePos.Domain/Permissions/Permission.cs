@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Permissions
 {
@@ -14,14 +15,14 @@ namespace SimplePos.Domain.Permissions
             Name = name;
         }
 
-        public static Permission Create(string name)
+        public static Result<Permission> Create(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new DomainException("Permission name cannot be empty.");
+                return Result<Permission>.Failure(PermissionError.PermissionNameEmpty);
             }
 
-            return new Permission(name);
+            return Result<Permission>.Success(new Permission(name));
         }
     }
 }
