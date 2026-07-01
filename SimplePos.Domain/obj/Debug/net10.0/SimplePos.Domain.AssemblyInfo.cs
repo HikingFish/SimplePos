@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SimplePos.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d732d26efbeffd1c4823c7994e28a90e23134c1d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+22823d5e363bee72cbcb9c61da0d992cd85ae6b3")]
 [assembly: System.Reflection.AssemblyProductAttribute("SimplePos.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SimplePos.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
