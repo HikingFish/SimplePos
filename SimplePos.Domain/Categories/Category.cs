@@ -3,93 +3,91 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 
-namespace SimplePos.Domain.Category
+namespace SimplePos.Domain.Category;
+public class Category
 {
-    public class Category
+    public Guid CategoryId;
+    public Guid CompanyId;
+    public string Name;
+    public bool IsActive;
+    public bool SoftDeleted;
+
+    private Category() { }
+
+    private Category(Guid companyId, string name)
     {
-        public Guid CategoryId;
-        public Guid CompanyId;
-        public string Name;
-        public bool IsActive;
-        public bool SoftDeleted;
+        CategoryId = Guid.CreateVersion7();
+        CompanyId = companyId;
+        Name = name;
+        IsActive = true;
+        SoftDeleted = false;
+    }
 
-        private Category() { }
-
-        private Category(Guid companyId, string name)
+    public static Result<Category> CreateCategory(Guid companyId, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
         {
-            CategoryId = Guid.CreateVersion7();
-            CompanyId = companyId;
-            Name = name;
-            IsActive = true;
-            SoftDeleted = false;
+            return Result<Category>.Failure(CategoryError.CategoryNameEmpty);
         }
 
-        public static Result<Category> CreateCategory(Guid companyId, string name)
+        if (companyId == Guid.Empty)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return Result<Category>.Failure(CategoryError.CategoryNameEmpty);
-            }
-
-            if (companyId == Guid.Empty)
-            {
-                return Result<Category>.Failure(CategoryError.CompanyIdEmpty);
-            }
-
-            return Result<Category>.Success(new Category(companyId, name)); 
-        }
-        public Result UpdateCategoryInfo(string newName)
-        {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return Result.Failure(CategoryError.CategoryNameEmpty);
-            }
-            Name = newName;
-            
-            return Result.Success();
+            return Result<Category>.Failure(CategoryError.CompanyIdEmpty);
         }
 
-        public Result UpdateToActiveStatus()
+        return Result<Category>.Success(new Category(companyId, name)); 
+    }
+    public Result UpdateCategoryInfo(string newName)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-            IsActive = true;
-            return Result.Success();
+            return Result.Failure(CategoryError.CategoryNameEmpty);
         }
+        Name = newName;
+        
+        return Result.Success();
+    }
 
-        public Result UpdateToNotActiveStatus()
+    public Result UpdateToActiveStatus()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-            IsActive = false;
-            return Result.Success();
+            return statusResult;
         }
+        IsActive = true;
+        return Result.Success();
+    }
 
-        public Result SoftDelete()
+    public Result UpdateToNotActiveStatus()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-            SoftDeleted = true;
-            IsActive = false;
-            return Result.Success();
+            return statusResult;
         }
-        private Result EnsureNotSoftDeleted()
+        IsActive = false;
+        return Result.Success();
+    }
+
+    public Result SoftDelete()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (statusResult.IsSuccess)
         {
-            if (SoftDeleted)
-            {
-                return Result.Failure(CategoryError.SoftDeleted);
-            }
-            return Result.Success();
+            return statusResult;
         }
+        SoftDeleted = true;
+        IsActive = false;
+        return Result.Success();
+    }
+    private Result EnsureNotSoftDeleted()
+    {
+        if (SoftDeleted)
+        {
+            return Result.Failure(CategoryError.SoftDeleted);
+        }
+        return Result.Success();
     }
 }

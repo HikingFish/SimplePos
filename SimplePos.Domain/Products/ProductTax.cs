@@ -1,31 +1,29 @@
 using SimplePos.Domain.Common;
 
-namespace SimplePos.Domain.Products
+namespace SimplePos.Domain.Products;
+public class ProductTax
 {
-    public class ProductTax
+    public Guid ProductId { get; private set; }
+    public Guid TaxId { get; private set; }
+    private ProductTax() { }
+    private ProductTax(Guid productId, Guid taxId)
     {
-        public Guid ProductId { get; private set; }
-        public Guid TaxId { get; private set; }
-        private ProductTax() { }
-        private ProductTax(Guid productId, Guid taxId)
+        ProductId = productId;
+        TaxId = taxId;
+    }
+
+    internal static ProductTax Create(Guid productId, Guid taxId)
+    {
+        if (productId == Guid.Empty)
         {
-            ProductId = productId;
-            TaxId = taxId;
+            throw new DomainException("Product ID cannot be empty.");
         }
 
-        internal static ProductTax Create(Guid productId, Guid taxId)
+        if (taxId == Guid.Empty)
         {
-            if (productId == Guid.Empty)
-            {
-                throw new DomainException("Product ID cannot be empty.");
-            }
-
-            if (taxId == Guid.Empty)
-            {
-                throw new DomainException("Tax ID cannot be empty.");
-            }
-
-            return new ProductTax(productId, taxId);
+            throw new DomainException("Tax ID cannot be empty.");
         }
+
+        return new ProductTax(productId, taxId);
     }
 }

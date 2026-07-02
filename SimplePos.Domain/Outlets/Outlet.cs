@@ -1,137 +1,135 @@
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
-namespace SimplePos.Domain.Outlets
+namespace SimplePos.Domain.Outlets;
+public class Outlet
 {
-    public class Outlet
+    public Guid OutletId { get; private set; }
+    public Guid CompanyId { get; private set; }
+    public string Name { get; private set; } 
+    public Address OutletAddress { get; private set; } 
+    public string PhoneNumber { get; private set; } 
+    public DateTime DateTimeCreated { get; private set; }
+    public DateTime? DateTimeLastOnline { get; private set; }
+    public bool IsActive { get; private set; }
+    public bool SoftDeleted { get; private set; }
+    private Outlet() { }
+    private Outlet(Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
     {
-        public Guid OutletId { get; private set; }
-        public Guid CompanyId { get; private set; }
-        public string Name { get; private set; } 
-        public Address OutletAddress { get; private set; } 
-        public string PhoneNumber { get; private set; } 
-        public DateTime DateTimeCreated { get; private set; }
-        public DateTime? DateTimeLastOnline { get; private set; }
-        public bool IsActive { get; private set; }
-        public bool SoftDeleted { get; private set; }
-        private Outlet() { }
-        private Outlet(Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
+        OutletId = Guid.CreateVersion7();
+        CompanyId = companyId;
+        Name = name;
+        OutletAddress = outletAddress;
+        PhoneNumber = phoneNumber;
+        DateTimeCreated = DateTime.UtcNow;
+        DateTimeLastOnline = null;
+        IsActive = isActive;
+        SoftDeleted = softDeleted;
+    }
+
+    public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(name))
         {
-            OutletId = Guid.CreateVersion7();
-            CompanyId = companyId;
-            Name = name;
-            OutletAddress = outletAddress;
-            PhoneNumber = phoneNumber;
-            DateTimeCreated = DateTime.UtcNow;
-            DateTimeLastOnline = null;
-            IsActive = isActive;
-            SoftDeleted = softDeleted;
+            return Result<Outlet>.Failure(OutletError.OutletNameEmpty);
         }
 
-        public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
+        if (outletAddress == null)
         {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return Result<Outlet>.Failure(OutletError.OutletNameEmpty);
-            }
-
-            if (outletAddress == null)
-            {
-                return Result<Outlet>.Failure(OutletError.OutletAddressNull);
-            }
-
-            return Result<Outlet>.Success(new Outlet(companyId, name, outletAddress, phoneNumber, true, false));
+            return Result<Outlet>.Failure(OutletError.OutletAddressNull);
         }
 
-        public Result UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)
+        return Result<Outlet>.Success(new Outlet(companyId, name, outletAddress, phoneNumber, true, false));
+    }
+
+    public Result UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-
-            if (string.IsNullOrWhiteSpace(newName))
-            {
-                return Result.Failure(OutletError.OutletNameEmpty);
-            }
-
-            if (newAddress == null)
-            {
-                return Result.Failure(OutletError.OutletAddressNull);
-            }
-
-            Name = newName;
-            OutletAddress = newAddress;
-            PhoneNumber = newPhoneNumber;
-            return Result.Success();
+            return statusResult;
         }
 
-        public Result UpdateLastOnline()
+        if (string.IsNullOrWhiteSpace(newName))
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-            DateTimeLastOnline = DateTime.UtcNow;
-            return Result.Success();
+            return Result.Failure(OutletError.OutletNameEmpty);
         }
 
-        public Result UpdateToActiveStatus()
+        if (newAddress == null)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-
-            if (IsActive)
-            {
-                return Result.Failure(OutletError.AlreadyActive);
-            }
-
-            IsActive = true;
-            return Result.Success();
+            return Result.Failure(OutletError.OutletAddressNull);
         }
 
-        public Result UpdateToNotActiveStatus()
+        Name = newName;
+        OutletAddress = newAddress;
+        PhoneNumber = newPhoneNumber;
+        return Result.Success();
+    }
+
+    public Result UpdateLastOnline()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
+            return statusResult;
+        }
+        DateTimeLastOnline = DateTime.UtcNow;
+        return Result.Success();
+    }
 
-            if (!IsActive)
-            {
-                return Result.Failure(OutletError.AlreadyInactive);
-            }
-
-            IsActive = false;
-            return Result.Success();
+    public Result UpdateToActiveStatus()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
         }
 
-        public Result SoftDelete()
+        if (IsActive)
         {
-            var statusResult = EnsureNotSoftDeleted();
-            if (!statusResult.IsSuccess)
-            {
-                return statusResult;
-            }
-
-            SoftDeleted = true;
-            IsActive = false;
-            return Result.Success();
+            return Result.Failure(OutletError.AlreadyActive);
         }
 
-        private Result EnsureNotSoftDeleted()
+        IsActive = true;
+        return Result.Success();
+    }
+
+    public Result UpdateToNotActiveStatus()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            if (SoftDeleted)
-            {
-                return Result.Failure(OutletError.SoftDeleted);
-            }
-            return Result.Success();
+            return statusResult;
         }
+
+        if (!IsActive)
+        {
+            return Result.Failure(OutletError.AlreadyInactive);
+        }
+
+        IsActive = false;
+        return Result.Success();
+    }
+
+    public Result SoftDelete()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        SoftDeleted = true;
+        IsActive = false;
+        return Result.Success();
+    }
+
+    private Result EnsureNotSoftDeleted()
+    {
+        if (SoftDeleted)
+        {
+            return Result.Failure(OutletError.SoftDeleted);
+        }
+        return Result.Success();
     }
 }

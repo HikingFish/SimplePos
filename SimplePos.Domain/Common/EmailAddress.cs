@@ -1,42 +1,40 @@
-namespace SimplePos.Domain.Common
+namespace SimplePos.Domain.Common;
+public record EmailAddress
 {
-    public record EmailAddress
+    public string Value { get; init; }
+
+    private EmailAddress(string email)
     {
-        public string Value { get; init; }
+        Value = email;
+    }
 
-        private EmailAddress(string email)
+    public static EmailAddress Create(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
         {
-            Value = email;
+            throw new DomainException("Email address cannot be empty.");
         }
 
-        public static EmailAddress Create(string email)
+        var emailAddress = new EmailAddress(email);
+
+        if (!emailAddress.IsValidEmail(email))
         {
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                throw new DomainException("Email address cannot be empty.");
-            }
-
-            var emailAddress = new EmailAddress(email);
-
-            if (!emailAddress.IsValidEmail(email))
-            {
-                throw new DomainException("Invalid email address format.");
-            }
-
-            return emailAddress;
+            throw new DomainException("Invalid email address format.");
         }
 
-        private bool IsValidEmail(string email)
+        return emailAddress;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
         {
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(email);
-                return addr.Address == email;
-            }
-            catch
-            {
-                return false;
-            }
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
         }
     }
 }

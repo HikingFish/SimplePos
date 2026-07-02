@@ -1,13 +1,11 @@
 using SimplePos.Domain.Common.ResultPattern;
 
-namespace SimplePos.Domain.Category
+namespace SimplePos.Domain.Category;
+public interface ICategoryRepository
 {
-    public interface ICategoryRepository
-    {
-        Task<Result<Category>> GetCategoryByIdAsync(Guid categoryId);
-        Task<Result<List<Category>>> GetCategoryByCompanyIdAsync(Guid companyId);
-        Task AddCategoryAsync(Category category);
-        Task UpdateCategoryAsync(Category category);
-        Task DeleteCategoryAsync(Guid categoryId);
-    }
+    Task<Result<Category>> GetCategoryByIdAsync(Guid categoryId);
+    Task<Result<List<Category>>> GetCategoryByCompanyIdAsync(Guid companyId);
+    Task AddCategoryAsync(Category category);
+    Task UpdateCategoryAsync(Category category);
+    Task DeleteCategoryAsync(Guid categoryId);
 }

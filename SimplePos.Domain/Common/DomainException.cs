@@ -1,9 +1,7 @@
-namespace SimplePos.Domain.Common
+namespace SimplePos.Domain.Common;
+public class DomainException : Exception
 {
-    public class DomainException : Exception
+    public DomainException(string message) : base(message)
     {
-        public DomainException(string message) : base(message)
-        {
-        }
     }
 }

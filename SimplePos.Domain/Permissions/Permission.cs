@@ -1,28 +1,26 @@
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
-namespace SimplePos.Domain.Permissions
+namespace SimplePos.Domain.Permissions;
+public class Permission
 {
-    public class Permission
+    public Guid PermissionId { get; private set; }
+    public string Name { get; private set; } = string.Empty;
+    private Permission() { }
+
+    private Permission(string name)
     {
-        public Guid PermissionId { get; private set; }
-        public string Name { get; private set; } = string.Empty;
-        private Permission() { }
+        PermissionId = Guid.CreateVersion7();
+        Name = name;
+    }
 
-        private Permission(string name)
+    public static Result<Permission> Create(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
         {
-            PermissionId = Guid.CreateVersion7();
-            Name = name;
+            return Result<Permission>.Failure(PermissionError.PermissionNameEmpty);
         }
 
-        public static Result<Permission> Create(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                return Result<Permission>.Failure(PermissionError.PermissionNameEmpty);
-            }
-
-            return Result<Permission>.Success(new Permission(name));
-        }
+        return Result<Permission>.Success(new Permission(name));
     }
 }
