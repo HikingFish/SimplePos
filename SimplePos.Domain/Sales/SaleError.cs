@@ -11,5 +11,7 @@ public static class SaleError
         "Sales.SalePaymentNull", "Sale payment cannot be null.");
     public static readonly Error SoftDeleted = new Error(
         "Sales.SoftDeleted", "Operation cannot be performed on a soft deleted sale.");
+    public static readonly Error SaleItemNotFound = new Error(
+        "Sales.SaleItemNotFound", "Sale item not found.");
 }
 

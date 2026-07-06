@@ -14,9 +14,9 @@ public class Outlet
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
     private Outlet() { }
-    private Outlet(Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
+    private Outlet(Guid outletId, Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
     {
-        OutletId = Guid.CreateVersion7();
+        OutletId = outletId;
         CompanyId = companyId;
         Name = name;
         OutletAddress = outletAddress;
@@ -39,7 +39,7 @@ public class Outlet
             return Result<Outlet>.Failure(OutletError.OutletAddressNull);
         }
 
-        return Result<Outlet>.Success(new Outlet(companyId, name, outletAddress, phoneNumber, true, false));
+        return Result<Outlet>.Success(new Outlet(Guid.CreateVersion7(), companyId, name, outletAddress, phoneNumber, true, false));
     }
 
     public Result UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)

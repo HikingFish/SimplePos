@@ -17,9 +17,9 @@ public class User
     public bool SoftDeleted { get; private set; }
     private User() { }
     
-    private User(Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
+    private User(Guid userId, Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
     {
-        UserId = Guid.CreateVersion7();
+        UserId = userId;
         this.OutletId = OutletId;
         this.Username = Username;
         this.HashedPassword = HashedPassword;
@@ -49,7 +49,7 @@ public class User
             return Result<User>.Failure(UserError.EmailEmpty);
         }
 
-        return Result<User>.Success(new User(OutletId, Username, HashedPassword, Email, PhoneNumber, UserPosition));
+        return Result<User>.Success(new User(Guid.CreateVersion7(), OutletId, Username, HashedPassword, Email, PhoneNumber, UserPosition));
     }
 
     public Result UpdateLastLogin()

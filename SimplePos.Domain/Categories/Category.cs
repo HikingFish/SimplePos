@@ -14,9 +14,9 @@ public class Category
 
     private Category() { }
 
-    private Category(Guid companyId, string name)
+    private Category(Guid categoryId, Guid companyId, string name)
     {
-        CategoryId = Guid.CreateVersion7();
+        CategoryId = categoryId;
         CompanyId = companyId;
         Name = name;
         IsActive = true;
@@ -35,7 +35,7 @@ public class Category
             return Result<Category>.Failure(CategoryError.CompanyIdEmpty);
         }
 
-        return Result<Category>.Success(new Category(companyId, name)); 
+        return Result<Category>.Success(new Category(Guid.CreateVersion7(), companyId, name)); 
     }
     public Result UpdateCategoryInfo(string newName)
     {

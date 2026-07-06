@@ -8,9 +8,9 @@ public class Permission
     public string Name { get; private set; } = string.Empty;
     private Permission() { }
 
-    private Permission(string name)
+    private Permission(Guid permissionId, string name)
     {
-        PermissionId = Guid.CreateVersion7();
+        PermissionId = permissionId;
         Name = name;
     }
 
@@ -21,6 +21,6 @@ public class Permission
             return Result<Permission>.Failure(PermissionError.PermissionNameEmpty);
         }
 
-        return Result<Permission>.Success(new Permission(name));
+        return Result<Permission>.Success(new Permission(Guid.CreateVersion7(), name));
     }
 }

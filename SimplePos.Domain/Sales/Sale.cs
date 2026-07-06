@@ -1,6 +1,4 @@
-using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
-using SimplePos.Domain.Taxes;
 
 namespace SimplePos.Domain.Sales;
 public class Sale
@@ -8,26 +6,39 @@ public class Sale
     public Guid SaleId { get; private set; }
     public Guid OutletId { get; private set; }
     public string InvoiceNumber { get; private set; } 
+    // SubTotal is total without tax and discount
     public decimal SubTotal { get; private set; }
     public decimal TaxAmount { get; private set; }
+    //Net Amount is total without tax but with discount
+    public decimal NetAmount { get; private set; }
     public decimal TotalAmount { get; private set; }
     public DateTime DateTimeCreated { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public decimal TotalPaid { get; private set; }
+    public decimal TotalChange { get; private set; }
+    public decimal TotalOutstanding { get; private set; }
+    public decimal TotalDiscount { get; private set; }
     private readonly List<SaleItem> _saleItems  = new List<SaleItem>();
     public IReadOnlyCollection<SaleItem> SaleItems => _saleItems.AsReadOnly();
     private readonly List<SalePayment> _salePayments = new List<SalePayment>();
     public IReadOnlyCollection<SalePayment> SalePayments => _salePayments.AsReadOnly();
-    public decimal TotalPaid => _salePayments.Sum(p => p.Amount);
 
     private Sale() { }
 
-    private Sale(Guid outletId, string invoiceNumber)
+    private Sale(Guid saleId, Guid outletId, string invoiceNumber)
     {
-        SaleId = Guid.CreateVersion7();
+        SaleId = saleId;
         OutletId = outletId;
         DateTimeCreated = DateTime.UtcNow;
         SoftDeleted = false;
         InvoiceNumber = invoiceNumber;
+        SubTotal = 0;
+        TaxAmount = 0;
+        NetAmount = 0;
+        TotalAmount = 0;
+        TotalPaid = 0;
+        TotalChange = 0;
+        TotalOutstanding = 0;
     }
 
     public static Result<Sale> Create(Guid outletId, string invoiceNumber)
@@ -37,7 +48,7 @@ public class Sale
             return Result<Sale>.Failure(SaleError.OutletIdEmpty);
         }
 
-        return Result<Sale>.Success(new Sale(outletId, invoiceNumber));
+        return Result<Sale>.Success(new Sale(Guid.CreateVersion7(), outletId, invoiceNumber));
     }
 
     public Result AddSaleItem(SaleItem saleItem)
@@ -75,6 +86,29 @@ public class Sale
         return Result.Success();
     }
 
+    public Result RemoveSaleItem(SaleItem saleItem)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (saleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNull);
+        }
+
+        if (!_saleItems.Contains(saleItem))
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        _saleItems.Remove(saleItem);
+        CalculateTotals();
+        return Result.Success();
+    }
+
     public Result CalculateTotals()
     {
         var statusResult = EnsureNotSoftDeleted();
@@ -85,17 +119,22 @@ public class Sale
 
         decimal subTotal = 0;
         decimal taxAmount = 0;
+        decimal totalAmount = 0;
+        decimal netAmount = 0;
 
         foreach (var saleItem in _saleItems)
         {
-            subTotal += saleItem.NetAmount;
+            subTotal += saleItem.GrossAmount;
             taxAmount += saleItem.TaxAmount;
+            netAmount += saleItem.NetAmount;
+            totalAmount += saleItem.TotalLineAmount;
         }
 
         SubTotal = subTotal;
         TaxAmount = taxAmount;
-        TotalAmount = SubTotal + TaxAmount;
-        
+        TotalAmount = totalAmount;
+        NetAmount = netAmount;
+
         return Result.Success();
     }
 

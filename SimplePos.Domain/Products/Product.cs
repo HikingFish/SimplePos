@@ -18,9 +18,9 @@ public class Product
 
     private Product() { }
 
-    private Product(Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
+    private Product(Guid productId, Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
     {            
-        ProductId = Guid.CreateVersion7();
+        ProductId = productId;
         CompanyId = companyId;
         SKU = sku;
         ProductName = productName;
@@ -52,7 +52,7 @@ public class Product
             return Result<Product>.Failure(ProductError.BasePriceNegative);
         }
 
-        return Result<Product>.Success(new Product(companyId, sku, productName, costPrice, basePrice));
+        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, sku, productName, costPrice, basePrice));
     }
 
     public Result UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)

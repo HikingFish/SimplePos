@@ -12,9 +12,9 @@ public class PaymentMethod
 
     private PaymentMethod(){}
 
-    private PaymentMethod(Guid companyId, string name)
+    private PaymentMethod(Guid paymentMethodId, Guid companyId, string name)
     {
-        PaymentMethodId = Guid.CreateVersion7();
+        PaymentMethodId = paymentMethodId;
         CompanyId = companyId;
         Name = name;
         IsActive = true;
@@ -33,7 +33,7 @@ public class PaymentMethod
             return Result<PaymentMethod>.Failure(PaymentMethodError.NameEmpty);
         }
 
-        return Result<PaymentMethod>.Success(new PaymentMethod(companyId, name));
+        return Result<PaymentMethod>.Success(new PaymentMethod(Guid.CreateVersion7(), companyId, name));
     }
 
     public Result UpdateName(string newName)

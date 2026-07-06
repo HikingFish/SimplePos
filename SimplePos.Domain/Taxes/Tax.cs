@@ -12,9 +12,9 @@ public class Tax
 
     private Tax() { }
 
-    private Tax(Guid companyId, string taxName, decimal taxRate)
+    private Tax(Guid taxId, Guid companyId, string taxName, decimal taxRate)
     {
-        TaxId = Guid.CreateVersion7();
+        TaxId = taxId;
         CompanyId = companyId;
         TaxName = taxName;
         TaxRate = taxRate;
@@ -33,7 +33,7 @@ public class Tax
             return Result<Tax>.Failure(TaxError.TaxRateNegative);
         }
 
-        return Result<Tax>.Success(new Tax(companyId, taxName, taxRate));
+        return Result<Tax>.Success(new Tax(Guid.CreateVersion7(), companyId, taxName, taxRate));
     }
 
     public Result UpdateTaxInfo(string newTaxName, decimal newTaxRate)

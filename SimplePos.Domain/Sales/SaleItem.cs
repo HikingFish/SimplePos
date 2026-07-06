@@ -23,7 +23,9 @@ public class SaleItem
 
     private SaleItem(){}
 
-    private SaleItem(Guid productId, 
+    private SaleItem(
+        Guid saleItemId,
+        Guid productId, 
         Guid saleId, 
         decimal quantity,
         decimal unitPrice,
@@ -31,7 +33,7 @@ public class SaleItem
         string? remark,
         decimal taxRate)
     {
-        SaleItemId = Guid.CreateVersion7();
+        SaleItemId = saleItemId;
         ProductId = productId;
         SaleId = saleId;
         Quantity = quantity;
@@ -43,7 +45,8 @@ public class SaleItem
         CalculateLineTotal();
     }
 
-    public static Result<SaleItem> Create(Guid productId, 
+    public static Result<SaleItem> Create(
+        Guid productId, 
         Guid saleId, 
         decimal quantity,
         decimal unitPrice,
@@ -71,12 +74,19 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.QuantityZero);
         }
 
-        return Result<SaleItem>.Success(new SaleItem(productId, saleId, quantity, unitPrice, unitDiscount, remark, taxRate));
+        return Result<SaleItem>.Success(new SaleItem(Guid.CreateVersion7(), productId, saleId, quantity, unitPrice, unitDiscount, remark, taxRate));
     }
 
     private void CalculateLineTotal()
     {
-        DiscountedUnitPrice = decimal.Round(UnitPrice * UnitDiscount, 2);
+        if (UnitDiscount > 0)
+        {
+            DiscountedUnitPrice = decimal.Round(UnitPrice - (UnitPrice * UnitDiscount), 2);
+        }
+        else
+        {
+            DiscountedUnitPrice = UnitPrice;
+        }
         GrossAmount = decimal.Round(Quantity * UnitPrice, 2);
         NetAmount = decimal.Round(Quantity * DiscountedUnitPrice, 2);
         TaxAmount = decimal.Round(NetAmount * TaxRate, 2);

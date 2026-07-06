@@ -12,9 +12,9 @@ public class SalePayment
 
     private SalePayment() { }
 
-    private SalePayment(Guid saleId, Guid paymentMethodId, decimal amount, string? referenceNumber)
+    private SalePayment(Guid salePaymentId, Guid saleId, Guid paymentMethodId, decimal amount, string? referenceNumber)
     {
-        SalePaymentId = Guid.CreateVersion7();
+        SalePaymentId = salePaymentId;
         SaleId = saleId;
         PaymentMethodId = paymentMethodId;
         Amount = amount;
@@ -39,7 +39,6 @@ public class SalePayment
             return Result<SalePayment>.Failure(SalePaymentError.AmountNegativeOrZero);
         }
 
-        return Result<SalePayment>.Success(new SalePayment(saleId, paymentMethodId, amount, referenceNumber));
+        return Result<SalePayment>.Success(new SalePayment(Guid.CreateVersion7(), saleId, paymentMethodId, amount, referenceNumber));
     }
 }
-
