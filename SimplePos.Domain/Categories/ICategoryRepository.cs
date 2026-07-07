@@ -1,6 +1,6 @@
 using SimplePos.Domain.Common.ResultPattern;
 
-namespace SimplePos.Domain.Category;
+namespace SimplePos.Domain.Categories;
 public interface ICategoryRepository
 {
     Task<Result<Category>> GetCategoryByIdAsync(Guid categoryId);

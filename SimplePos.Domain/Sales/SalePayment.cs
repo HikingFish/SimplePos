@@ -6,18 +6,18 @@ public class SalePayment
     public Guid SalePaymentId { get; private set; }
     public Guid SaleId { get; private set; }
     public Guid PaymentMethodId { get; private set; }
-    public decimal Amount { get; private set; }
+    public decimal AmountPaid { get; private set; }
     public DateTime PaymentDate { get; private set; }
     public string? ReferenceNumber { get; private set; }
 
     private SalePayment() { }
 
-    private SalePayment(Guid salePaymentId, Guid saleId, Guid paymentMethodId, decimal amount, string? referenceNumber)
+    private SalePayment(Guid salePaymentId, Guid saleId, Guid paymentMethodId, decimal amountPaid, string? referenceNumber)
     {
         SalePaymentId = salePaymentId;
         SaleId = saleId;
         PaymentMethodId = paymentMethodId;
-        Amount = amount;
+        AmountPaid = amountPaid;
         PaymentDate = DateTime.UtcNow;
         ReferenceNumber = referenceNumber;
     }

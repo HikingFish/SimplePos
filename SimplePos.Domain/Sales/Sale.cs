@@ -135,29 +135,40 @@ public class Sale
         return Result.Success();
     }
 
-    public Result UpdateSaleItem(SaleItem updatedSaleItem)
+    public Result UpdateSaleItem(Guid saleItemId, decimal quantity, decimal unitPrice, decimal unitDiscount, string? remark, decimal taxRate)
     {
         var statusResult = EnsureNotSoftDeleted();
+
         if (!statusResult.IsSuccess)
         {
             return statusResult;
         }
 
-        if (updatedSaleItem == null)
+        if (saleItemId == Guid.Empty)
         {
             return Result.Failure(SaleError.SaleItemNull);
         }
 
+        if (quantity <= 0)
+        {
+            return Result.Failure(SaleItemError.QuantityZero);
+        }
+
         //class would only create a pointer to it where as struct would create a copy of it.
         // So we can use the pointer to update the original object in the list.
-        SaleItem? existingSaleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == updatedSaleItem.SaleItemId);
+        SaleItem? existingSaleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
 
         if (existingSaleItem == null)
         {
             return Result.Failure(SaleError.SaleItemNotFound);
         }
 
-        existingSaleItem.UpdateSaleItem(updatedSaleItem.Quantity, updatedSaleItem.UnitPrice, updatedSaleItem.UnitDiscount, updatedSaleItem.Remark, updatedSaleItem.TaxRate);
+        Result updateResult = existingSaleItem.UpdateSaleItem(quantity, unitPrice, unitDiscount, remark, taxRate);
+        if (!updateResult.IsSuccess)
+        {
+            return updateResult;
+        }
+
         CalculateTotals();
         return Result.Success();
     }
@@ -198,6 +209,34 @@ public class Sale
         TaxAmount = taxAmount;
         TotalAmount = totalAmount;
         NetAmount = netAmount;
+
+        return Result.Success();
+    }
+
+    public Result CalculatePaymentTotals()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        decimal totalPaid = 0;
+        decimal totalChange = 0;
+        decimal totalOutstanding = 0;
+
+        foreach (var salePayment in _salePayments)
+        {
+            totalPaid += salePayment.AmountPaid;
+        }
+
+        totalOutstanding = TotalAmount - totalPaid;
+
+        totalChange = totalPaid > TotalAmount ? totalPaid - TotalAmount : 0;
+
+        TotalPaid = totalPaid;
+        TotalChange = totalChange;
+        TotalOutstanding = totalOutstanding;
 
         return Result.Success();
     }

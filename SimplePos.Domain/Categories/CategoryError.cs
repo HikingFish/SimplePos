@@ -1,6 +1,6 @@
 using SimplePos.Domain.Common.ResultPattern;
 
-namespace SimplePos.Domain.Category;
+namespace SimplePos.Domain.Categories;
 public static class CategoryError
 {
     public static readonly Error CategoryNameEmpty = new Error(

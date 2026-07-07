@@ -83,4 +83,39 @@ public class SaleTests
         Assert.Equal(78M, result.Data.TotalAmount);
         Assert.Equal(76M,result.Data.NetAmount);
     }
+
+    [Fact]
+    public void UpdateSaleItem_ShouldBeUpdated_InputValidUpdatedSaleItem()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        Result<Sale> result = Sale.Create(outletId, invoiceNumber);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Data);
+        var sale = result.Data;
+
+        var productId = Guid.NewGuid();
+        SaleItem saleItem = SaleItem.Create(productId, sale.SaleId, 5, 10.0m, 0.15m, "Sample remark", 0.05m).Data!;
+        var resultAddingSaleItem = sale.AddSaleItem(saleItem);
+        Assert.True(resultAddingSaleItem.IsSuccess);
+
+        // Act
+        var resultUpdatingSaleItem = sale.UpdateSaleItem(
+            saleItem.SaleItemId, 
+            quantity: 5, 
+            unitPrice: 7.2m, 
+            unitDiscount: 0.0m, 
+            remark: "Sample remark2", 
+            taxRate: 0.0m);
+
+        // Assert
+        Assert.True(resultUpdatingSaleItem.IsSuccess);
+        var updatedItem = sale.SaleItems.FirstOrDefault(d => d.SaleItemId == saleItem.SaleItemId);
+        Assert.NotNull(updatedItem);
+        Assert.Equal(7.2m, updatedItem.UnitPrice);
+        Assert.Equal(0.0m, updatedItem.UnitDiscount);
+        Assert.Equal("Sample remark2", updatedItem.Remark);
+        Assert.Equal(0.0m, updatedItem.TaxRate);
+    }
 }

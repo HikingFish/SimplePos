@@ -3,7 +3,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 
-namespace SimplePos.Domain.Category;
+namespace SimplePos.Domain.Categories;
 public class Category
 {
     public Guid CategoryId;
@@ -23,7 +23,7 @@ public class Category
         SoftDeleted = false;
     }
 
-    public static Result<Category> CreateCategory(Guid companyId, string name)
+    public static Result<Category> Create(Guid companyId, string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {

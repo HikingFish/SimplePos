@@ -52,7 +52,8 @@ public class SaleItem
         decimal unitPrice,
         decimal unitDiscount,
         string? remark,
-        decimal taxRate)
+        decimal taxRate,
+        Guid? saleItemId = null)
     {
         if (productId == Guid.Empty)
         {
@@ -74,7 +75,8 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.QuantityZero);
         }
 
-        return Result<SaleItem>.Success(new SaleItem(Guid.CreateVersion7(), productId, saleId, quantity, unitPrice, unitDiscount, remark, taxRate));
+        Guid finalId = saleItemId ?? Guid.CreateVersion7();
+        return Result<SaleItem>.Success(new SaleItem(finalId, productId, saleId, quantity, unitPrice, unitDiscount, remark, taxRate));
     }
 
     private void CalculateLineTotal()
@@ -93,7 +95,12 @@ public class SaleItem
         TotalLineAmount = decimal.Round(NetAmount + TaxAmount, 2);
     }
 
-    public Result UpdateSaleItem(decimal quantity, decimal unitPrice, decimal unitDiscount, string? remark, decimal taxRate)
+    public Result UpdateSaleItem(
+        decimal quantity,
+        decimal unitPrice,
+        decimal unitDiscount,
+        string? remark,
+        decimal taxRate)
     {
         if (quantity <= 0)
         {
