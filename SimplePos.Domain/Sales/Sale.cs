@@ -86,7 +86,7 @@ public class Sale
         return Result.Success();
     }
 
-    public Result RemoveSaleItem(SaleItem saleItem)
+    public Result RemoveSaleItem(Guid saleItemId)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
@@ -94,10 +94,12 @@ public class Sale
             return statusResult;
         }
 
-        if (saleItem == null)
+        if (saleItemId == Guid.Empty)
         {
             return Result.Failure(SaleError.SaleItemNull);
         }
+
+        SaleItem? saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
 
         if (!_saleItems.Contains(saleItem))
         {
@@ -106,6 +108,68 @@ public class Sale
 
         _saleItems.Remove(saleItem);
         CalculateTotals();
+        return Result.Success();
+    }
+
+    public Result RemovePayment(Guid salePaymentId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (salePaymentId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.SalePaymentNull);
+        }
+
+        SalePayment? salePayment = _salePayments.FirstOrDefault(s => s.SalePaymentId == salePaymentId);
+
+        if (!_salePayments.Contains(salePayment))
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        _salePayments.Remove(salePayment);
+        return Result.Success();
+    }
+
+    public Result UpdateSaleItem(SaleItem updatedSaleItem)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (updatedSaleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNull);
+        }
+
+        //class would only create a pointer to it where as struct would create a copy of it.
+        // So we can use the pointer to update the original object in the list.
+        SaleItem? existingSaleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == updatedSaleItem.SaleItemId);
+
+        if (existingSaleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        existingSaleItem.UpdateSaleItem(updatedSaleItem.Quantity, updatedSaleItem.UnitPrice, updatedSaleItem.UnitDiscount, updatedSaleItem.Remark, updatedSaleItem.TaxRate);
+        CalculateTotals();
+        return Result.Success();
+    }
+
+    public Result SoftDelete()
+    {
+        if (SoftDeleted)
+        {
+            return Result.Failure(SaleError.SoftDeleted);
+        }
+
+        SoftDeleted = true;
         return Result.Success();
     }
 

@@ -92,4 +92,27 @@ public class SaleItem
         TaxAmount = decimal.Round(NetAmount * TaxRate, 2);
         TotalLineAmount = decimal.Round(NetAmount + TaxAmount, 2);
     }
+
+    public Result UpdateSaleItem(decimal quantity, decimal unitPrice, decimal unitDiscount, string? remark, decimal taxRate)
+    {
+        if (quantity <= 0)
+        {
+            return Result.Failure(SaleItemError.QuantityZero);
+        }
+
+        if (taxRate < 0)
+        {
+            return Result.Failure(SaleItemError.TaxRateNegative);
+        }
+
+        Quantity = quantity;
+        UnitPrice = unitPrice;
+        UnitDiscount = unitDiscount;
+        Remark = remark;
+        TaxRate = taxRate;
+
+        CalculateLineTotal();
+
+        return Result.Success();
+    }
 }
