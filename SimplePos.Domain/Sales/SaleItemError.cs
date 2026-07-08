@@ -29,5 +29,7 @@ public static class SaleItemError
 
     public static readonly Error DiscountExceedsTotal = new Error(
         "SaleItem.DiscountExceedsTotal", "Discount cannot exceed line amount.");
+    public static readonly Error UnitDiscountNegative = new Error(
+        "SaleItem.UnitDiscountNegative", "Unit discount cannot be negative.");
 }
 

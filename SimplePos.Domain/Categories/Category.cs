@@ -6,11 +6,11 @@ using SimplePos.Domain.Companies;
 namespace SimplePos.Domain.Categories;
 public class Category
 {
-    public Guid CategoryId;
-    public Guid CompanyId;
-    public string Name;
-    public bool IsActive;
-    public bool SoftDeleted;
+    public Guid CategoryId { get; private set; }
+    public Guid CompanyId { get; private set; }
+    public string Name { get; private set; }
+    public bool IsActive { get; private set; }
+    public bool SoftDeleted { get; private set; }
 
     private Category() { }
 
@@ -42,8 +42,14 @@ public class Category
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
         {
+            return statusResult;
+        }
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
             return Result.Failure(CategoryError.CategoryNameEmpty);
         }
+
         Name = newName;
         
         return Result.Success();
@@ -56,6 +62,10 @@ public class Category
         {
             return statusResult;
         }
+        if (IsActive)
+        {
+            return Result.Failure(CategoryError.AlreadyActive);
+        }
         IsActive = true;
         return Result.Success();
     }
@@ -67,6 +77,10 @@ public class Category
         {
             return statusResult;
         }
+        if (!IsActive)
+        {
+            return Result.Failure(CategoryError.AlreadyInactive);
+        }
         IsActive = false;
         return Result.Success();
     }
@@ -74,7 +88,7 @@ public class Category
     public Result SoftDelete()
     {
         var statusResult = EnsureNotSoftDeleted();
-        if (statusResult.IsSuccess)
+        if (!statusResult.IsSuccess)
         {
             return statusResult;
         }

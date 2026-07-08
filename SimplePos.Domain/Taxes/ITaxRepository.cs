@@ -3,6 +3,7 @@ public interface ITaxRepository
 {
     Task<Tax?> GetTaxByIdAsync(Guid taxId);
     Task<List<Tax>> GetTaxesByCompanyIdAsync(Guid companyId);
+    Task<List<Tax>> GetActiveTaxesByCompanyIdAsync(Guid companyId);
     Task AddTaxAsync(Tax tax);
     Task UpdateTaxAsync(Tax tax);
     Task DeleteTaxAsync(Guid taxId);

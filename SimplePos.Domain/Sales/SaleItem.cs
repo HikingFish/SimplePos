@@ -12,10 +12,13 @@ public class SaleItem
     public decimal UnitPrice { get; private set; }
     //Gross amount total without discount and tax
     public decimal GrossAmount { get; private set; }
+    //How much to discount from the unit price, e.g. 0.1 for 10% discount
     public decimal UnitDiscount { get; private set; }
+    //Discounted unit price after applying the unit discount
     public decimal DiscountedUnitPrice { get; private set; }
     //Net Amount is total without tax but with discount
     public decimal NetAmount { get; private set; }
+    public decimal TotalDiscount { get; private set; }
     public decimal TotalLineAmount { get; private set; }
     public string? Remark { get; private set; } 
     public decimal TaxRate { get; private set; }
@@ -70,9 +73,14 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.TaxRateNegative);
         }
 
-        if (quantity <= 0)
+        if (unitDiscount < 0)
         {
-            return Result<SaleItem>.Failure(SaleItemError.QuantityZero);
+            return Result<SaleItem>.Failure(SaleItemError.UnitDiscountNegative);
+        }
+
+        if (unitPrice < 0)
+        {
+            return Result<SaleItem>.Failure(SaleItemError.UnitPriceNegative);
         }
 
         Guid finalId = saleItemId ?? Guid.CreateVersion7();
@@ -93,6 +101,7 @@ public class SaleItem
         NetAmount = decimal.Round(Quantity * DiscountedUnitPrice, 2);
         TaxAmount = decimal.Round(NetAmount * TaxRate, 2);
         TotalLineAmount = decimal.Round(NetAmount + TaxAmount, 2);
+        TotalDiscount = decimal.Round(Quantity * (UnitPrice - DiscountedUnitPrice), 2);
     }
 
     public Result UpdateSaleItem(
@@ -102,14 +111,19 @@ public class SaleItem
         string? remark,
         decimal taxRate)
     {
-        if (quantity <= 0)
-        {
-            return Result.Failure(SaleItemError.QuantityZero);
-        }
-
         if (taxRate < 0)
         {
             return Result.Failure(SaleItemError.TaxRateNegative);
+        }
+
+        if (unitDiscount < 0)
+        {
+            return Result.Failure(SaleItemError.UnitDiscountNegative);
+        }
+
+        if (unitPrice < 0)
+        {
+            return Result.Failure(SaleItemError.UnitPriceNegative);
         }
 
         Quantity = quantity;

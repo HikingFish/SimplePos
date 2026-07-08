@@ -11,4 +11,6 @@ public interface IPermissionRepository
     Task AddUserPermissionAsync(UserPermission userPermission);
     Task<List<Permission>> GetPermissionsByUserIdAsync(Guid userId);
     Task DeleteUserPermissionsByUserIdAsync(Guid userId);
+    Task DeleteUserPermissionAsync(Guid userId, Guid permissionId);
+    Task<bool> UserPermissionExistsAsync(Guid userId, Guid permissionId);
 }

@@ -13,5 +13,13 @@ public static class SaleError
         "Sales.SoftDeleted", "Operation cannot be performed on a soft deleted sale.");
     public static readonly Error SaleItemNotFound = new Error(
         "Sales.SaleItemNotFound", "Sale item not found.");
+    public static readonly Error SaleItemIsEmpty = new Error(
+        "Sales.SaleItemIsEmpty", "Sale item is empty.");
+    public static readonly Error SalePaymentNotFound = new Error(
+        "Sales.SalePaymentNotFound", "Sale payment is not found.");
+    public static readonly Error SaleFullyPaid = new Error(
+        "Sales.SaleFullyPaid", "Sale is already fully paid.");
+    public static readonly Error AmountNegativeOrZero = new Error(
+        "Sales.AmountNegativeOrZero", "Amount cannot be negative or zero.");
 }
 

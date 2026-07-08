@@ -18,6 +18,7 @@ public class Sale
     public decimal TotalChange { get; private set; }
     public decimal TotalOutstanding { get; private set; }
     public decimal TotalDiscount { get; private set; }
+    public bool IsFullyPaid => TotalOutstanding == 0;
     private readonly List<SaleItem> _saleItems  = new List<SaleItem>();
     public IReadOnlyCollection<SaleItem> SaleItems => _saleItems.AsReadOnly();
     private readonly List<SalePayment> _salePayments = new List<SalePayment>();
@@ -82,7 +83,18 @@ public class Sale
             return Result.Failure(SaleError.SalePaymentNull);
         }
 
+        if (payment.AmountPaid <= 0)
+        {
+            return Result.Failure(SaleError.AmountNegativeOrZero);
+        }
+
+        if (TotalOutstanding <= 0)
+        {
+            return Result.Failure(SaleError.SaleFullyPaid);
+        }
+
         _salePayments.Add(payment);
+        CalculatePaymentTotals();
         return Result.Success();
     }
 
@@ -99,7 +111,22 @@ public class Sale
             return Result.Failure(SaleError.SaleItemNull);
         }
 
+        if (!_saleItems.Any(s => s.SaleItemId == saleItemId))
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        if (_saleItems.Count == 0)
+        {
+            return Result.Failure(SaleError.SaleItemIsEmpty);
+        }
+
         SaleItem? saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
+
+        if (saleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
 
         if (!_saleItems.Contains(saleItem))
         {
@@ -126,12 +153,18 @@ public class Sale
 
         SalePayment? salePayment = _salePayments.FirstOrDefault(s => s.SalePaymentId == salePaymentId);
 
+        if (salePayment == null)
+        {
+            return Result.Failure(SaleError.SalePaymentNotFound);
+        }
+
         if (!_salePayments.Contains(salePayment))
         {
-            return Result.Failure(SaleError.SaleItemNotFound);
+            return Result.Failure(SaleError.SalePaymentNotFound);
         }
 
         _salePayments.Remove(salePayment);
+        CalculatePaymentTotals();
         return Result.Success();
     }
 
@@ -147,11 +180,6 @@ public class Sale
         if (saleItemId == Guid.Empty)
         {
             return Result.Failure(SaleError.SaleItemNull);
-        }
-
-        if (quantity <= 0)
-        {
-            return Result.Failure(SaleItemError.QuantityZero);
         }
 
         //class would only create a pointer to it where as struct would create a copy of it.
@@ -196,6 +224,7 @@ public class Sale
         decimal taxAmount = 0;
         decimal totalAmount = 0;
         decimal netAmount = 0;
+        decimal totalDiscount = 0;
 
         foreach (var saleItem in _saleItems)
         {
@@ -203,12 +232,14 @@ public class Sale
             taxAmount += saleItem.TaxAmount;
             netAmount += saleItem.NetAmount;
             totalAmount += saleItem.TotalLineAmount;
+            totalDiscount += saleItem.TotalDiscount;
         }
 
         SubTotal = subTotal;
         TaxAmount = taxAmount;
         TotalAmount = totalAmount;
         NetAmount = netAmount;
+        TotalDiscount = totalDiscount;
 
         return Result.Success();
     }
