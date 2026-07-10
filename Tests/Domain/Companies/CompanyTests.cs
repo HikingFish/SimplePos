@@ -39,6 +39,7 @@ public class CompanyTests
         Assert.InRange(company.DateTimeCreated, before, after);
         Assert.InRange(company.DateTimeLastOnline, before, after);
         Assert.False(company.SoftDeleted);
+        Assert.Null(company.DateTimeSoftDeleted);
         Assert.True(company.IsActive);
     }
 
@@ -266,13 +267,17 @@ public class CompanyTests
     {
         // Arrange
         var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var beforeDelete = DateTime.UtcNow;
 
         // Act
         Result result = company.SoftDelete();
+        var afterDelete = DateTime.UtcNow;
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.True(company.SoftDeleted);
+        Assert.NotNull(company.DateTimeSoftDeleted);
+        Assert.InRange(company.DateTimeSoftDeleted.Value, beforeDelete, afterDelete);
         Assert.False(company.IsActive);
     }
 

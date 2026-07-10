@@ -4,13 +4,14 @@ using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 
 namespace SimplePos.Domain.Categories;
-public class Category
+public class Category : ISoftDeletable
 {
     public Guid CategoryId { get; private set; }
     public Guid CompanyId { get; private set; }
     public string Name { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
 
     private Category() { }
 
@@ -21,6 +22,7 @@ public class Category
         Name = name;
         IsActive = true;
         SoftDeleted = false;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<Category> Create(Guid companyId, string name)
@@ -93,6 +95,7 @@ public class Category
             return statusResult;
         }
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

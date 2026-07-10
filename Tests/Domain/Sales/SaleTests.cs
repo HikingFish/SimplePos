@@ -23,6 +23,7 @@ public class SaleTests
         Assert.Equal(outletId, sale.OutletId);
         Assert.Equal(invoiceNumber, sale.InvoiceNumber);
         Assert.False(sale.SoftDeleted);
+        Assert.Null(sale.DateTimeSoftDeleted);
         Assert.NotEqual(Guid.Empty, sale.SaleId);
     }
     [Fact]
@@ -117,5 +118,25 @@ public class SaleTests
         Assert.Equal(0.0m, updatedItem.UnitDiscount);
         Assert.Equal("Sample remark2", updatedItem.Remark);
         Assert.Equal(0.0m, updatedItem.TaxRate);
+    }
+
+    [Fact]
+    public void SoftDelete_ShouldReturnSuccess_AndSetFlags()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, invoiceNumber).Data!;
+        var beforeDelete = DateTime.UtcNow;
+
+        // Act
+        Result result = sale.SoftDelete();
+        var afterDelete = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.True(sale.SoftDeleted);
+        Assert.NotNull(sale.DateTimeSoftDeleted);
+        Assert.InRange(sale.DateTimeSoftDeleted.Value, beforeDelete, afterDelete);
     }
 }

@@ -2,7 +2,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Companies;
-public class Company
+public class Company : ISoftDeletable
 {
     public Guid CompanyId { get; private set; }
     public string Name { get; private set; } 
@@ -13,6 +13,7 @@ public class Company
     public DateTime DateTimeLastOnline { get; private set; }
     public bool IsActive{ get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
 
     private Company() { }
     private Company(Guid companyId, string name, Address companyAddress, EmailAddress email, string phoneNumber, DateTime dateTimeCreated, DateTime dateTimeLastOnline, bool isActive, bool softDeleted)
@@ -26,6 +27,7 @@ public class Company
         DateTimeLastOnline = dateTimeLastOnline;
         IsActive = isActive;
         SoftDeleted = softDeleted;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<Company> Create(string name, Address companyAddress, string phoneNumber, EmailAddress email)
@@ -154,6 +156,7 @@ public class Company
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

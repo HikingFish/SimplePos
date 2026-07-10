@@ -2,13 +2,14 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Payments;
-public class PaymentMethod
+public class PaymentMethod : ISoftDeletable
 {
     public Guid PaymentMethodId { get; private set; }
     public Guid CompanyId { get; private set; }
     public string Name { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
 
     private PaymentMethod(){}
 
@@ -19,6 +20,7 @@ public class PaymentMethod
         Name = name;
         IsActive = true;
         SoftDeleted = false;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<PaymentMethod> Create(Guid companyId, string name)
@@ -96,6 +98,7 @@ public class PaymentMethod
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

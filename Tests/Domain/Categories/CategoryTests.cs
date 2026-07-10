@@ -25,6 +25,7 @@ public class CategoryTests
         Assert.Equal(name, category.Name);
         Assert.True(category.IsActive);
         Assert.False(category.SoftDeleted);
+        Assert.Null(category.DateTimeSoftDeleted);
         Assert.NotEqual(Guid.Empty, category.CategoryId);
     }
 
@@ -161,13 +162,17 @@ public class CategoryTests
     {
         // Arrange
         var category = Category.Create(Guid.NewGuid(), "Electronics").Data!;
+        var beforeDelete = DateTime.UtcNow;
 
         // Act
         Result result = category.SoftDelete();
+        var afterDelete = DateTime.UtcNow;
 
         // Assert
         Assert.True(result.IsSuccess);
         Assert.True(category.SoftDeleted);
+        Assert.NotNull(category.DateTimeSoftDeleted);
+        Assert.InRange(category.DateTimeSoftDeleted.Value, beforeDelete, afterDelete);
         Assert.False(category.IsActive);
     }
 

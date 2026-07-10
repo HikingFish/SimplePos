@@ -2,7 +2,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Outlets;
-public class Outlet
+public class Outlet : ISoftDeletable
 {
     public Guid OutletId { get; private set; }
     public Guid CompanyId { get; private set; }
@@ -13,6 +13,7 @@ public class Outlet
     public DateTime? DateTimeLastOnline { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
     private Outlet() { }
     private Outlet(Guid outletId, Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
     {
@@ -25,6 +26,7 @@ public class Outlet
         DateTimeLastOnline = null;
         IsActive = isActive;
         SoftDeleted = softDeleted;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
@@ -120,6 +122,7 @@ public class Outlet
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

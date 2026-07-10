@@ -2,7 +2,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Products;
-public class Product
+public class Product : ISoftDeletable
 {
     public Guid ProductId { get; private set; }
     public Guid CompanyId { get; private set; }
@@ -13,6 +13,7 @@ public class Product
     public decimal BasePrice { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
     private readonly List<ProductTax> _productTaxes = new List<ProductTax>();
     public IReadOnlyCollection<ProductTax> ProductTaxes => _productTaxes.AsReadOnly();
 
@@ -28,6 +29,7 @@ public class Product
         BasePrice = basePrice;
         IsActive = true;
         SoftDeleted = false;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<Product> Create(Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
@@ -183,6 +185,7 @@ public class Product
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

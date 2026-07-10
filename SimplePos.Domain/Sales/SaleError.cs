@@ -21,5 +21,9 @@ public static class SaleError
         "Sales.SaleFullyPaid", "Sale is already fully paid.");
     public static readonly Error AmountNegativeOrZero = new Error(
         "Sales.AmountNegativeOrZero", "Amount cannot be negative or zero.");
+    public static readonly Error Void = new Error(
+        "Sales.Void", "Operation cannot be performed on a void sale.");
+    public static readonly Error NotVoid = new Error(
+        "Sales.NotVoid", "Operation cannot be performed on a not void sale.");
 }
 

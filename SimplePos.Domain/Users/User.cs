@@ -2,7 +2,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Users;
-public class User
+public class User : ISoftDeletable
 {
     public Guid UserId { get; private set; }
     public Guid OutletId { get; private set;}
@@ -15,6 +15,7 @@ public class User
     public DateTime? DateTimeLastLogin { get; private set; }
     public DateTime DateTimeCreated { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
     private User() { }
     
     private User(Guid userId, Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
@@ -30,6 +31,7 @@ public class User
         DateTimeLastLogin = null;
         DateTimeCreated = DateTime.UtcNow;
         SoftDeleted = false;
+        DateTimeSoftDeleted = null;
     }
 
     public static Result<User> Create(Guid OutletId, string Username, string HashedPassword, EmailAddress Email, string PhoneNumber, string UserPosition)
@@ -108,6 +110,7 @@ public class User
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         IsActive = false;
         return Result.Success();
     }

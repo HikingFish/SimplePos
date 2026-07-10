@@ -1,7 +1,8 @@
+using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Sales;
-public class Sale
+public class Sale : ISoftDeletable
 {
     public Guid SaleId { get; private set; }
     public Guid OutletId { get; private set; }
@@ -14,6 +15,8 @@ public class Sale
     public decimal TotalAmount { get; private set; }
     public DateTime DateTimeCreated { get; private set; }
     public bool SoftDeleted { get; private set; }
+    public DateTime? DateTimeSoftDeleted { get; private set; }
+    public bool Void { get; private set; }
     public decimal TotalPaid { get; private set; }
     public decimal TotalChange { get; private set; }
     public decimal TotalOutstanding { get; private set; }
@@ -32,6 +35,7 @@ public class Sale
         OutletId = outletId;
         DateTimeCreated = DateTime.UtcNow;
         SoftDeleted = false;
+        DateTimeSoftDeleted = null;
         InvoiceNumber = invoiceNumber;
         SubTotal = 0;
         TaxAmount = 0;
@@ -40,6 +44,7 @@ public class Sale
         TotalPaid = 0;
         TotalChange = 0;
         TotalOutstanding = 0;
+        Void = false;
     }
 
     public static Result<Sale> Create(Guid outletId, string invoiceNumber)
@@ -209,6 +214,7 @@ public class Sale
         }
 
         SoftDeleted = true;
+        DateTimeSoftDeleted = DateTime.UtcNow;
         return Result.Success();
     }
 
@@ -272,11 +278,54 @@ public class Sale
         return Result.Success();
     }
 
+    public Result VoidSale()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (Void)
+        {
+            return Result.Failure(SaleError.Void);
+        }
+
+        Void = true;
+        return Result.Success();
+    }
+
+    public Result UnvoidSale()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (!Void)
+        {
+            return Result.Failure(SaleError.NotVoid);
+        }
+
+        Void = false;
+        return Result.Success();
+    }
+
     private Result EnsureNotSoftDeleted()
     {
         if (SoftDeleted)
         {
             return Result.Failure(SaleError.SoftDeleted);
+        }
+        return Result.Success();
+    }
+
+    private Result EnsureNotVoid()
+    {
+        if (Void)
+        {
+            return Result.Failure(SaleError.Void);
         }
         return Result.Success();
     }

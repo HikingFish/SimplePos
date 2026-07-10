@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="SimplePos.Application/SimplePos.Application.csproj" />
   <Project Path="SimplePos.Domain/SimplePos.Domain.csproj" />
+  <Project Path="SimplePos.Infrastructure/SimplePos.Infrastructure.csproj" />
   <Project Path="Tests/Tests.csproj" />
 </Solution>
