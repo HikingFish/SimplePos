@@ -1,3 +1,5 @@
+using SimplePos.Domain.Common.ResultPattern;
+
 namespace SimplePos.Domain.Common;
 public record Address
 {
@@ -16,33 +18,33 @@ public record Address
         Country = country;
     }
 
-    public static Address Create(string street, string city, string state, string postalCode, string country)
+    public static Result<Address> Create(string street, string city, string state, string postalCode, string country)
     {
         if (string.IsNullOrWhiteSpace(street))
         {
-            throw new DomainException("Street cannot be empty.");
+            return Result<Address>.Failure(CommonError.Address.StreetEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(city))
         {
-            throw new DomainException("City cannot be empty.");
+            return Result<Address>.Failure(CommonError.Address.CityEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(state))
         {
-            throw new DomainException("State cannot be empty.");
+            return Result<Address>.Failure(CommonError.Address.StateEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(postalCode))
         {
-            throw new DomainException("Postal code cannot be empty.");
+            return Result<Address>.Failure(CommonError.Address.PostalCodeEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(country))
         {
-            throw new DomainException("Country cannot be empty.");
+            return Result<Address>.Failure(CommonError.Address.CountryEmpty);
         }
 
-        return new Address(street, city, state, postalCode, country);
+        return Result<Address>.Success(new Address(street, city, state, postalCode, country));
     }
 }

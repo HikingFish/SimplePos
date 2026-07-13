@@ -1,3 +1,5 @@
+using SimplePos.Domain.Common.ResultPattern;
+
 namespace SimplePos.Domain.Permissions;
 public class UserPermission
 {
@@ -10,8 +12,18 @@ public class UserPermission
         PermissionId = permissionId;
     }
 
-    public static UserPermission Create(Guid userId, Guid permissionId)
+    public static Result<UserPermission> Create(Guid userId, Guid permissionId)
     {
-        return new UserPermission(userId, permissionId);
+        if (userId == Guid.Empty)
+        {
+            return Result<UserPermission>.Failure(PermissionError.UserIdEmpty);
+        }
+
+        if (permissionId == Guid.Empty)
+        {
+            return Result<UserPermission>.Failure(PermissionError.PermissionIdEmpty);
+        }
+
+        return Result<UserPermission>.Success(new UserPermission(userId, permissionId));
     }
 }

@@ -1,3 +1,5 @@
+using SimplePos.Domain.Common.ResultPattern;
+
 namespace SimplePos.Domain.Common;
 public record EmailAddress
 {
@@ -8,21 +10,21 @@ public record EmailAddress
         Value = email;
     }
 
-    public static EmailAddress Create(string email)
+    public static Result<EmailAddress> Create(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            throw new DomainException("Email address cannot be empty.");
+            return Result<EmailAddress>.Failure(CommonError.EmailAddress.Empty);
         }
 
         var emailAddress = new EmailAddress(email);
 
         if (!emailAddress.IsValidEmail(email))
         {
-            throw new DomainException("Invalid email address format.");
+            return Result<EmailAddress>.Failure(CommonError.EmailAddress.InvalidFormat);
         }
 
-        return emailAddress;
+        return Result<EmailAddress>.Success(emailAddress);
     }
 
     private bool IsValidEmail(string email)

@@ -8,10 +8,10 @@ namespace Tests.Domain.Companies;
 public class CompanyTests
 {
     private Address CreateValidAddress() => 
-        Address.Create("Jalan 8", "Ampang", "Selangor", "12345", "Malaysia");
+        Address.Create("Jalan 8", "Ampang", "Selangor", "12345", "Malaysia").Data!;
 
     private EmailAddress CreateValidEmail() => 
-        EmailAddress.Create("John@gmail.com");
+        EmailAddress.Create("John@gmail.com").Data!;
 
     [Fact]
     public void Create_ShouldReturnCompany_WhenInputIsValid()
@@ -110,7 +110,7 @@ public class CompanyTests
         var company = companyResult.Data!;
 
         string newName = "Jack's Food";
-        Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia");
+        Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia").Data!;
         string newPhoneNumber = "012987654";
 
         // Act
@@ -131,7 +131,7 @@ public class CompanyTests
     {
         // Arrange
         var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
-        Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia");
+        Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia").Data!;
 
         // Act
         Result result = company.UpdateCompanyInfo(newName!, newAddress, "012987654");
@@ -160,7 +160,7 @@ public class CompanyTests
     {
         // Arrange
         var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
-        var newEmail = EmailAddress.Create("jack@gmail.com");
+        var newEmail = EmailAddress.Create("jack@gmail.com").Data!;
 
         // Act
         Result result = company.UpdateEmail(newEmail);

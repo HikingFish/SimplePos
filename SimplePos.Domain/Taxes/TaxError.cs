@@ -11,5 +11,7 @@ public static class TaxError
         "Tax.AlreadyDeactivated", "Tax is already deactivated.");
     public static readonly Error AlreadyActivated = new Error(
         "Tax.AlreadyActivated", "Tax is already activated.");
+    public static readonly Error SoftDeleted = new Error(
+        "Tax.SoftDeleted", "Operation cannot be performed on a soft deleted tax rate.");
 }
 
