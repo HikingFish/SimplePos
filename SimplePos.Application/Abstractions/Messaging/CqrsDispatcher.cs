@@ -17,6 +17,12 @@ public class CqrsDispatcher : ICqrsDispatcher
         return handler.HandleAsync(command, ct);
     }
 
+    public Task<TResult> SendAsync<TCommand, TResult>(TCommand command, CancellationToken ct = default) where TCommand : ICommand<TResult>
+    {
+        var handler = _provider.GetRequiredService<ICommandHandler<TCommand, TResult>>();
+        return handler.HandleAsync(command, ct);
+    }
+
     public Task<TResult> QueryAsync<TResult>(IQuery<TResult> query, CancellationToken ct = default)
     {
         // Because TQuery is not known at compile time via the method signature in the same way,

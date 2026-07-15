@@ -15,4 +15,6 @@ public static class CompanyError
         "Companies.AlreadyInactive", "Company is already inactive");
     public static readonly Error SoftDeleted = new Error(
         "Companies.SoftDeleted", "Operation cannot be performed on a soft deleted company");
+    public static readonly Error CompanyNotFound = new Error(
+        "Companies.CompanyNotFound", "Company not found");
 }

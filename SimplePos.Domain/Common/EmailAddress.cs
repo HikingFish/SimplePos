@@ -14,14 +14,14 @@ public record EmailAddress
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            return Result<EmailAddress>.Failure(CommonError.EmailAddress.Empty);
+            return Result<EmailAddress>.Failure(EmailAddressError.Empty);
         }
 
         var emailAddress = new EmailAddress(email);
 
         if (!emailAddress.IsValidEmail(email))
         {
-            return Result<EmailAddress>.Failure(CommonError.EmailAddress.InvalidFormat);
+            return Result<EmailAddress>.Failure(EmailAddressError.InvalidFormat);
         }
 
         return Result<EmailAddress>.Success(emailAddress);

@@ -22,27 +22,27 @@ public record Address
     {
         if (string.IsNullOrWhiteSpace(street))
         {
-            return Result<Address>.Failure(CommonError.Address.StreetEmpty);
+            return Result<Address>.Failure(AddressError.StreetEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(city))
         {
-            return Result<Address>.Failure(CommonError.Address.CityEmpty);
+            return Result<Address>.Failure(AddressError.CityEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(state))
         {
-            return Result<Address>.Failure(CommonError.Address.StateEmpty);
+            return Result<Address>.Failure(AddressError.StateEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(postalCode))
         {
-            return Result<Address>.Failure(CommonError.Address.PostalCodeEmpty);
+            return Result<Address>.Failure(AddressError.PostalCodeEmpty);
         }
 
         if (string.IsNullOrWhiteSpace(country))
         {
-            return Result<Address>.Failure(CommonError.Address.CountryEmpty);
+            return Result<Address>.Failure(AddressError.CountryEmpty);
         }
 
         return Result<Address>.Success(new Address(street, city, state, postalCode, country));
