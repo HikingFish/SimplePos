@@ -1,4 +1,4 @@
-using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.DomainEvent;
 
 namespace SimplePos.Domain.Companies.Events;
 

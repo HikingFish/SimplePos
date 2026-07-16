@@ -218,7 +218,7 @@ public class Sale : ISoftDeletable
         return Result.Success();
     }
 
-    public Result CalculateTotals()
+    private Result CalculateTotals()
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
@@ -250,7 +250,7 @@ public class Sale : ISoftDeletable
         return Result.Success();
     }
 
-    public Result CalculatePaymentTotals()
+    private Result CalculatePaymentTotals()
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)

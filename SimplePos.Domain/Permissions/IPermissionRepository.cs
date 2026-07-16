@@ -1,3 +1,5 @@
+using SimplePos.Domain.Users;
+
 namespace SimplePos.Domain.Permissions;
 public interface IPermissionRepository
 {

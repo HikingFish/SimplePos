@@ -1,6 +1,7 @@
 using SimplePos.Domain.Common.ResultPattern;
+using SimplePos.Domain.Permissions;
 
-namespace SimplePos.Domain.Permissions;
+namespace SimplePos.Domain.Users;
 public class UserPermission
 {
     public Guid UserId { get; private set; }

@@ -8,7 +8,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         services.AddScoped<ICqrsDispatcher, CqrsDispatcher>();
-        services.AddScoped<IEventDispatcher, EventDispatcher>();
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
         return services;
     }
