@@ -13,7 +13,6 @@ public static class DependencyInjection
         services.AddScoped<ICqrsDispatcher, CqrsDispatcher>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IDomainEventHandler<CompanyCreatedDomainEvent>, SetupDefaultOutlet>();
-        services.AddScoped<IDomainEventHandler<CompanyCreatedDomainEvent>, SetupDefaultPayment>();
 
         return services;
     }

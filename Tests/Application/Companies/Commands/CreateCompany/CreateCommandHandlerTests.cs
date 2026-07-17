@@ -2,6 +2,7 @@ using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Companies.Commands.CreateCompany;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies.Events;
+using SimplePos.Domain.Common.DomainEvent;
 using Xunit;
 using NSubstitute;
 
@@ -36,7 +37,7 @@ public class CreateCompanyCommandHandlerTests
         Assert.True(result.IsSuccess);
         // Verify: The event dispatcher received a call to publish the CompanyCreatedDomainEvent
         await _domainEventDispatcherMock.Received(1).PublishAsync(
-            Arg.Is<CompanyCreatedDomainEvent>(e => e.Name == command.Name),
+            Arg.Is<IDomainEvent>(e => e is CompanyCreatedDomainEvent && ((CompanyCreatedDomainEvent)e).Name == command.Name),
             Arg.Any<CancellationToken>()
         );
     }
@@ -61,7 +62,7 @@ public class CreateCompanyCommandHandlerTests
         
         // Verify: Event dispatcher was NOT called because validation failed early
         await _domainEventDispatcherMock.DidNotReceive().PublishAsync(
-            Arg.Any<CompanyCreatedDomainEvent>(),
+            Arg.Any<IDomainEvent>(),
             Arg.Any<CancellationToken>()
         );
     }

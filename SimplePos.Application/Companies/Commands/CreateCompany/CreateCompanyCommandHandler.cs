@@ -1,4 +1,4 @@
-﻿using SimplePos.Application.Abstractions.Messaging;
+using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
@@ -37,6 +37,12 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
             return Result.Failure(EmailAddressError.EmailAddressNotFound);
 
         Result<Company> companyResult = Company.Create(command.Name, resultAddress.Data, command.PhoneNumber, resultEmail.Data);
+
+        if (companyResult.IsFailure)
+            return companyResult;
+
+        if (companyResult.Data is null)
+            return Result.Failure(CompanyError.CompanyNotFound);
 
         var DomainEvents = companyResult.Data.DomainEvents.ToList();
         companyResult.Data.ClearDomainEvents();
