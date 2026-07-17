@@ -9,6 +9,7 @@ public static class DependencyInjection
     {
         services.AddScoped<ICqrsDispatcher, CqrsDispatcher>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<
 
         return services;
     }

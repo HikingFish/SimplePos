@@ -1,8 +1,9 @@
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
+using SimplePos.Domain.Companies.Events;
 
 namespace SimplePos.Domain.Companies;
-public class Company : ISoftDeletable
+public class Company : AggregateRoot, ISoftDeletable
 {
     public Guid CompanyId { get; private set; }
     public string Name { get; private set; } 
@@ -61,6 +62,8 @@ public class Company : ISoftDeletable
             true,
             false
         );
+
+        company.Raise(new CompanyCreatedDomainEvent(company.CompanyId, company.Name, company.CompanyAddress, company.PhoneNumber));
 
         return Result<Company>.Success(company);
     }
