@@ -43,7 +43,7 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
 
         foreach (var domainEvent in DomainEvents)
         {
-            await _domainEventDispatcher.PublishAsync<domainEvent>(domainEvent, cancellationToken);
+            await _domainEventDispatcher.PublishAsync(domainEvent, cancellationToken);
         }
 
         Debug.WriteLine($"Company created with ID: {companyResult.Data.CompanyId}");

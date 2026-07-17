@@ -27,5 +27,16 @@ namespace SimplePos.Application.Abstractions.Messaging
             var tasks = handlers.Select(handler => handler.Handle(@event, cancellationToken));
             await Task.WhenAll(tasks);
         }
+
+        public async Task PublishAsync(IDomainEvent @event, CancellationToken cancellationToken = default)
+        {
+            var eventType = @event.GetType();
+            //IDomainEventHandler<IDomainEvent>
+            var handlerType = typeof(IDomainEventHandler<>).MakeGenericType(eventType); 
+            var handlers = _serviceProvider.GetServices(handlerType);
+            var tasks = handlers.Cast<dynamic>()
+                .Select(handler => (Task)handler.Handle((dynamic)@event, cancellationToken));
+            await Task.WhenAll(tasks);
+        }
     }
 }

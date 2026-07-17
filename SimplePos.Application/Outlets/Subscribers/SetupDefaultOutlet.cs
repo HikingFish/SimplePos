@@ -2,8 +2,9 @@ using System.Diagnostics;
 using SimplePos.Domain.Common.DomainEvent;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies.Events;
+using SimplePos.Domain.Outlets;
 
-namespace SimplePos.Domain.Outlets.Subscribers;
+namespace SimplePos.Application.Outlets.Subscribers;
 
 public class SetupDefaultOutlet : IDomainEventHandler<CompanyCreatedDomainEvent>
 {
