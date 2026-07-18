@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: simplepos-postgres
+    environment:
+      POSTGRES_USER: simplepos_user
+      POSTGRES_PASSWORD: simplepos_secret
+      POSTGRES_DB: simplepos_db
+    
+    # PORT MAPPING: host_port:container_port
+    # PostgreSQL listens on 5432 inside the container.
+    # We map it to 5432 on your Mac so you can connect with
+    # tools like pgAdmin, DBeaver, or `psql` from your terminal.
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - ./.containers/simple_db:/var/lib/postgresql
+  
+  api:
+    # Build the image from the Dockerfile in the current directory.
+    # "context: ." means the build context is the project root.
+    # "dockerfile: Dockerfile" points to our Dockerfile.
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simplepos-api
+    restart: unless-stopped
+
+    # Map port 8080 in the container to port 5000 on your Mac.
+    # You'll access the API at http://localhost:5000
+    ports:
+      - "5001:8080"
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
