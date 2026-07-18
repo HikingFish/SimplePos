@@ -1,0 +1,6 @@
+@SimplePos.WebApi_HostAddress = http://localhost:5238
+
+GET {{SimplePos.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
