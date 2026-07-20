@@ -1,4 +1,5 @@
-﻿using SimplePos.Domain.Users;
+﻿using SimplePos.Domain.Companies;
+using SimplePos.Domain.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,5 +7,5 @@ using System.Text;
 namespace SimplePos.Application.Abstractions.Identity;
 public interface ITokenProvider
 {
-    string CreateToken(User user, IEnumerable<string> permissions);
+    string CreateToken(User user, Company company, IEnumerable<string> permissions);
 }

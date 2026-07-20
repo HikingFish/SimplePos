@@ -1,4 +1,5 @@
-﻿using SimplePos.Application.Abstractions.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using SimplePos.Application.Abstractions.Identity;
 using SimplePos.Domain.Common.ResultPattern;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,9 @@ namespace SimplePos.Infrastructure.Identity;
 
 public class IdentityService : IIdentityService
 {
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly ITokenProvider _tokenProvider;
     public Task<Result<string>> LoginAsync(string email, string password)
     {
         throw new NotImplementedException();

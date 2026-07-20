@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SimplePos.Application.Abstractions.Identity;
+using SimplePos.Domain.Companies;
+using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,7 +17,7 @@ namespace SimplePos.Infrastructure.Identity
         {
             _configuration = configuration;
         }
-        public string CreateToken(User user, IEnumerable<string> permissions)
+        public string CreateToken(User user, Company company, IEnumerable<string> permissions)
         {
             var secretKey = _configuration["Jwt:Secret"];
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -25,10 +27,28 @@ namespace SimplePos.Infrastructure.Identity
             {
                 new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email.Value),
-                new("OutletId", user.OutletId.ToString())
+                new("OutletId", user.OutletId.ToString()),
+                new("CompanyId", company.CompanyId.ToString())
             };
 
-            throw new NotImplementedException();
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("permission", permission));
+            }
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddMinutes(15),
+                SigningCredentials = credentials,
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"]
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }
