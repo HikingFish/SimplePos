@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using SimplePos.Application.Abstractions.Identity;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
 using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
-using SimplePos.Infrastructure.Persistence.Permission;
 using System;
 using System.Collections.Generic;
 using System.Text;

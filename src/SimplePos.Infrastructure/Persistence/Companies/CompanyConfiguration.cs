@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SimplePos.Domain.Companies;
 
-namespace SimplePos.Infrastructure.Persistence.Configurations;
+namespace SimplePos.Infrastructure.Persistence.Companies;
 
 public class CompanyConfiguration : IEntityTypeConfiguration<Company>
 {

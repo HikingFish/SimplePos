@@ -1,10 +1,10 @@
-﻿using SimplePos.Domain.Permissions;
+using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimplePos.Infrastructure.Persistence.Permission;
+namespace SimplePos.Infrastructure.Persistence.Permissions;
 
 public class PermissionRepository : IPermissionRepository
 {
