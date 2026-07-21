@@ -21,5 +21,9 @@ public static class UserError
         "Users.PermissionNotAssigned", "Permission is not assigned to this user.");
     public static readonly Error PermissionIdEmpty = new Error(
         "Users.PermissionIdEmpty", "Permission ID cannot be empty.");
+    public static readonly Error InvalidCredentials = new(
+        "Users.InvalidCredentials", "Invalid email or password.");
+    public static readonly Error AccountLocked = new(
+        "Users.AccountLocked", "User account is locked.");
 }
 
