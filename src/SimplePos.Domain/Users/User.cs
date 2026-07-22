@@ -34,16 +34,11 @@ public class User : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<User> Create(Guid OutletId, string Username, string Password, EmailAddress Email, string PhoneNumber, string UserPosition)
+    public static Result<User> Create(Guid OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
     {
         if (string.IsNullOrWhiteSpace(Username))
         {
             return Result<User>.Failure(UserError.UsernameEmpty);
-        }
-
-        if (string.IsNullOrWhiteSpace(Password))
-        {
-            return Result<User>.Failure(UserError.PasswordEmpty);
         }
 
         if (Email == null)

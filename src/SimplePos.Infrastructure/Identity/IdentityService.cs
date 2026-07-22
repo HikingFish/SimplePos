@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity;
+using Npgsql.Internal;
 using SimplePos.Application.Abstractions.Identity;
+using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
@@ -69,8 +71,31 @@ public class IdentityService : IIdentityService
         return Result<string>.Success(token);
     }
 
-    public Task<Result<Guid>> RegisterUserAsync(string username, string email, string password, Guid outletId)
+    public async Task<Result<Guid>> RegisterUserAsync(string username, string email, string password, Guid outletId, string phoneNumber, string userPosition)
     {
-        throw new NotImplementedException();
+        var newUserEmail = EmailAddress.Create(email);
+
+        if(newUserEmail.IsFailure)
+            return Result<Guid>.Failure(newUserEmail.Error);
+
+        var newUser = User.Create(outletId, username, newUserEmail.Data, phoneNumber, userPosition);
+
+        ApplicationUser appUser = new ApplicationUser{
+            DomainUserId = newUser.Data.UserId,
+            Email = newUser.Data.Email.ToString(), 
+            UserName = newUser.Data.Username
+        };
+
+        await _userRepository.AddUserAsync(newUser.Data);
+
+        var identityResult = await _userManager.CreateAsync(appUser, password);
+
+        if (!identityResult.Succeeded)
+        {
+            var errorMessage = string.Join(", ", identityResult.Errors.Select(e => e.Description));
+            return Result<Guid>.Failure(new Error("Identity.RegistrationFailed", errorMessage));
+        }
+
+        return Result<Guid>.Success(appUser.DomainUserId);
     }
 }
