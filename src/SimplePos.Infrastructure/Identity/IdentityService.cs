@@ -56,7 +56,17 @@ public class IdentityService : IIdentityService
 
         var userOutlet = await _outletRepository.GetOutletByIdAsync(domainUser.OutletId);
 
+        if(userOutlet is null)
+        {
+            return Result<string>.Failure(IdentityError.OutletNotFound);
+        }
+
         var userCompany = await _companyRepository.GetCompanyByIdAsync(userOutlet.CompanyId);
+
+        if(userCompany is null)
+        {
+            return Result<string>.Failure(IdentityError.CompanyNotFound);
+        }
 
         var userPermissionsId = domainUser.UserPermissions.Select(up => up.PermissionId);
 
@@ -79,6 +89,9 @@ public class IdentityService : IIdentityService
             return Result<Guid>.Failure(newUserEmail.Error);
 
         var newUser = User.Create(outletId, username, newUserEmail.Data, phoneNumber, userPosition);
+
+        if (newUser.IsFailure)
+            return Result<Guid>.Failure(newUser.Error);
 
         ApplicationUser appUser = new ApplicationUser{
             DomainUserId = newUser.Data.UserId,

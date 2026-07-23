@@ -3,7 +3,7 @@ using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Taxes;
 
 namespace SimplePos.Domain.Sales;
-public class Sale : ISoftDeletable
+public class Sale : AggregateRoot, ISoftDeletable 
 {
     public Guid SaleId { get; private set; }
     public Guid OutletId { get; private set; }
