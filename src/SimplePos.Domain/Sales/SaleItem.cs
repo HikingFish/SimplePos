@@ -1,4 +1,3 @@
-using System.Dynamic;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Taxes;
 
@@ -24,7 +23,10 @@ public class SaleItem
     public decimal TaxRate { get; private set; }
     public decimal TaxAmount { get; private set; }
 
-    private SaleItem(){}
+    private readonly List<SaleItemTax> _saleItemTaxes = new List<SaleItemTax>();
+    public IReadOnlyCollection<SaleItemTax> SaleItemTaxes => _saleItemTaxes.AsReadOnly();
+
+    private SaleItem() { }
 
     private SaleItem(
         Guid saleItemId,
@@ -34,7 +36,7 @@ public class SaleItem
         decimal unitPrice,
         decimal unitDiscount,
         string? remark,
-        decimal taxRate)
+        IEnumerable<Tax>? taxes)
     {
         SaleItemId = saleItemId;
         ProductId = productId;
@@ -43,7 +45,18 @@ public class SaleItem
         UnitPrice = unitPrice;
         UnitDiscount = unitDiscount;
         Remark = remark;
-        TaxRate = taxRate;
+
+        if (taxes != null)
+        {
+            foreach (var tax in taxes)
+            {
+                var taxResult = SaleItemTax.Create(saleItemId, tax.TaxId, tax.TaxName, tax.TaxRate, 0);
+                if (taxResult.IsSuccess && taxResult.Data != null)
+                {
+                    _saleItemTaxes.Add(taxResult.Data);
+                }
+            }
+        }
 
         CalculateLineTotal();
     }
@@ -55,7 +68,7 @@ public class SaleItem
         decimal unitPrice,
         decimal unitDiscount,
         string? remark,
-        decimal taxRate,
+        IEnumerable<Tax>? taxes = null,
         Guid? saleItemId = null)
     {
         if (productId == Guid.Empty)
@@ -68,11 +81,6 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.SaleIdEmpty);
         }
 
-        if (taxRate < 0)
-        {
-            return Result<SaleItem>.Failure(SaleItemError.TaxRateNegative);
-        }
-
         if (unitDiscount < 0)
         {
             return Result<SaleItem>.Failure(SaleItemError.UnitDiscountNegative);
@@ -83,8 +91,27 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.UnitPriceNegative);
         }
 
+        if (taxes != null)
+        {
+            foreach (var tax in taxes)
+            {
+                if (tax.TaxRate < 0)
+                {
+                    return Result<SaleItem>.Failure(SaleItemError.TaxRateNegative);
+                }
+                if (tax.TaxId == Guid.Empty)
+                {
+                    return Result<SaleItem>.Failure(SaleItemTaxError.TaxIdEmpty);
+                }
+                if (string.IsNullOrWhiteSpace(tax.TaxName))
+                {
+                    return Result<SaleItem>.Failure(SaleItemTaxError.TaxNameEmpty);
+                }
+            }
+        }
+
         Guid finalId = saleItemId ?? Guid.CreateVersion7();
-        return Result<SaleItem>.Success(new SaleItem(finalId, productId, saleId, quantity, unitPrice, unitDiscount, remark, taxRate));
+        return Result<SaleItem>.Success(new SaleItem(finalId, productId, saleId, quantity, unitPrice, unitDiscount, remark, taxes));
     }
 
     private void CalculateLineTotal()
@@ -99,7 +126,20 @@ public class SaleItem
         }
         GrossAmount = decimal.Round(Quantity * UnitPrice, 2);
         NetAmount = decimal.Round(Quantity * DiscountedUnitPrice, 2);
-        TaxAmount = decimal.Round(NetAmount * TaxRate, 2);
+
+        decimal totalTaxAmount = 0;
+        decimal totalTaxRate = 0;
+
+        foreach (var saleItemTax in _saleItemTaxes)
+        {
+            saleItemTax.UpdateTaxAmount(NetAmount);
+            totalTaxAmount += saleItemTax.TaxAmount;
+            totalTaxRate += saleItemTax.TaxRate;
+        }
+
+        TaxRate = totalTaxRate;
+        TaxAmount = decimal.Round(totalTaxAmount, 2);
+
         TotalLineAmount = decimal.Round(NetAmount + TaxAmount, 2);
         TotalDiscount = decimal.Round(Quantity * (UnitPrice - DiscountedUnitPrice), 2);
     }
@@ -109,13 +149,8 @@ public class SaleItem
         decimal unitPrice,
         decimal unitDiscount,
         string? remark,
-        decimal taxRate)
+        IEnumerable<Tax>? taxes = null)
     {
-        if (taxRate < 0)
-        {
-            return Result.Failure(SaleItemError.TaxRateNegative);
-        }
-
         if (unitDiscount < 0)
         {
             return Result.Failure(SaleItemError.UnitDiscountNegative);
@@ -126,11 +161,42 @@ public class SaleItem
             return Result.Failure(SaleItemError.UnitPriceNegative);
         }
 
+        if (taxes != null)
+        {
+            foreach (var tax in taxes)
+            {
+                if (tax.TaxRate < 0)
+                {
+                    return Result.Failure(SaleItemError.TaxRateNegative);
+                }
+                if (tax.TaxId == Guid.Empty)
+                {
+                    return Result.Failure(SaleItemTaxError.TaxIdEmpty);
+                }
+                if (string.IsNullOrWhiteSpace(tax.TaxName))
+                {
+                    return Result.Failure(SaleItemTaxError.TaxNameEmpty);
+                }
+            }
+        }
+
         Quantity = quantity;
         UnitPrice = unitPrice;
         UnitDiscount = unitDiscount;
         Remark = remark;
-        TaxRate = taxRate;
+
+        _saleItemTaxes.Clear();
+        if (taxes != null)
+        {
+            foreach (var tax in taxes)
+            {
+                var taxResult = SaleItemTax.Create(SaleItemId, tax.TaxId, tax.TaxName, tax.TaxRate, 0);
+                if (taxResult.IsSuccess && taxResult.Data != null)
+                {
+                    _saleItemTaxes.Add(taxResult.Data);
+                }
+            }
+        }
 
         CalculateLineTotal();
 

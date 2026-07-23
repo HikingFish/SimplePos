@@ -19,10 +19,11 @@ public class Product : ISoftDeletable
 
     private Product() { }
 
-    private Product(Guid productId, Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
+    private Product(Guid productId, Guid companyId, Guid categoryId, string sku, string productName, decimal costPrice, decimal basePrice)
     {            
         ProductId = productId;
         CompanyId = companyId;
+        CategoryId = categoryId;
         SKU = sku;
         ProductName = productName;
         CostPrice = costPrice;
@@ -32,7 +33,7 @@ public class Product : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<Product> Create(Guid companyId, string sku, string productName, decimal costPrice, decimal basePrice)
+    public static Result<Product> Create(Guid companyId, Guid categoryId, string sku, string productName, decimal costPrice, decimal basePrice)
     {
         if (string.IsNullOrWhiteSpace(productName))
         {
@@ -49,7 +50,17 @@ public class Product : ISoftDeletable
             return Result<Product>.Failure(ProductError.BasePriceNegative);
         }
 
-        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, sku, productName, costPrice, basePrice));
+        if (companyId == Guid.Empty)
+        {
+            return Result<Product>.Failure(ProductError.CompanyIdEmpty);
+        }
+
+        if (categoryId == Guid.Empty)
+        {
+            return Result<Product>.Failure(ProductError.CategoryIdEmpty);
+        }
+
+        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, categoryId, sku, productName, costPrice, basePrice));
     }
 
     public Result UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)

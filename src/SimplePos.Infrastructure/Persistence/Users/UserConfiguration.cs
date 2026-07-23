@@ -38,5 +38,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.Metadata.FindNavigation(nameof(User.UserPermissions))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
+
+        builder.HasQueryFilter(u => !u.SoftDeleted);
     }
 }

@@ -1,5 +1,6 @@
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
+using SimplePos.Domain.Taxes;
 
 namespace SimplePos.Domain.Sales;
 public class Sale : ISoftDeletable
@@ -60,9 +61,17 @@ public class Sale : ISoftDeletable
     public Result AddSaleItem(SaleItem saleItem)
     {
         var statusResult = EnsureNotSoftDeleted();
+
         if (!statusResult.IsSuccess)
         {
             return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
         }
 
         if (saleItem == null)
@@ -81,6 +90,13 @@ public class Sale : ISoftDeletable
         if (!statusResult.IsSuccess)
         {
             return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
         }
 
         if (payment == null)
@@ -109,6 +125,13 @@ public class Sale : ISoftDeletable
         if (!statusResult.IsSuccess)
         {
             return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
         }
 
         if (saleItemId == Guid.Empty)
@@ -151,6 +174,13 @@ public class Sale : ISoftDeletable
             return statusResult;
         }
 
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
+        }
+
         if (salePaymentId == Guid.Empty)
         {
             return Result.Failure(SaleError.SalePaymentNull);
@@ -173,13 +203,20 @@ public class Sale : ISoftDeletable
         return Result.Success();
     }
 
-    public Result UpdateSaleItem(Guid saleItemId, decimal quantity, decimal unitPrice, decimal unitDiscount, string? remark, decimal taxRate)
+    public Result UpdateSaleItem(Guid saleItemId, decimal quantity, decimal unitPrice, decimal unitDiscount, string? remark, IEnumerable<Tax>? taxes = null)
     {
         var statusResult = EnsureNotSoftDeleted();
 
         if (!statusResult.IsSuccess)
         {
             return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
         }
 
         if (saleItemId == Guid.Empty)
@@ -196,7 +233,7 @@ public class Sale : ISoftDeletable
             return Result.Failure(SaleError.SaleItemNotFound);
         }
 
-        Result updateResult = existingSaleItem.UpdateSaleItem(quantity, unitPrice, unitDiscount, remark, taxRate);
+        Result updateResult = existingSaleItem.UpdateSaleItem(quantity, unitPrice, unitDiscount, remark, taxes);
         if (!updateResult.IsSuccess)
         {
             return updateResult;
@@ -268,6 +305,11 @@ public class Sale : ISoftDeletable
         }
 
         totalOutstanding = TotalAmount - totalPaid;
+
+        if(totalOutstanding < 0)
+        {
+            totalOutstanding = 0;
+        }
 
         totalChange = totalPaid > TotalAmount ? totalPaid - TotalAmount : 0;
 
