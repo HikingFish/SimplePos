@@ -6,8 +6,7 @@ public class User : ISoftDeletable
 {
     public Guid UserId { get; private set; }
     public Guid OutletId { get; private set;}
-    public string Username { get; private set; } 
-    public string Password { get; private set; } 
+    public string Username { get; private set; }
     public EmailAddress Email { get; private set; } 
     public string? PhoneNumber { get; private set; } 
     public string? UserPosition { get; private set; } 
@@ -20,12 +19,11 @@ public class User : ISoftDeletable
     public IReadOnlyCollection<UserPermission> UserPermissions => _userPermissions.AsReadOnly();
     private User() { }
     
-    private User(Guid userId, Guid OutletId, string Username, string Password, EmailAddress Email, string PhoneNumber, string UserPosition)
+    private User(Guid userId, Guid OutletId, string Username, EmailAddress Email, string PhoneNumber, string UserPosition)
     {
         UserId = userId;
         this.OutletId = OutletId;
         this.Username = Username;
-        this.Password = Password;
         this.Email = Email;
         this.PhoneNumber = PhoneNumber;
         this.UserPosition = UserPosition;
@@ -36,16 +34,11 @@ public class User : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<User> Create(Guid OutletId, string Username, string Password, EmailAddress Email, string PhoneNumber, string UserPosition)
+    public static Result<User> Create(Guid OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
     {
         if (string.IsNullOrWhiteSpace(Username))
         {
             return Result<User>.Failure(UserError.UsernameEmpty);
-        }
-
-        if (string.IsNullOrWhiteSpace(Password))
-        {
-            return Result<User>.Failure(UserError.PasswordEmpty);
         }
 
         if (Email == null)
@@ -53,7 +46,7 @@ public class User : ISoftDeletable
             return Result<User>.Failure(UserError.EmailEmpty);
         }
 
-        return Result<User>.Success(new User(Guid.CreateVersion7(), OutletId, Username, Password, Email, PhoneNumber, UserPosition));
+        return Result<User>.Success(new User(Guid.CreateVersion7(), OutletId, Username, Email, PhoneNumber, UserPosition));
     }
 
     public Result UpdateLastLogin()
@@ -85,22 +78,6 @@ public class User : ISoftDeletable
         PhoneNumber = newPhoneNumber;
         UserPosition = newUserPosition;
         IsActive = newIsActive;
-        return Result.Success();
-    }
-    public Result UpdatePassword(string newHashedPassword)
-    {
-        var statusResult = EnsureNotSoftDeleted();
-        if (!statusResult.IsSuccess)
-        {
-            return statusResult;
-        }
-
-        if (string.IsNullOrWhiteSpace(newHashedPassword))
-        {
-            return Result.Failure(UserError.NewPasswordEmpty);
-        }
-
-        Password = newHashedPassword;
         return Result.Success();
     }
 

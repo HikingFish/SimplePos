@@ -39,11 +39,6 @@ public class Product : ISoftDeletable
             return Result<Product>.Failure(ProductError.ProductNameEmpty);
         }
 
-        if (string.IsNullOrWhiteSpace(sku))
-        {
-            return Result<Product>.Failure(ProductError.SkuEmpty);
-        }
-
         if (costPrice < 0)
         {
             return Result<Product>.Failure(ProductError.CostPriceNegative);
