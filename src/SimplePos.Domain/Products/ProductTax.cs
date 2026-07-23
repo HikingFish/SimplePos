@@ -1,4 +1,5 @@
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.Domain.Products;
 public class ProductTax
@@ -12,18 +13,18 @@ public class ProductTax
         TaxId = taxId;
     }
 
-    internal static ProductTax Create(Guid productId, Guid taxId)
+    internal static Result<ProductTax> Create(Guid productId, Guid taxId)
     {
         if (productId == Guid.Empty)
         {
-            throw new DomainException("Product ID cannot be empty.");
+            Result<Guid>.Failure(ProductTaxError.ProductIdEmpty);
         }
 
         if (taxId == Guid.Empty)
         {
-            throw new DomainException("Tax ID cannot be empty.");
+            Result<Guid>.Failure(ProductTaxError.TaxIdEmpty);
         }
 
-        return new ProductTax(productId, taxId);
+        return Result<ProductTax>.Success(new ProductTax(productId, taxId));
     }
 }

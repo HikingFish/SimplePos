@@ -20,8 +20,6 @@ public class AppDbContext : DbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Tax> Taxes => Set<Tax>();
     public DbSet<Sale> Sales => Set<Sale>();
-    public DbSet<SaleItem> SaleItems => Set<SaleItem>();
-    public DbSet<SalePayment> SalePayments => Set<SalePayment>();
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<Permission> Permissions => Set<Permission>();
 

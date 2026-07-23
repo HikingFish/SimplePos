@@ -19,7 +19,7 @@ public class User : ISoftDeletable
     public IReadOnlyCollection<UserPermission> UserPermissions => _userPermissions.AsReadOnly();
     private User() { }
     
-    private User(Guid userId, Guid OutletId, string Username, EmailAddress Email, string PhoneNumber, string UserPosition)
+    private User(Guid userId, Guid OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
     {
         UserId = userId;
         this.OutletId = OutletId;

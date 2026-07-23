@@ -454,6 +454,9 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .WithMany()
             .HasForeignKey(si => si.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+        // Configure private field access for _saleItemTaxes collection
+        builder.Metadata.FindNavigation(nameof(SaleItem.SaleItemTaxes))?
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }
 ```
@@ -499,3 +502,54 @@ public class SalePaymentConfiguration : IEntityTypeConfiguration<SalePayment>
     }
 }
 ```
+
+### `SaleItemTaxConfiguration`
+- **Table**: `sale_item_taxes`
+- **Primary Key**: `SaleItemTaxId`
+- **Foreign Keys**:
+  - `SaleItemId` -> `SaleItem` (`OnDelete: Cascade`)
+  - `TaxId` -> `Tax` (`OnDelete: Restrict`)
+- **Decimal Precision**: `TaxRate` (`5, 4`), `TaxAmount` (`18, 2`)
+
+```csharp
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SimplePos.Domain.Sales;
+using SimplePos.Domain.Taxes;
+
+namespace SimplePos.Infrastructure.Persistence.Sales;
+
+public class SaleItemTaxConfiguration : IEntityTypeConfiguration<SaleItemTax>
+{
+    public void Configure(EntityTypeBuilder<SaleItemTax> builder)
+    {
+        builder.ToTable("sale_item_taxes");
+
+        builder.HasKey(sit => sit.SaleItemTaxId);
+
+        builder.Property(sit => sit.TaxName)
+            .IsRequired()
+            .HasMaxLength(100);
+
+        builder.Property(sit => sit.TaxRate)
+            .HasPrecision(5, 4)
+            .IsRequired();
+
+        builder.Property(sit => sit.TaxAmount)
+            .HasPrecision(18, 2)
+            .IsRequired();
+
+        // Foreign Keys
+        builder.HasOne<SaleItem>()
+            .WithMany(si => si.SaleItemTaxes)
+            .HasForeignKey(sit => sit.SaleItemId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasOne<Tax>()
+            .WithMany()
+            .HasForeignKey(sit => sit.TaxId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+```
+

@@ -23,5 +23,9 @@ public static class ProductError
         "Products.TaxNotAssociated", "This tax is not associated with the product");
     public static readonly Error SoftDeleted = new Error(
         "Products.SoftDeleted", "Operation cannot be performed on a soft-deleted product");
+    public static readonly Error CompanyIdEmpty = new Error(
+        "Products.CompanyIdEmpty", "Company Id cannot be empty");
+    public static readonly Error CategoryIdEmpty = new Error(
+        "Products.CategoryIdEmpty", "Category Id cannot be empty");
 }
 
