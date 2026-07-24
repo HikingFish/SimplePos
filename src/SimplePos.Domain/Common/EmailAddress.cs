@@ -5,9 +5,9 @@ public record EmailAddress
 {
     public string Value { get; init; }
 
-    private EmailAddress(string email)
+    private EmailAddress(string value)
     {
-        Value = email;
+        Value = value;
     }
 
     public static Result<EmailAddress> Create(string email)

@@ -95,7 +95,7 @@ public class IdentityService : IIdentityService
 
         ApplicationUser appUser = new ApplicationUser{
             DomainUserId = newUser.Data.UserId,
-            Email = newUser.Data.Email.ToString(), 
+            Email = newUser.Data.Email.Value, 
             UserName = newUser.Data.Username
         };
 

@@ -91,6 +91,11 @@ public class SaleItem
             return Result<SaleItem>.Failure(SaleItemError.UnitPriceNegative);
         }
 
+        if (quantity <= 0)
+        {
+            return Result<SaleItem>.Failure(SaleItemError.QuantityZero);
+        }
+
         if (taxes != null)
         {
             foreach (var tax in taxes)

@@ -144,19 +144,9 @@ public class Sale : AggregateRoot, ISoftDeletable
             return Result.Failure(SaleError.SaleItemNotFound);
         }
 
-        if (_saleItems.Count == 0)
-        {
-            return Result.Failure(SaleError.SaleItemIsEmpty);
-        }
-
         SaleItem? saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
 
         if (saleItem == null)
-        {
-            return Result.Failure(SaleError.SaleItemNotFound);
-        }
-
-        if (!_saleItems.Contains(saleItem))
         {
             return Result.Failure(SaleError.SaleItemNotFound);
         }
@@ -245,9 +235,10 @@ public class Sale : AggregateRoot, ISoftDeletable
 
     public Result SoftDelete()
     {
-        if (SoftDeleted)
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
         {
-            return Result.Failure(SaleError.SoftDeleted);
+            return statusResult;
         }
 
         SoftDeleted = true;

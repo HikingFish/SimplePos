@@ -17,12 +17,12 @@ public class ProductTax
     {
         if (productId == Guid.Empty)
         {
-            return Result<Guid>.Failure(ProductTaxError.ProductIdEmpty);
+            return Result<ProductTax>.Failure(ProductTaxError.ProductIdEmpty);
         }
 
         if (taxId == Guid.Empty)
         {
-            return Result<Guid>.Failure(ProductTaxError.TaxIdEmpty);
+            return Result<ProductTax>.Failure(ProductTaxError.TaxIdEmpty);
         }
 
         return Result<ProductTax>.Success(new ProductTax(productId, taxId));
