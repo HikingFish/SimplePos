@@ -12,10 +12,12 @@ namespace SimplePos.Application.Companies.Commands.CreateCompany;
 public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand, Result>
 {
     private readonly IDomainEventDispatcher _domainEventDispatcher;
+    private readonly ICompanyRepository _companyRepository;
 
-    public CreateCompanyCommandHandler(IDomainEventDispatcher domainEventDispatcher)
+    public CreateCompanyCommandHandler(IDomainEventDispatcher domainEventDispatcher, ICompanyRepository companyRepository)
     {
         _domainEventDispatcher = domainEventDispatcher;
+        _companyRepository = companyRepository;
     }
 
     public async Task<Result> HandleAsync(CreateCompanyCommand command, CancellationToken cancellationToken)
@@ -53,6 +55,8 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
         }
 
         Debug.WriteLine($"Company created with ID: {companyResult.Data.CompanyId}");
+
+        await _companyRepository.AddCompanyAsync(companyResult.Data);
 
         return Result.Success();
     }
