@@ -1,4 +1,5 @@
-﻿using SimplePos.Domain.Outlets;
+﻿using Microsoft.EntityFrameworkCore;
+using SimplePos.Domain.Outlets;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,24 +8,35 @@ namespace SimplePos.Infrastructure.Persistence.Outlets;
 
 public class OutletRepository : IOutletRepository
 {
-    public Task AddOutletAsync(Outlet outlet)
+    private readonly AppDbContext _appDbContext;
+
+    public OutletRepository(AppDbContext appDbContext)
     {
-        throw new NotImplementedException();
+        _appDbContext = appDbContext;
     }
 
-    public Task DeleteOutletAsync(Guid outletId)
+    public async Task AddOutletAsync(Outlet outlet)
     {
-        throw new NotImplementedException();
+        await _appDbContext.Outlets.AddAsync(outlet);
     }
 
-    public Task<Outlet?> GetOutletByIdAsync(Guid outletId)
+    public async Task DeleteOutletAsync(Guid outletId)
     {
-        throw new NotImplementedException();
+        var outlet = await GetOutletByIdAsync(outletId);
+        if(outlet != null)
+        {
+            _appDbContext.Remove(outlet);
+        }
     }
 
-    public Task<IEnumerable<Outlet>> GetOutletsByCompanyIdAsync(Guid companyId)
+    public async Task<Outlet?> GetOutletByIdAsync(Guid outletId)
     {
-        throw new NotImplementedException();
+        return await _appDbContext.Outlets.FirstOrDefaultAsync(o => o.OutletId.Equals(outletId));
+    }
+
+    public async Task<IEnumerable<Outlet>> GetOutletsByCompanyIdAsync(Guid companyId)
+    {
+        return await _appDbContext.Outlets.Where(o => o.CompanyId.Equals(companyId)).ToListAsync();
     }
 
     public Task UpdateOutletAsync(Outlet outlet)
