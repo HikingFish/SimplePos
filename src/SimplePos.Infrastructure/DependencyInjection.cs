@@ -5,6 +5,8 @@ using SimplePos.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Identity;
 using SimplePos.Domain.Companies;
 using SimplePos.Infrastructure.Persistence.Companies;
+using SimplePos.Domain.Outlets;
+using SimplePos.Infrastructure.Persistence.Outlets;
 
 namespace SimplePos.Infrastructure;
 
@@ -26,6 +28,7 @@ public static class DependencyInjection
         .AddDefaultTokenProviders();
 
         services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IOutletRepository, OutletRepository>();
 
         return services;
     }

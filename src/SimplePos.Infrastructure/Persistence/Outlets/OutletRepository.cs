@@ -41,6 +41,7 @@ public class OutletRepository : IOutletRepository
 
     public Task UpdateOutletAsync(Outlet outlet)
     {
-        throw new NotImplementedException();
+        _appDbContext.Outlets.Update(outlet);
+        return Task.CompletedTask;
     }
 }

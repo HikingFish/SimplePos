@@ -34,6 +34,6 @@ services:
 
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # Environment overrides for JWT when running in Docker
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=simplepos_db;Username=simplepos_user;Password=simplepos_secret;Include Error Detail=true
       - Jwt__Issuer=http://localhost:5001
       - Jwt__Audience=http://localhost:5001

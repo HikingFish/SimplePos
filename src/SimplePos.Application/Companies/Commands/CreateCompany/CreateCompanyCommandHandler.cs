@@ -58,6 +58,8 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
 
         await _companyRepository.AddCompanyAsync(companyResult.Data);
 
+        
+
         return Result.Success();
     }
 }

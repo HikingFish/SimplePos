@@ -1,8 +1,10 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using SimplePos.Application;
 using SimplePos.Infrastructure;
+using SimplePos.WebApi.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,7 +32,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Secret"]!)
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!)
         )
     };
 });
@@ -47,6 +49,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
@@ -54,6 +57,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+app.MapCompanyEndpoints();
 
 app.Run();
 
