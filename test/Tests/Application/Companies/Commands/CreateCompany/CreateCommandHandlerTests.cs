@@ -1,6 +1,8 @@
+using SimplePos.Application.Abstractions;
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Companies.Commands.CreateCompany;
 using SimplePos.Domain.Common.ResultPattern;
+using SimplePos.Domain.Companies;
 using SimplePos.Domain.Companies.Events;
 using SimplePos.Domain.Common.DomainEvent;
 using Xunit;
@@ -9,13 +11,21 @@ using NSubstitute;
 public class CreateCompanyCommandHandlerTests
 {
     private readonly IDomainEventDispatcher _domainEventDispatcherMock;
+    private readonly ICompanyRepository _companyRepositoryMock;
+    private readonly IUnitOfWork _unitOfWorkMock;
     private readonly CreateCompanyCommandHandler _handler;
+
     public CreateCompanyCommandHandlerTests()
     {
-        // 1. Mock only the Event Dispatcher using NSubstitute
         _domainEventDispatcherMock = Substitute.For<IDomainEventDispatcher>();
-        // 2. Instantiate the Handler
-        _handler = new CreateCompanyCommandHandler(_domainEventDispatcherMock);
+        _companyRepositoryMock = Substitute.For<ICompanyRepository>();
+        _unitOfWorkMock = Substitute.For<IUnitOfWork>();
+
+        _handler = new CreateCompanyCommandHandler(
+            _domainEventDispatcherMock,
+            _companyRepositoryMock,
+            _unitOfWorkMock
+        );
     }
     [Fact]
     public async Task HandleAsync_ShouldReturnSuccess_AndPublishEvent_WhenCommandIsValid()

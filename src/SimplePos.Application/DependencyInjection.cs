@@ -5,6 +5,7 @@ using SimplePos.Domain.Companies.Events;
 using SimplePos.Application.Outlets.Subscribers;
 using SimplePos.Application.Companies.Commands.CreateCompany;
 using SimplePos.Domain.Common.ResultPattern;
+using SimplePos.Application.Abstractions;
 
 namespace SimplePos.Application;
 

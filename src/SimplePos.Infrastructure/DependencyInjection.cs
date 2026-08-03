@@ -7,6 +7,7 @@ using SimplePos.Domain.Companies;
 using SimplePos.Infrastructure.Persistence.Companies;
 using SimplePos.Domain.Outlets;
 using SimplePos.Infrastructure.Persistence.Outlets;
+using SimplePos.Application.Abstractions;
 
 namespace SimplePos.Infrastructure;
 
@@ -27,6 +28,7 @@ public static class DependencyInjection
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IOutletRepository, OutletRepository>();
 

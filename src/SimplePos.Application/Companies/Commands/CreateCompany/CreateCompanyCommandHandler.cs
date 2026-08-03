@@ -1,3 +1,4 @@
+using SimplePos.Application.Abstractions;
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
@@ -13,11 +14,13 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
 {
     private readonly IDomainEventDispatcher _domainEventDispatcher;
     private readonly ICompanyRepository _companyRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateCompanyCommandHandler(IDomainEventDispatcher domainEventDispatcher, ICompanyRepository companyRepository)
+    public CreateCompanyCommandHandler(IDomainEventDispatcher domainEventDispatcher, ICompanyRepository companyRepository, IUnitOfWork unitOfWork)
     {
         _domainEventDispatcher = domainEventDispatcher;
         _companyRepository = companyRepository;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> HandleAsync(CreateCompanyCommand command, CancellationToken cancellationToken)
@@ -46,6 +49,10 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
         if (companyResult.Data is null)
             return Result.Failure(CompanyError.CompanyNotFound);
 
+        Debug.WriteLine($"Company created with ID: {companyResult.Data.CompanyId}");
+
+        await _companyRepository.AddCompanyAsync(companyResult.Data);
+
         var DomainEvents = companyResult.Data.DomainEvents.ToList();
         companyResult.Data.ClearDomainEvents();
 
@@ -54,11 +61,7 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
             await _domainEventDispatcher.PublishAsync(domainEvent, cancellationToken);
         }
 
-        Debug.WriteLine($"Company created with ID: {companyResult.Data.CompanyId}");
-
-        await _companyRepository.AddCompanyAsync(companyResult.Data);
-
-        
+        await _unitOfWork.SaveChangesAsync();
 
         return Result.Success();
     }

@@ -18,7 +18,6 @@ public class CompanyRepository : ICompanyRepository
     public async Task AddCompanyAsync(Company company)
     {
         await _appDbContext.Companies.AddAsync(company);
-        await _appDbContext.SaveChangesAsync();
     }
 
     public async Task DeleteCompanyAsync(Guid companyId)
