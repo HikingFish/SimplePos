@@ -4,12 +4,12 @@ namespace SimplePos.Domain.Permissions;
 public static class PermissionError
 {
     public static readonly Error PermissionNameEmpty = new Error(
-        "Permissions.PermissionNameEmpty", "Permission name cannot be empty");
+        "Permissions.PermissionNameEmpty", "Permission name cannot be empty", ErrorType.Validation);
     public static readonly Error UserIdEmpty = new Error(
-        "Permissions.UserIdEmpty", "User ID cannot be empty.");
+        "Permissions.UserIdEmpty", "User ID cannot be empty.", ErrorType.Validation);
     public static readonly Error PermissionIdEmpty = new Error(
-        "Permissions.PermissionIdEmpty", "Permission ID cannot be empty.");
+        "Permissions.PermissionIdEmpty", "Permission ID cannot be empty.", ErrorType.Validation);
     public static readonly Error UserPermissionNotFound = new Error(
-        "Permissions.UserPermissionNotFound", "User permission association not found.");
+        "Permissions.UserPermissionNotFound", "User permission association not found.", ErrorType.NotFound);
 }
 

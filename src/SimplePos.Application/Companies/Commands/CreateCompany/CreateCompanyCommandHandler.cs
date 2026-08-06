@@ -33,6 +33,11 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
         if (resultAddress.Data is null)
             return Result.Failure(AddressError.AddressNotFound);
 
+        if(await _companyRepository.ExistsByEmailAsync(command.Email))
+        {
+            return Result.Failure(CompanyError.CompanyAlreadyExists);
+        }
+
         Result<EmailAddress> resultEmail = EmailAddress.Create(command.Email);
 
         if (resultEmail.IsFailure)
@@ -51,7 +56,7 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
 
         Debug.WriteLine($"Company created with ID: {companyResult.Data.CompanyId}");
 
-        await _companyRepository.AddCompanyAsync(companyResult.Data);
+        _companyRepository.AddCompany(companyResult.Data);
 
         var DomainEvents = companyResult.Data.DomainEvents.ToList();
         companyResult.Data.ClearDomainEvents();

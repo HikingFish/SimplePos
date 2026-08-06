@@ -15,7 +15,7 @@ public class SetupDefaultOutlet : IDomainEventHandler<CompanyCreatedDomainEvent>
         _outletRepository = outletRepository;
     }
 
-    public Task Handle(CompanyCreatedDomainEvent @event, CancellationToken cancellationToken = default)
+    public async Task Handle(CompanyCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {
         Result<Outlet> resultOutlet = Outlet.Create(@event.CompanyId, @event.Name, @event.Address, @event.PhoneNumber);
 
@@ -29,8 +29,7 @@ public class SetupDefaultOutlet : IDomainEventHandler<CompanyCreatedDomainEvent>
             throw new InvalidOperationException($"Failed to create default outlet for company with ID: {@event.CompanyId}. Outlet data is null.");
         }
 
-        _outletRepository.AddOutletAsync(resultOutlet.Data);
+        _outletRepository.AddOutlet(resultOutlet.Data);
         Debug.WriteLine($"Default outlet created for company with ID: {@event.CompanyId}");
-        return Task.CompletedTask;
     }
 }

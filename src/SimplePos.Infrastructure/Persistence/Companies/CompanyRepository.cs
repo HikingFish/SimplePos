@@ -15,9 +15,9 @@ public class CompanyRepository : ICompanyRepository
         _appDbContext = appDbContext;
     }
 
-    public async Task AddCompanyAsync(Company company)
+    public void AddCompany(Company company)
     {
-        await _appDbContext.Companies.AddAsync(company);
+        _appDbContext.Companies.Add(company);
     }
 
     public async Task DeleteCompanyAsync(Guid companyId)
@@ -49,9 +49,8 @@ public class CompanyRepository : ICompanyRepository
         return await _appDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyId.Equals(companyId));
     }
 
-    public Task UpdateCompanyAsync(Company company)
+    public void UpdateCompany(Company company)
     {
         _appDbContext.Companies.Update(company);
-        return Task.CompletedTask;
     }
 }

@@ -15,9 +15,9 @@ public class OutletRepository : IOutletRepository
         _appDbContext = appDbContext;
     }
 
-    public async Task AddOutletAsync(Outlet outlet)
+    public void AddOutlet(Outlet outlet)
     {
-        await _appDbContext.Outlets.AddAsync(outlet);
+        _appDbContext.Outlets.Add(outlet);
     }
 
     public async Task DeleteOutletAsync(Guid outletId)
@@ -39,9 +39,8 @@ public class OutletRepository : IOutletRepository
         return await _appDbContext.Outlets.Where(o => o.CompanyId.Equals(companyId)).ToListAsync();
     }
 
-    public Task UpdateOutletAsync(Outlet outlet)
+    public void UpdateOutlet(Outlet outlet)
     {
         _appDbContext.Outlets.Update(outlet);
-        return Task.CompletedTask;
     }
 }

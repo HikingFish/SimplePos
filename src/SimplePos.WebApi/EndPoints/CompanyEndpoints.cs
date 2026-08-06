@@ -13,7 +13,11 @@ public static class CompanyEndpoints
         group.MapPost("/", async (CreateCompanyCommand command, ICqrsDispatcher dispatcher, CancellationToken ct) =>
         {
             var result = await dispatcher.SendAsync<CreateCompanyCommand, Result>(command, ct);
-            return result.IsSuccess ? Results.Ok(result) : Results.BadRequest(result.Error);
+            if (result.IsSuccess)
+                return Results.Ok(result);
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(result);
+            return Results.Problem(result.Error.Description);
         });
     }
 }
