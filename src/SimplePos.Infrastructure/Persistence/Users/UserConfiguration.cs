@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
 using SimplePos.Domain.Users;
 
@@ -13,10 +14,17 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("users");
         builder.HasKey(u => u.UserId);
 
+        builder.HasOne<Company>()
+            .WithMany()
+            .HasForeignKey(c => c.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired();
+
         builder.HasOne<Outlet>()
             .WithMany()
             .HasForeignKey(o => o.OutletId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Restrict)
+            .IsRequired(false);
 
         builder.Property(u => u.Username).HasMaxLength(200).IsRequired();
 

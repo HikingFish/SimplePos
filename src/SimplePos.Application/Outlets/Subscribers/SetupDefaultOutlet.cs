@@ -1,8 +1,9 @@
-using System.Diagnostics;
+using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.DomainEvent;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies.Events;
 using SimplePos.Domain.Outlets;
+using System.Diagnostics;
 
 namespace SimplePos.Application.Outlets.Subscribers;
 
@@ -17,7 +18,19 @@ public class SetupDefaultOutlet : IDomainEventHandler<CompanyCreatedDomainEvent>
 
     public async Task Handle(CompanyCreatedDomainEvent @event, CancellationToken cancellationToken = default)
     {
-        Result<Outlet> resultOutlet = Outlet.Create(@event.CompanyId, @event.Name, @event.Address, @event.PhoneNumber);
+        var outletAddressResult = Address.Create(
+            @event.Address.Street,
+            @event.Address.City,
+            @event.Address.State,
+            @event.Address.PostalCode,
+            @event.Address.Country);
+
+        if (outletAddressResult.IsFailure || outletAddressResult.Data is null)
+        {
+            throw new InvalidOperationException($"Failed to create address for default outlet: {outletAddressResult.Error}");
+        }
+
+        Result<Outlet> resultOutlet = Outlet.Create(@event.CompanyId, @event.Name, outletAddressResult.Data, @event.PhoneNumber);
 
         if (resultOutlet.IsFailure)
         {

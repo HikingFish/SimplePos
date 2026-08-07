@@ -54,14 +54,14 @@ public class IdentityService : IIdentityService
             return Result<string>.Failure(new Error("Identity.UserNotFound", "User domain entity not found"));
         }
 
-        var userOutlet = await _outletRepository.GetOutletByIdAsync(domainUser.OutletId);
+        //var userOutlet = await _outletRepository.GetOutletByIdAsync(domainUser.OutletId);
 
-        if(userOutlet is null)
-        {
-            return Result<string>.Failure(IdentityError.OutletNotFound);
-        }
+        //if(userOutlet is null)
+        //{
+        //    return Result<string>.Failure(IdentityError.OutletNotFound);
+        //}
 
-        var userCompany = await _companyRepository.GetCompanyByIdAsync(userOutlet.CompanyId);
+        var userCompany = await _companyRepository.GetCompanyByIdAsync(domainUser.CompanyId);
 
         if(userCompany is null)
         {
@@ -81,14 +81,14 @@ public class IdentityService : IIdentityService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<Guid>> RegisterUserAsync(string username, string email, string password, Guid outletId, string phoneNumber, string userPosition)
+    public async Task<Result<Guid>> RegisterUserAsync(string username, string email, string password,Guid companyId, Guid outletId, string phoneNumber, string userPosition)
     {
         var newUserEmail = EmailAddress.Create(email);
 
         if(newUserEmail.IsFailure)
             return Result<Guid>.Failure(newUserEmail.Error);
 
-        var newUser = User.Create(outletId, username, newUserEmail.Data, phoneNumber, userPosition);
+        var newUser = User.Create(outletId, companyId, username, newUserEmail.Data, phoneNumber, userPosition);
 
         if (newUser.IsFailure)
             return Result<Guid>.Failure(newUser.Error);

@@ -27,6 +27,8 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
     {
         Result<Address> resultAddress = Address.Create(command.Street, command.City, command.State, command.PostalCode, command.Country);
 
+        Result<EmailAddress> resultEmail = EmailAddress.Create(command.Email);
+
         if (resultAddress.IsFailure)
             return resultAddress;
 
@@ -37,8 +39,6 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
         {
             return Result.Failure(CompanyError.CompanyAlreadyExists);
         }
-
-        Result<EmailAddress> resultEmail = EmailAddress.Create(command.Email);
 
         if (resultEmail.IsFailure)
             return resultEmail;

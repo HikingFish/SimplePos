@@ -5,7 +5,8 @@ namespace SimplePos.Domain.Users;
 public class User : ISoftDeletable
 {
     public Guid UserId { get; private set; }
-    public Guid OutletId { get; private set;}
+    public Guid? OutletId { get; private set;}
+    public Guid CompanyId { get; private set; }
     public string Username { get; private set; }
     public EmailAddress Email { get; private set; } 
     public string? PhoneNumber { get; private set; } 
@@ -19,9 +20,10 @@ public class User : ISoftDeletable
     public IReadOnlyCollection<UserPermission> UserPermissions => _userPermissions.AsReadOnly();
     private User() { }
     
-    private User(Guid userId, Guid OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
+    private User(Guid userId,Guid CompanyId, Guid? OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
     {
         UserId = userId;
+        this.CompanyId = CompanyId;
         this.OutletId = OutletId;
         this.Username = Username;
         this.Email = Email;
@@ -34,7 +36,7 @@ public class User : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<User> Create(Guid OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
+    public static Result<User> Create(Guid? OutletId,Guid CompanyId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
     {
         if (string.IsNullOrWhiteSpace(Username))
         {
@@ -46,7 +48,7 @@ public class User : ISoftDeletable
             return Result<User>.Failure(UserError.EmailEmpty);
         }
 
-        return Result<User>.Success(new User(Guid.CreateVersion7(), OutletId, Username, Email, PhoneNumber, UserPosition));
+        return Result<User>.Success(new User(Guid.CreateVersion7(), CompanyId, OutletId, Username, Email, PhoneNumber, UserPosition));
     }
 
     public Result UpdateLastLogin()

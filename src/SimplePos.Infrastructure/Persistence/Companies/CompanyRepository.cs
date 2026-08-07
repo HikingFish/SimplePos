@@ -46,7 +46,7 @@ public class CompanyRepository : ICompanyRepository
 
     public async Task<Company?> GetCompanyByIdAsync(Guid companyId)
     {
-        return await _appDbContext.Companies.FirstOrDefaultAsync(c => c.CompanyId.Equals(companyId));
+        return await _appDbContext.Companies.AsNoTracking().FirstOrDefaultAsync(c => c.CompanyId.Equals(companyId));
     }
 
     public void UpdateCompany(Company company)
