@@ -85,13 +85,13 @@ public class IdentityService : IIdentityService
     {
         var newUserEmail = EmailAddress.Create(email);
 
-        if(newUserEmail.IsFailure)
-            return Result<Guid>.Failure(newUserEmail.Error);
+        // if(newUserEmail.IsFailure)
+        //     return Result<Guid>.Failure(newUserEmail.Error);
 
         var newUser = User.Create(outletId, companyId, username, newUserEmail.Data, phoneNumber, userPosition);
 
-        if (newUser.IsFailure)
-            return Result<Guid>.Failure(newUser.Error);
+        // if (newUser.IsFailure)
+        //     return Result<Guid>.Failure(newUser.Error);
 
         ApplicationUser appUser = new ApplicationUser{
             DomainUserId = newUser.Data.UserId,
@@ -99,7 +99,7 @@ public class IdentityService : IIdentityService
             UserName = newUser.Data.Username
         };
 
-        await _userRepository.AddUserAsync(newUser.Data);
+        //await _userRepository.AddUser(newUser.Data);
 
         var identityResult = await _userManager.CreateAsync(appUser, password);
 

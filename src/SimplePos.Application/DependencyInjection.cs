@@ -7,6 +7,7 @@ using SimplePos.Application.Companies.Commands.CreateCompany;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Application.Abstractions;
 using SimplePos.Application.Companies.Queries;
+using SimplePos.Application.Registrations.Commands.RegisterBusiness;
 
 namespace SimplePos.Application;
 
@@ -22,6 +23,8 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<CreateCompanyCommand, Result>, CreateCompanyCommandHandler>();
 
         services.AddScoped<IQueryHandler<GetCompanyByIdQuery, Result<CompanyResponse>>, GetCompanyByIdQueryHandler>();
+
+        services.AddScoped<ICommandHandler<RegisterBusinessCommand, Result>, RegisterBusinessCommandHandler>();
 
         return services;
     }

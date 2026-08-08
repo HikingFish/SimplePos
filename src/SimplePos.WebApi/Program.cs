@@ -5,6 +5,7 @@ using Scalar.AspNetCore;
 using SimplePos.Application;
 using SimplePos.Infrastructure;
 using SimplePos.WebApi.Endpoints;
+using SimplePos.WebApi.EndPoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapCompanyEndpoints();
+app.MapRegisterBusinessEndpoints();
 
 app.Run();
 

@@ -4,12 +4,20 @@ namespace SimplePos.Infrastructure.Persistence.Users;
 
 public class UserRepository : IUserRepository
 {
-    public Task AddUserAsync(User user)
+    private readonly AppDbContext _appDbContext;
+
+    public UserRepository(AppDbContext appDbContext)
     {
-        throw new NotImplementedException();
+        _appDbContext = appDbContext;
     }
 
-    public Task DeleteUserAsync(Guid userId)
+    public void AddUser(User user)
+    {
+        _appDbContext.DomainUsers.Add(user);
+        return;
+    }
+
+    public Task DeleteUser(Guid userId)
     {
         throw new NotImplementedException();
     }
@@ -44,7 +52,7 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
-    public Task UpdateUserAsync(User user)
+    public void UpdateUser(User user)
     {
         throw new NotImplementedException();
     }

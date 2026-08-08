@@ -8,7 +8,13 @@ namespace SimplePos.Application.Auths.Commands.Register
         string Username,
         string Email,
         string Password,
-        Guid OutletId,
-        string PhoneNumber,
-        string UserPosition);
+        string? PhoneNumber,
+        string CompanyName,
+        string Street,
+        string City,
+        string State,
+        string PostalCode,
+        string Country,
+        string CompanyEmail,
+        string CompanyPhoneNumber);
 }
