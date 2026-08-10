@@ -17,7 +17,7 @@ namespace SimplePos.Infrastructure.Identity
         {
             _configuration = configuration;
         }
-        public string CreateToken(User user, Company company, IEnumerable<string> permissions)
+        public string CreateToken(User user, IEnumerable<string> permissions)
         {
             var secretKey = _configuration["Jwt:Secret"];
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -27,9 +27,13 @@ namespace SimplePos.Infrastructure.Identity
             {
                 new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
                 new(JwtRegisteredClaimNames.Email, user.Email.Value),
-                new("OutletId", user.OutletId.ToString()),
-                new("CompanyId", company.CompanyId.ToString())
+                new("CompanyId", user.CompanyId.ToString())
             };
+
+            if (user.OutletId.HasValue)
+            {
+                claims.Add(new Claim("OutletId", user.OutletId.Value.ToString()));
+            }
 
             foreach (var permission in permissions)
             {

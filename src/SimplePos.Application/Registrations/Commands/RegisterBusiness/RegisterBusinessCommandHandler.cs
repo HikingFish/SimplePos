@@ -42,9 +42,20 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         _outletRepository.AddOutlet(outletResult.Data);
         _userRepository.AddUser(userResult.Data);
 
-        await _identityService.RegisterUserAsync(command.Username, userResult.Data.Email.Value, command.Password, companyResult.Data.CompanyId, outletResult.Data.OutletId, userResult.Data.PhoneNumber, userResult.Data.UserPosition);
-
+        // Save domain entities first so FK references exist in the DB
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        // Now create the identity user (UserManager.CreateAsync calls SaveChangesAsync internally)
+        var identityResult = await _identityService.RegisterUserAsync(
+            userResult.Data.UserId,
+            command.Username,
+            userResult.Data.Email.Value,
+            command.Password);
+
+        if (!identityResult.IsSuccess)
+        {
+            return Result.Failure(identityResult.Error);
+        }
 
         return Result.Success();
     }

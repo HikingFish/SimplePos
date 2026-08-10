@@ -25,5 +25,7 @@ public static class UserError
         "Users.InvalidCredentials", "Invalid email or password.", ErrorType.Unauthorized);
     public static readonly Error AccountLocked = new(
         "Users.AccountLocked", "User account is locked.", ErrorType.Forbidden);
+    public static readonly Error AccountNotFound = new(
+        "Users.AccountNotFound", "User account not found.", ErrorType.NotFound);
 }
 

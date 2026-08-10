@@ -9,6 +9,7 @@ using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace SimplePos.Infrastructure.Identity;
@@ -36,7 +37,7 @@ public class IdentityService : IIdentityService
 
     public async Task<Result<string>> LoginAsync(string email, string password)
     {
-        var appUser = await _userManager.FindByNameAsync(email);
+        var appUser = await _userManager.FindByEmailAsync(email);
         if(appUser == null)
         {
             return Result<string>.Failure(UserError.InvalidCredentials);
@@ -46,12 +47,13 @@ public class IdentityService : IIdentityService
         if(!result.Succeeded)
         {
             return Result<string>.Failure(UserError.InvalidCredentials);
+
         }
 
         var domainUser = await _userRepository.GetUserByIdAsync(appUser.DomainUserId);
         if (domainUser == null)
         {
-            return Result<string>.Failure(new Error("Identity.UserNotFound", "User domain entity not found"));
+            return Result<string>.Failure(new Error("Identity.UserNotFound", "User domain entity not found", ErrorType.NotFound));
         }
 
         //var userOutlet = await _outletRepository.GetOutletByIdAsync(domainUser.OutletId);
@@ -68,45 +70,35 @@ public class IdentityService : IIdentityService
             return Result<string>.Failure(IdentityError.CompanyNotFound);
         }
 
-        var userPermissionsId = domainUser.UserPermissions.Select(up => up.PermissionId);
+        //var userPermissionsId = domainUser.UserPermissions.Select(up => up.PermissionId);
 
-        var permissions = await _permissionRepository.GetAllPermissionsAsync();
+        //var permissions = await _permissionRepository.GetAllPermissionsAsync();
 
-        var userPermissions = permissions
-            .Where(p => userPermissionsId
-            .Contains(p.PermissionId))
-            .Select(p => p.Name);
+        // var userPermissions = permissions
+        //     .Where(p => userPermissionsId
+        //     .Contains(p.PermissionId))
+        //     .Select(p => p.Name);
 
-        var token = _tokenProvider.CreateToken(domainUser, userCompany, userPermissions);
+        //var token = _tokenProvider.CreateToken(domainUser, userPermissions);
+        var token = _tokenProvider.CreateToken(domainUser, new List<string>());
         return Result<string>.Success(token);
     }
 
-    public async Task<Result<Guid>> RegisterUserAsync(string username, string email, string password,Guid companyId, Guid outletId, string phoneNumber, string userPosition)
+    public async Task<Result<Guid>> RegisterUserAsync(Guid domainUserId, string username, string email, string password)
     {
-        var newUserEmail = EmailAddress.Create(email);
-
-        // if(newUserEmail.IsFailure)
-        //     return Result<Guid>.Failure(newUserEmail.Error);
-
-        var newUser = User.Create(outletId, companyId, username, newUserEmail.Data, phoneNumber, userPosition);
-
-        // if (newUser.IsFailure)
-        //     return Result<Guid>.Failure(newUser.Error);
-
-        ApplicationUser appUser = new ApplicationUser{
-            DomainUserId = newUser.Data.UserId,
-            Email = newUser.Data.Email.Value, 
-            UserName = newUser.Data.Username
+        ApplicationUser appUser = new ApplicationUser
+        {
+            DomainUserId = domainUserId,
+            Email = email, 
+            UserName = username
         };
-
-        //await _userRepository.AddUser(newUser.Data);
 
         var identityResult = await _userManager.CreateAsync(appUser, password);
 
         if (!identityResult.Succeeded)
         {
             var errorMessage = string.Join(", ", identityResult.Errors.Select(e => e.Description));
-            return Result<Guid>.Failure(new Error("Identity.RegistrationFailed", errorMessage));
+            return Result<Guid>.Failure(new Error("Identity.RegistrationFailed", errorMessage, ErrorType.Validation));
         }
 
         return Result<Guid>.Success(appUser.DomainUserId);

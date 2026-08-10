@@ -7,5 +7,5 @@ using System.Text;
 namespace SimplePos.Application.Abstractions.Identity;
 public interface ITokenProvider
 {
-    string CreateToken(User user, Company company, IEnumerable<string> permissions);
+    string CreateToken(User user, IEnumerable<string> permissions);
 }

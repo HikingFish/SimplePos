@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using SimplePos.Domain.Users;
 
 namespace SimplePos.Infrastructure.Persistence.Users;
@@ -37,9 +38,11 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
-    public Task<User?> GetUserByIdAsync(Guid userId)
+    public async Task<User?> GetUserByIdAsync(Guid userId)
     {
-        throw new NotImplementedException();
+        return await _appDbContext.DomainUsers
+            .Include(u => u.UserPermissions)
+            .FirstOrDefaultAsync(u => u.UserId == userId);
     }
 
     public Task<User?> GetUserByUsernameAsync(string username)
