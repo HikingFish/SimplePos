@@ -29,21 +29,37 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
     public async Task<Result> HandleAsync(RegisterBusinessCommand command, CancellationToken cancellationToken)
     {
         var companyAddress = Address.Create(command.Street, command.City, command.State, command.PostalCode, command.Country);
+        if (!companyAddress.IsSuccess || companyAddress.Data == null)
+            return Result.Failure(companyAddress.Error);
+
         var companyEmail = EmailAddress.Create(command.CompanyEmail);
+        if (!companyEmail.IsSuccess || companyEmail.Data == null)
+            return Result.Failure(companyEmail.Error);
+
         var companyResult = Company.Create(command.CompanyName, companyAddress.Data, command.CompanyPhoneNumber, companyEmail.Data);
+        if (!companyResult.IsSuccess || companyResult.Data == null)
+            return Result.Failure(companyResult.Error);
 
         var outletAddress = Address.Create(command.Street, command.City, command.State, command.PostalCode, command.Country);
+        if (!outletAddress.IsSuccess || outletAddress.Data == null)
+            return Result.Failure(outletAddress.Error);
+
         var outletResult = Outlet.Create(companyResult.Data.CompanyId,command.CompanyName + "HQ", outletAddress.Data, command.CompanyPhoneNumber);
+        if (!outletResult.IsSuccess || outletResult.Data == null)
+            return Result.Failure(outletResult.Error);
 
         var userEmailAddress = EmailAddress.Create(command.Email);
+        if (!userEmailAddress.IsSuccess || userEmailAddress.Data == null)
+            return Result.Failure(userEmailAddress.Error);
+
         var userResult = User.Create(outletResult.Data.OutletId, companyResult.Data.CompanyId, command.Username, userEmailAddress.Data, command.PhoneNumber, "Administrator");
+        if (!userResult.IsSuccess || userResult.Data == null)
+            return Result.Failure(userResult.Error);
 
         _companyRepository.AddCompany(companyResult.Data);
         _outletRepository.AddOutlet(outletResult.Data);
         _userRepository.AddUser(userResult.Data);
-
-        // Save domain entities first so FK references exist in the DB
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
 
         // Now create the identity user (UserManager.CreateAsync calls SaveChangesAsync internally)
         var identityResult = await _identityService.RegisterUserAsync(
@@ -56,6 +72,8 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         {
             return Result.Failure(identityResult.Error);
         }
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return Result.Success();
     }
