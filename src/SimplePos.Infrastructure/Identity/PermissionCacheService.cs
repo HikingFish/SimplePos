@@ -42,14 +42,15 @@ namespace SimplePos.Infrastructure.Identity
             return permissionNames;
         }
 
-        public Task InvalidatePermissionsCacheAsync(Guid userId, CancellationToken cancellationToken = default)
+        public async Task InvalidatePermissionsCacheAsync(Guid userId, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            await _cache.RemoveAsync(CacheKey(userId), cancellationToken);
         }
 
-        public Task SetPermissionAsync(Guid userId, IEnumerable<string> permissions, CancellationToken cancellationToken = default)
+        public async Task SetPermissionAsync(Guid userId, IEnumerable<string> permissions, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var serializedPermissions = JsonSerializer.Serialize(permissions);
+            await _cache.SetStringAsync(CacheKey(userId), serializedPermissions, CacheOptions, cancellationToken);
         }
     }
 }

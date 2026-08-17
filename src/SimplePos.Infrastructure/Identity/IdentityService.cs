@@ -7,6 +7,7 @@ using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
 using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
+using SimplePos.Infrastructure.Persistence.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,19 +21,24 @@ public class IdentityService : IIdentityService
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ITokenProvider _tokenProvider;
     private readonly IUserRepository _userRepository;
-    private readonly IPermissionRepository _permissionRepository;
     private readonly ICompanyRepository _companyRepository;
-    private readonly IOutletRepository _outletRepository;
+    private readonly IPermissionCacheService _permissionCacheService;
+    private readonly IPermissionRepository _permissionRepository;
 
-    public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenProvider tokenProvider, IUserRepository userRepository, IPermissionRepository permissionRepository, ICompanyRepository companyRepository, IOutletRepository outletRepository)
+    public IdentityService(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        ITokenProvider tokenProvider,
+        IUserRepository userRepository,
+        ICompanyRepository companyRepository,
+        IPermissionCacheService permissionCacheService,
+        IPermissionRepository permissionRepository)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenProvider = tokenProvider;
         _userRepository = userRepository;
-        _permissionRepository = permissionRepository;
         _companyRepository = companyRepository;
-        _outletRepository = outletRepository;
+        _permissionCacheService = permissionCacheService;
     }
 
     public async Task<Result<string>> LoginAsync(string email, string password)
@@ -56,13 +62,6 @@ public class IdentityService : IIdentityService
             return Result<string>.Failure(new Error("Identity.UserNotFound", "User domain entity not found", ErrorType.NotFound));
         }
 
-        //var userOutlet = await _outletRepository.GetOutletByIdAsync(domainUser.OutletId);
-
-        //if(userOutlet is null)
-        //{
-        //    return Result<string>.Failure(IdentityError.OutletNotFound);
-        //}
-
         var userCompany = await _companyRepository.GetCompanyByIdAsync(domainUser.CompanyId);
 
         if(userCompany is null)
@@ -70,17 +69,11 @@ public class IdentityService : IIdentityService
             return Result<string>.Failure(IdentityError.CompanyNotFound);
         }
 
-        //var userPermissionsId = domainUser.UserPermissions.Select(up => up.PermissionId);
+        var token = _tokenProvider.CreateToken(domainUser);
+        var permissionsResult = await _permissionRepository.GetPermissionsByUserIdAsync(domainUser.UserId);
+        var permissions = permissionsResult.Select(p => p.Name).ToList();
+        await _permissionCacheService.SetPermissionAsync(domainUser.UserId, permissions);
 
-        //var permissions = await _permissionRepository.GetAllPermissionsAsync();
-
-        // var userPermissions = permissions
-        //     .Where(p => userPermissionsId
-        //     .Contains(p.PermissionId))
-        //     .Select(p => p.Name);
-
-        //var token = _tokenProvider.CreateToken(domainUser, userPermissions);
-        var token = _tokenProvider.CreateToken(domainUser, new List<string>());
         return Result<string>.Success(token);
     }
 

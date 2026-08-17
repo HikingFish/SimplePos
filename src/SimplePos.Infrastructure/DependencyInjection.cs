@@ -14,6 +14,7 @@ using SimplePos.Infrastructure.Persistence.Permissions;
 using SimplePos.Application.Abstractions;
 using SimplePos.Application.Abstractions.Identity;
 using SimplePos.Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SimplePos.Infrastructure;
 
@@ -42,6 +43,9 @@ public static class DependencyInjection
         .AddSignInManager()
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
+
+        services.AddScoped<IPermissionCacheService, PermissionCacheService>();
+        services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();

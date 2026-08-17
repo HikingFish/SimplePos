@@ -17,7 +17,7 @@ namespace SimplePos.Infrastructure.Identity
         {
             _configuration = configuration;
         }
-        public string CreateToken(User user, IEnumerable<string> permissions)
+        public string CreateToken(User user)
         {
             var secretKey = _configuration["Jwt:Secret"];
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
@@ -33,11 +33,6 @@ namespace SimplePos.Infrastructure.Identity
             if (user.OutletId.HasValue)
             {
                 claims.Add(new Claim("OutletId", user.OutletId.Value.ToString()));
-            }
-
-            foreach (var permission in permissions)
-            {
-                claims.Add(new Claim("permission", permission));
             }
 
             var tokenDescriptor = new SecurityTokenDescriptor
