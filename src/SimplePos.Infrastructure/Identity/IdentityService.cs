@@ -7,7 +7,6 @@ using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
 using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
-using SimplePos.Infrastructure.Persistence.Permissions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,22 +21,23 @@ public class IdentityService : IIdentityService
     private readonly ITokenProvider _tokenProvider;
     private readonly IUserRepository _userRepository;
     private readonly ICompanyRepository _companyRepository;
-    private readonly IPermissionCacheService _permissionCacheService;
     private readonly IPermissionRepository _permissionRepository;
+    private readonly IPermissionCacheService _permissionCacheService;
 
     public IdentityService(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        ITokenProvider tokenProvider,
-        IUserRepository userRepository,
+     SignInManager<ApplicationUser> signInManager,
+     ITokenProvider tokenProvider,
+       IUserRepository userRepository,
         ICompanyRepository companyRepository,
-        IPermissionCacheService permissionCacheService,
-        IPermissionRepository permissionRepository)
+         IPermissionRepository permissionRepository,
+         IPermissionCacheService permissionCacheService)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _tokenProvider = tokenProvider;
         _userRepository = userRepository;
         _companyRepository = companyRepository;
+        _permissionRepository = permissionRepository;
         _permissionCacheService = permissionCacheService;
     }
 
@@ -70,9 +70,11 @@ public class IdentityService : IIdentityService
         }
 
         var token = _tokenProvider.CreateToken(domainUser);
-        var permissionsResult = await _permissionRepository.GetPermissionsByUserIdAsync(domainUser.UserId);
-        var permissions = permissionsResult.Select(p => p.Name).ToList();
-        await _permissionCacheService.SetPermissionAsync(domainUser.UserId, permissions);
+
+        var userPermissionsResult = await _permissionRepository.GetPermissionsByUserIdAsync(domainUser.UserId);
+        var userPermissions = userPermissionsResult.Select(p => p.Name).ToHashSet();
+
+        await _permissionCacheService.SetPermissionAsync(domainUser.UserId, userPermissions);
 
         return Result<string>.Success(token);
     }

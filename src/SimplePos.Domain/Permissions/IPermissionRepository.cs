@@ -10,7 +10,7 @@ public interface IPermissionRepository
     Task<List<Permission>> GetAllPermissionsAsync();
     // Task UpdatePermissionAsync(Permission permission);
     // Task DeletePermissionAsync(Guid permissionId);
-    Task AddUserPermissionAsync(UserPermission userPermission);
+    void AddUserPermission(UserPermission userPermission);
     Task<List<Permission>> GetPermissionsByUserIdAsync(Guid userId);
     Task DeleteUserPermissionsByUserIdAsync(Guid userId);
     Task DeleteUserPermissionAsync(Guid userId, Guid permissionId);

@@ -27,5 +27,7 @@ public static class UserError
         "Users.AccountLocked", "User account is locked.", ErrorType.Forbidden);
     public static readonly Error AccountNotFound = new(
         "Users.AccountNotFound", "User account not found.", ErrorType.NotFound);
+    public static readonly Error AdminPermissionNotFound = new(
+        "Users.AdminPermissionNotFound", "Admin permission not found.", ErrorType.NotFound);
 }
 

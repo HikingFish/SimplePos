@@ -5,6 +5,7 @@ using SimplePos.Domain.Common;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
+using SimplePos.Domain.Permissions;
 using SimplePos.Domain.Users;
 
 namespace SimplePos.Application.Registrations.Commands.RegisterBusiness;
@@ -16,14 +17,16 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
     private readonly ICompanyRepository _companyRepository;
     private readonly IOutletRepository _outletRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IPermissionRepository _permissionRepository;
 
-    public RegisterBusinessCommandHandler(IUnitOfWork unitOfWork, IIdentityService identityService, ICompanyRepository companyRepository, IOutletRepository outletRepository, IUserRepository userRepository)
+    public RegisterBusinessCommandHandler(IUnitOfWork unitOfWork, IIdentityService identityService, ICompanyRepository companyRepository, IOutletRepository outletRepository, IUserRepository userRepository, IPermissionRepository permissionRepository)
     {
         _unitOfWork = unitOfWork;
         _identityService = identityService;
         _companyRepository = companyRepository;
         _outletRepository = outletRepository;
         _userRepository = userRepository;
+        _permissionRepository = permissionRepository;
     }
 
     public async Task<Result> HandleAsync(RegisterBusinessCommand command, CancellationToken cancellationToken)
@@ -55,6 +58,12 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         var userResult = User.Create(outletResult.Data.OutletId, companyResult.Data.CompanyId, command.Username, userEmailAddress.Data, command.PhoneNumber, "Administrator");
         if (!userResult.IsSuccess || userResult.Data == null)
             return Result.Failure(userResult.Error);
+
+        var adminPermission = await _permissionRepository.GetPermissionByNameAsync("Admin");
+        if (adminPermission == null)
+            return Result.Failure(UserError.AdminPermissionNotFound);
+        
+        userResult.Data.AssignPermission(adminPermission.PermissionId);
 
         _companyRepository.AddCompany(companyResult.Data);
         _outletRepository.AddOutlet(outletResult.Data);
