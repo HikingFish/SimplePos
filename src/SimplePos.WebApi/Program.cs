@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using SimplePos.Application;
 using SimplePos.Infrastructure;
+using SimplePos.Infrastructure.Identity;
 using SimplePos.WebApi.Endpoints;
 using SimplePos.WebApi.EndPoints;
 
@@ -40,8 +41,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    // Define role-based or claim-based policies if needed
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("Admin", policy => policy.Requirements.Add(new PermissionRequirement("Admin")));
 });
 
 var app = builder.Build();

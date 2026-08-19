@@ -39,6 +39,6 @@ public static class CompanyEndpoints
 
             return Results.Problem(title: "Error", detail: result.Error.Description, statusCode: 500);
         })
-        .RequireAuthorization();
+        .RequireAuthorization("Admin");
     }
 }
