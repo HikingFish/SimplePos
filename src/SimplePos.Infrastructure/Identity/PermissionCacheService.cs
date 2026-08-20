@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Caching.Distributed;
 using SimplePos.Application.Abstractions.Identity;
-using SimplePos.Domain.Permissions;
+using SimplePos.Domain.Users;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,7 +11,7 @@ namespace SimplePos.Infrastructure.Identity
     public class PermissionCacheService : IPermissionCacheService
     {
         private readonly IDistributedCache _cache;
-        private readonly IPermissionRepository _permissionRepository;
+        private readonly IUserPermissionRepository _userPermissionRepository;
 
         private static readonly DistributedCacheEntryOptions CacheOptions = new()
         {
@@ -19,10 +19,10 @@ namespace SimplePos.Infrastructure.Identity
             SlidingExpiration = TimeSpan.FromMinutes(10)
         };
 
-        public PermissionCacheService(IDistributedCache cache, IPermissionRepository permissionRepository)
+        public PermissionCacheService(IDistributedCache cache, IUserPermissionRepository userPermissionRepository)
         {
             _cache = cache;
-            _permissionRepository = permissionRepository;
+            _userPermissionRepository = userPermissionRepository;
         }
 
         private static string CacheKey(Guid userId) => $"permissions:{userId}";
@@ -35,7 +35,7 @@ namespace SimplePos.Infrastructure.Identity
                 return JsonSerializer.Deserialize<HashSet<string>>(cached) ?? new HashSet<string>();
             }
 
-            var permissions = await _permissionRepository.GetPermissionsByUserIdAsync(userId);
+            var permissions = await _userPermissionRepository.GetPermissionsByUserIdAsync(userId);
             var permissionNames = permissions.Select(p => p.Name).ToHashSet();
 
             await SetPermissionAsync(userId, permissionNames, cancellationToken);

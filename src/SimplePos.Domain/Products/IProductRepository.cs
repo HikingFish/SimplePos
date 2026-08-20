@@ -1,15 +1,17 @@
 namespace SimplePos.Domain.Products;
+
 public interface IProductRepository
 {
-    Task AddProductAsync(Product product);
+    void AddProduct(Product product);
     Task<Product?> GetProductByIdAsync(Guid productId);
     Task<List<Product>> GetProductsByCompanyIdAsync(Guid companyId);
     Task<Product?> GetProductBySkuAsync(string sku, Guid companyId);
     Task<List<Product>> GetProductsByCategoryIdAsync(Guid categoryId);
     Task<bool> ExistsBySkuAsync(string sku, Guid companyId);
-    Task UpdateProductAsync(Product product);
-    Task DeleteProductAsync(Guid productId);
-    Task AddProductTaxAsync(ProductTax productTax);
+    void UpdateProduct(Product product);
+    void DeleteProduct(Product product);
+    void AddProductTax(ProductTax productTax);
     Task<List<ProductTax>> GetProductTaxesByProductIdAsync(Guid productId);
-    Task DeleteProductTaxesByProductIdAsync(Guid productId);
+    void DeleteProductTax(ProductTax productTax);
+    void DeleteProductTaxes(IEnumerable<ProductTax> productTaxes);
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SimplePos.Domain.Outlets;
 using System;
 using System.Collections.Generic;
@@ -20,13 +20,9 @@ public class OutletRepository : IOutletRepository
         _appDbContext.Outlets.Add(outlet);
     }
 
-    public async Task DeleteOutletAsync(Guid outletId)
+    public void DeleteOutlet(Outlet outlet)
     {
-        var outlet = await GetOutletByIdAsync(outletId);
-        if(outlet != null)
-        {
-            _appDbContext.Remove(outlet);
-        }
+        _appDbContext.Outlets.Remove(outlet);
     }
 
     public async Task<Outlet?> GetOutletByIdAsync(Guid outletId)

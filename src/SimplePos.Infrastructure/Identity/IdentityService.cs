@@ -21,7 +21,7 @@ public class IdentityService : IIdentityService
     private readonly ITokenProvider _tokenProvider;
     private readonly IUserRepository _userRepository;
     private readonly ICompanyRepository _companyRepository;
-    private readonly IPermissionRepository _permissionRepository;
+    private readonly IUserPermissionRepository _userPermissionRepository;
     private readonly IPermissionCacheService _permissionCacheService;
 
     public IdentityService(UserManager<ApplicationUser> userManager,
@@ -29,7 +29,7 @@ public class IdentityService : IIdentityService
      ITokenProvider tokenProvider,
        IUserRepository userRepository,
         ICompanyRepository companyRepository,
-         IPermissionRepository permissionRepository,
+         IUserPermissionRepository userPermissionRepository,
          IPermissionCacheService permissionCacheService)
     {
         _userManager = userManager;
@@ -37,7 +37,7 @@ public class IdentityService : IIdentityService
         _tokenProvider = tokenProvider;
         _userRepository = userRepository;
         _companyRepository = companyRepository;
-        _permissionRepository = permissionRepository;
+        _userPermissionRepository = userPermissionRepository;
         _permissionCacheService = permissionCacheService;
     }
 
@@ -71,7 +71,7 @@ public class IdentityService : IIdentityService
 
         var token = _tokenProvider.CreateToken(domainUser);
 
-        var userPermissionsResult = await _permissionRepository.GetPermissionsByUserIdAsync(domainUser.UserId);
+        var userPermissionsResult = await _userPermissionRepository.GetPermissionsByUserIdAsync(domainUser.UserId);
         var userPermissions = userPermissionsResult.Select(p => p.Name).ToHashSet();
 
         await _permissionCacheService.SetPermissionAsync(domainUser.UserId, userPermissions);

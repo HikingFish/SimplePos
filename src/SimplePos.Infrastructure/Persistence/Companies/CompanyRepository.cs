@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SimplePos.Domain.Companies;
 using System;
 using System.Collections.Generic;
@@ -20,13 +20,9 @@ public class CompanyRepository : ICompanyRepository
         _appDbContext.Companies.Add(company);
     }
 
-    public async Task DeleteCompanyAsync(Guid companyId)
+    public void DeleteCompany(Company company)
     {
-        var company = await GetCompanyByIdAsync(companyId);
-        if(company != null)
-        {
-            _appDbContext.Remove(company);
-        }
+        _appDbContext.Companies.Remove(company);
     }
 
     public async Task<bool> ExistsByEmailAsync(string email)

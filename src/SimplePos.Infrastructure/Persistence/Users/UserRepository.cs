@@ -18,9 +18,9 @@ public class UserRepository : IUserRepository
         return;
     }
 
-    public Task DeleteUser(Guid userId)
+    public void DeleteUser(User user)
     {
-        throw new NotImplementedException();
+        _appDbContext.DomainUsers.Remove(user);
     }
 
     public Task<bool> ExistsByEmailAsync(string email)

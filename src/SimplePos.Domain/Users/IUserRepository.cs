@@ -1,4 +1,5 @@
 namespace SimplePos.Domain.Users;
+
 public interface IUserRepository
 {
     Task<User?> GetUserByIdAsync(Guid userId);
@@ -9,5 +10,5 @@ public interface IUserRepository
     Task<List<User>> GetUsersByOutletIdAsync(Guid outletId);
     void AddUser(User user);
     void UpdateUser(User user);
-    Task DeleteUser(Guid userId);
+    void DeleteUser(User user);
 }

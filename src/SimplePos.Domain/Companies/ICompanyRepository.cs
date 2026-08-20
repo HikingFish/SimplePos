@@ -1,4 +1,5 @@
 namespace SimplePos.Domain.Companies;
+
 public interface ICompanyRepository
 {
     void AddCompany(Company company);
@@ -7,5 +8,5 @@ public interface ICompanyRepository
     Task<bool> ExistsByEmailAsync(string email);
     Task<IEnumerable<Company>> GetAllCompaniesAsync();
     void UpdateCompany(Company company);
-    Task DeleteCompanyAsync(Guid companyId);
+    void DeleteCompany(Company company);
 }

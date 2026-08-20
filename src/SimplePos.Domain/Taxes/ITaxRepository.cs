@@ -1,10 +1,11 @@
 namespace SimplePos.Domain.Taxes;
+
 public interface ITaxRepository
 {
     Task<Tax?> GetTaxByIdAsync(Guid taxId);
     Task<List<Tax>> GetTaxesByCompanyIdAsync(Guid companyId);
     Task<List<Tax>> GetActiveTaxesByCompanyIdAsync(Guid companyId);
-    Task AddTaxAsync(Tax tax);
-    Task UpdateTaxAsync(Tax tax);
-    Task DeleteTaxAsync(Guid taxId);
+    void AddTax(Tax tax);
+    void UpdateTax(Tax tax);
+    void DeleteTax(Tax tax);
 }
