@@ -8,6 +8,7 @@ namespace Tests.Domain.Sales;
 public class SaleItemTests
 {
     private static readonly Guid CompanyId = Guid.NewGuid();
+    private static readonly Guid UserId = Guid.NewGuid();
 
     [Fact]
     public void SaleItem_Should_Have_Correct_Properties()
@@ -22,7 +23,7 @@ public class SaleItemTests
         var taxes = new List<Tax> { Tax.Create(CompanyId, "VAT", 0.05m).Data! };
 
         // Act
-        Result<SaleItem> result = SaleItem.Create(productId, saleId, quantity, unitPrice, unitDiscount, remark, taxes);
+        Result<SaleItem> result = SaleItem.Create(productId, saleId, UserId, quantity, unitPrice, unitDiscount, remark, taxes);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -31,6 +32,10 @@ public class SaleItemTests
 
         Assert.Equal(productId, saleItem.ProductId);
         Assert.Equal(saleId, saleItem.SaleId);
+        Assert.Equal(UserId, saleItem.AddedByUserId);
+        Assert.False(saleItem.Void);
+        Assert.Null(saleItem.VoidedByUserId);
+        Assert.Null(saleItem.DateTimeVoided);
         Assert.Equal(quantity, saleItem.Quantity);
         Assert.Equal(unitPrice, saleItem.UnitPrice);
         Assert.Equal(unitDiscount, saleItem.UnitDiscount);
@@ -48,7 +53,7 @@ public class SaleItemTests
     {
         //Arrange
         var taxes = new List<Tax> { Tax.Create(CompanyId, "Tax", taxRate).Data! };
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, remark, taxes);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, remark, taxes);
 
         //Assert
         Assert.NotNull(result.Data);
@@ -64,7 +69,7 @@ public class SaleItemTests
         decimal unitDiscount = 0.15M;
         string? remark = "test";
         var taxes = new List<Tax> { Tax.Create(CompanyId, "VAT", 0.06M).Data! };
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, remark, taxes);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, remark, taxes);
 
         //Assert
         Assert.NotNull(result.Data);
@@ -84,7 +89,7 @@ public class SaleItemTests
         decimal unitDiscount = 0M;
         string? remark = "test";
         var taxes = new List<Tax> { Tax.Create(CompanyId, "VAT", 0.06M).Data! };
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, remark, taxes);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, remark, taxes);
 
         //Assert
         Assert.NotNull(result.Data);
@@ -103,7 +108,7 @@ public class SaleItemTests
         decimal unitPrice = 12;
         decimal unitDiscount = 0.15M;
         string? remark = "test";
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, remark, taxes: null);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, remark, taxes: null);
 
         //Assert
         Assert.NotNull(result.Data);
@@ -124,7 +129,7 @@ public class SaleItemTests
         decimal unitDiscount = 0.15M;
         string? remark = "test";
         var taxes = new List<Tax> { Tax.Create(CompanyId, "VAT", 0.06M).Data! };
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, remark, taxes);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, remark, taxes);
 
         //Assert
         Assert.NotNull(result.Data);
@@ -147,7 +152,7 @@ public class SaleItemTests
         var taxes = new List<Tax> { tax1, tax2 };
 
         //Act
-        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), quantity, unitPrice, unitDiscount, "Multiple taxes", taxes);
+        Result<SaleItem> result = SaleItem.Create(Guid.CreateVersion7(), Guid.CreateVersion7(), UserId, quantity, unitPrice, unitDiscount, "Multiple taxes", taxes);
 
         //Assert
         Assert.True(result.IsSuccess);
@@ -164,5 +169,22 @@ public class SaleItemTests
         var serviceTax = saleItem.SaleItemTaxes.First(t => t.TaxName == "Service");
         Assert.Equal(20M, gstTax.TaxAmount);
         Assert.Equal(10M, serviceTax.TaxAmount);
+    }
+
+    [Fact]
+    public void VoidSaleItem_ShouldSetVoidProperties()
+    {
+        // Arrange
+        var saleItem = SaleItem.Create(Guid.NewGuid(), Guid.NewGuid(), UserId, 1, 50m, 0m, "Test item").Data!;
+        var voidingUser = Guid.NewGuid();
+
+        // Act
+        var result = saleItem.VoidSaleItem(voidingUser);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.True(saleItem.Void);
+        Assert.Equal(voidingUser, saleItem.VoidedByUserId);
+        Assert.NotNull(saleItem.DateTimeVoided);
     }
 }

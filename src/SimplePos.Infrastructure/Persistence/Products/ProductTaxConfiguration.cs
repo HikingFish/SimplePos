@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SimplePos.Domain.Products;
 using SimplePos.Domain.Taxes;
@@ -18,7 +18,7 @@ public class ProductTaxConfiguration : IEntityTypeConfiguration<ProductTax>
 
         builder.HasOne<Product>()
             .WithMany(p => p.ProductTaxes)
-            .HasForeignKey(p => p.TaxId)
+            .HasForeignKey(pt => pt.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne<Tax>()

@@ -25,5 +25,9 @@ public static class SaleError
         "Sales.Void", "Operation cannot be performed on a void sale.", ErrorType.Conflict);
     public static readonly Error NotVoid = new Error(
         "Sales.NotVoid", "Operation cannot be performed on a not void sale.", ErrorType.Conflict);
+    public static readonly Error CreatedByUserIdEmpty = new Error(
+        "Sales.CreatedByUserIdEmpty", "Created by user ID cannot be empty.", ErrorType.Validation);
+    public static readonly Error VoidedByUserIdEmpty = new Error(
+        "Sales.VoidedByUserIdEmpty", "Voided by user ID cannot be empty.", ErrorType.Validation);
 }
 

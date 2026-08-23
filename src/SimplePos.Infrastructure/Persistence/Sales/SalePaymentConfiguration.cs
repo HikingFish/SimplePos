@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SimplePos.Domain.Payments;
 using SimplePos.Domain.Sales;
+using SimplePos.Domain.Users;
 
 namespace SimplePos.Infrastructure.Persistence.Sales;
 
@@ -16,6 +17,11 @@ public class SalePaymentConfiguration : IEntityTypeConfiguration<SalePayment>
         builder.HasOne<PaymentMethod>()
             .WithMany()
             .HasForeignKey(sp => sp.PaymentMethodId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(sp => sp.ProcessedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder.Property(sp => sp.AmountPaid)

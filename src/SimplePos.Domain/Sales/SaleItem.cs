@@ -7,6 +7,11 @@ public class SaleItem
     public Guid SaleItemId { get; private set; }
     public Guid ProductId { get; private set; }
     public Guid SaleId { get; private set; }
+    public Guid AddedByUserId { get; private set; }
+    public DateTime DateTimeAdded { get; private set; }
+    public bool Void { get; private set; }
+    public Guid? VoidedByUserId { get; private set; }
+    public DateTime? DateTimeVoided { get; private set; }
     public decimal Quantity { get; private set; }
     public decimal UnitPrice { get; private set; }
     //Gross amount total without discount and tax
@@ -32,6 +37,8 @@ public class SaleItem
         Guid saleItemId,
         Guid productId, 
         Guid saleId, 
+        Guid addedByUserId,
+        DateTime dateTimeAdded,
         decimal quantity,
         decimal unitPrice,
         decimal unitDiscount,
@@ -41,6 +48,11 @@ public class SaleItem
         SaleItemId = saleItemId;
         ProductId = productId;
         SaleId = saleId;
+        AddedByUserId = addedByUserId;
+        DateTimeAdded = dateTimeAdded;
+        Void = false;
+        VoidedByUserId = null;
+        DateTimeVoided = null;
         Quantity = quantity;
         UnitPrice = unitPrice;
         UnitDiscount = unitDiscount;
@@ -64,12 +76,14 @@ public class SaleItem
     public static Result<SaleItem> Create(
         Guid productId, 
         Guid saleId, 
+        Guid addedByUserId,
         decimal quantity,
         decimal unitPrice,
         decimal unitDiscount,
         string? remark,
         IEnumerable<Tax>? taxes = null,
-        Guid? saleItemId = null)
+        Guid? saleItemId = null,
+        DateTime? dateTimeAdded = null)
     {
         if (productId == Guid.Empty)
         {
@@ -79,6 +93,11 @@ public class SaleItem
         if (saleId == Guid.Empty)
         {
             return Result<SaleItem>.Failure(SaleItemError.SaleIdEmpty);
+        }
+
+        if (addedByUserId == Guid.Empty)
+        {
+            return Result<SaleItem>.Failure(SaleItemError.AddedByUserIdEmpty);
         }
 
         if (unitDiscount < 0)
@@ -116,7 +135,39 @@ public class SaleItem
         }
 
         Guid finalId = saleItemId ?? Guid.CreateVersion7();
-        return Result<SaleItem>.Success(new SaleItem(finalId, productId, saleId, quantity, unitPrice, unitDiscount, remark, taxes));
+        DateTime finalDateTimeAdded = dateTimeAdded ?? DateTime.UtcNow;
+        return Result<SaleItem>.Success(new SaleItem(finalId, productId, saleId, addedByUserId, finalDateTimeAdded, quantity, unitPrice, unitDiscount, remark, taxes));
+    }
+
+    public Result VoidSaleItem(Guid voidedByUserId)
+    {
+        if (voidedByUserId == Guid.Empty)
+        {
+            return Result.Failure(SaleItemError.VoidedByUserIdEmpty);
+        }
+
+        if (Void)
+        {
+            return Result.Failure(SaleItemError.AlreadyVoid);
+        }
+
+        Void = true;
+        VoidedByUserId = voidedByUserId;
+        DateTimeVoided = DateTime.UtcNow;
+        return Result.Success();
+    }
+
+    public Result UnvoidSaleItem()
+    {
+        if (!Void)
+        {
+            return Result.Failure(SaleItemError.NotVoid);
+        }
+
+        Void = false;
+        VoidedByUserId = null;
+        DateTimeVoided = null;
+        return Result.Success();
     }
 
     private void CalculateLineTotal()
@@ -156,6 +207,11 @@ public class SaleItem
         string? remark,
         IEnumerable<Tax>? taxes = null)
     {
+        if (Void)
+        {
+            return Result.Failure(SaleItemError.Void);
+        }
+
         if (unitDiscount < 0)
         {
             return Result.Failure(SaleItemError.UnitDiscountNegative);

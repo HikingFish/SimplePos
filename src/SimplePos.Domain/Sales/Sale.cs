@@ -7,6 +7,7 @@ public class Sale : AggregateRoot, ISoftDeletable
 {
     public Guid SaleId { get; private set; }
     public Guid OutletId { get; private set; }
+    public Guid CreatedByUserId { get; private set; }
     public string InvoiceNumber { get; private set; } 
     // SubTotal is total without tax and discount
     public decimal SubTotal { get; private set; }
@@ -18,6 +19,8 @@ public class Sale : AggregateRoot, ISoftDeletable
     public bool SoftDeleted { get; private set; }
     public DateTime? DateTimeSoftDeleted { get; private set; }
     public bool Void { get; private set; }
+    public Guid? VoidedByUserId { get; private set; }
+    public DateTime? DateTimeVoided { get; private set; }
     public decimal TotalPaid { get; private set; }
     public decimal TotalChange { get; private set; }
     public decimal TotalOutstanding { get; private set; }
@@ -30,11 +33,12 @@ public class Sale : AggregateRoot, ISoftDeletable
 
     private Sale() { }
 
-    private Sale(Guid saleId, Guid outletId, string invoiceNumber)
+    private Sale(Guid saleId, Guid outletId, Guid createdByUserId, string invoiceNumber, DateTime? dateTimeCreated = null)
     {
         SaleId = saleId;
         OutletId = outletId;
-        DateTimeCreated = DateTime.UtcNow;
+        CreatedByUserId = createdByUserId;
+        DateTimeCreated = dateTimeCreated ?? DateTime.UtcNow;
         SoftDeleted = false;
         DateTimeSoftDeleted = null;
         InvoiceNumber = invoiceNumber;
@@ -45,17 +49,26 @@ public class Sale : AggregateRoot, ISoftDeletable
         TotalPaid = 0;
         TotalChange = 0;
         TotalOutstanding = 0;
+        TotalDiscount = 0;
         Void = false;
+        VoidedByUserId = null;
+        DateTimeVoided = null;
     }
 
-    public static Result<Sale> Create(Guid outletId, string invoiceNumber)
+    public static Result<Sale> Create(Guid outletId, Guid createdByUserId, string invoiceNumber, DateTime? dateTimeCreated = null, Guid? saleId = null)
     {
         if (outletId == Guid.Empty)
         {
             return Result<Sale>.Failure(SaleError.OutletIdEmpty);
         }
 
-        return Result<Sale>.Success(new Sale(Guid.CreateVersion7(), outletId, invoiceNumber));
+        if (createdByUserId == Guid.Empty)
+        {
+            return Result<Sale>.Failure(SaleError.CreatedByUserIdEmpty);
+        }
+
+        Guid finalId = saleId ?? Guid.CreateVersion7();
+        return Result<Sale>.Success(new Sale(finalId, outletId, createdByUserId, invoiceNumber, dateTimeCreated));
     }
 
     public Result AddSaleItem(SaleItem saleItem)
@@ -260,7 +273,7 @@ public class Sale : AggregateRoot, ISoftDeletable
         decimal netAmount = 0;
         decimal totalDiscount = 0;
 
-        foreach (var saleItem in _saleItems)
+        foreach (var saleItem in _saleItems.Where(si => !si.Void))
         {
             subTotal += saleItem.GrossAmount;
             taxAmount += saleItem.TaxAmount;
@@ -311,12 +324,17 @@ public class Sale : AggregateRoot, ISoftDeletable
         return Result.Success();
     }
 
-    public Result VoidSale()
+    public Result VoidSale(Guid voidedByUserId)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
         {
             return statusResult;
+        }
+
+        if (voidedByUserId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.VoidedByUserIdEmpty);
         }
 
         if (Void)
@@ -325,6 +343,8 @@ public class Sale : AggregateRoot, ISoftDeletable
         }
 
         Void = true;
+        VoidedByUserId = voidedByUserId;
+        DateTimeVoided = DateTime.UtcNow;
         return Result.Success();
     }
 
@@ -342,6 +362,78 @@ public class Sale : AggregateRoot, ISoftDeletable
         }
 
         Void = false;
+        VoidedByUserId = null;
+        DateTimeVoided = null;
+        return Result.Success();
+    }
+
+    public Result VoidSaleItem(Guid saleItemId, Guid voidedByUserId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
+        }
+
+        if (saleItemId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.SaleItemNull);
+        }
+
+        var saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
+        if (saleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        var voidResult = saleItem.VoidSaleItem(voidedByUserId);
+        if (!voidResult.IsSuccess)
+        {
+            return voidResult;
+        }
+
+        CalculateTotals();
+        return Result.Success();
+    }
+
+    public Result UnvoidSaleItem(Guid saleItemId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
+        }
+
+        if (saleItemId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.SaleItemNull);
+        }
+
+        var saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
+        if (saleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        var unvoidResult = saleItem.UnvoidSaleItem();
+        if (!unvoidResult.IsSuccess)
+        {
+            return unvoidResult;
+        }
+
+        CalculateTotals();
         return Result.Success();
     }
 

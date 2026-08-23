@@ -16,6 +16,11 @@ using SimplePos.Application.Abstractions.Identity;
 using SimplePos.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authorization;
 
+using SimplePos.Domain.Categories;
+using SimplePos.Infrastructure.Persistence.Categories;
+using SimplePos.Domain.Products;
+using SimplePos.Infrastructure.Persistence.Products;
+
 namespace SimplePos.Infrastructure;
 
 public static class DependencyInjection
@@ -50,6 +55,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IOutletRepository, OutletRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUserPermissionRepository, UserPermissionRepository>();
         services.AddScoped<IPermissionRepository, PermissionRepository>();

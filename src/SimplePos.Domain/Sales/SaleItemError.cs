@@ -31,5 +31,15 @@ public static class SaleItemError
         "SaleItem.DiscountExceedsTotal", "Discount cannot exceed line amount.", ErrorType.Validation);
     public static readonly Error UnitDiscountNegative = new Error(
         "SaleItem.UnitDiscountNegative", "Unit discount cannot be negative.", ErrorType.Validation);
+    public static readonly Error AddedByUserIdEmpty = new Error(
+        "SaleItem.AddedByUserIdEmpty", "Added by user ID cannot be empty.", ErrorType.Validation);
+    public static readonly Error VoidedByUserIdEmpty = new Error(
+        "SaleItem.VoidedByUserIdEmpty", "Voided by user ID cannot be empty.", ErrorType.Validation);
+    public static readonly Error Void = new Error(
+        "SaleItem.Void", "Operation cannot be performed on a void sale item.", ErrorType.Conflict);
+    public static readonly Error AlreadyVoid = new Error(
+        "SaleItem.AlreadyVoid", "Sale item is already void.", ErrorType.Conflict);
+    public static readonly Error NotVoid = new Error(
+        "SaleItem.NotVoid", "Operation cannot be performed on a not void sale item.", ErrorType.Conflict);
 }
 

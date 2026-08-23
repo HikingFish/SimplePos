@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using SimplePos.Domain.Products;
 using SimplePos.Domain.Sales;
+using SimplePos.Domain.Users;
 
 namespace SimplePos.Infrastructure.Persistence.Sales;
 
@@ -17,6 +18,24 @@ public class SaleItemConfiguration : IEntityTypeConfiguration<SaleItem>
             .WithMany()
             .HasForeignKey(si => si.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(si => si.AddedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(si => si.DateTimeAdded)
+            .IsRequired();
+
+        builder.Property(si => si.Void)
+            .IsRequired();
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(si => si.VoidedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(si => si.DateTimeVoided);
 
         builder.Property(si => si.Quantity)
             .HasPrecision(14, 4)
