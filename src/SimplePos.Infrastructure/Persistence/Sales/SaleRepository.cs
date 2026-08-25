@@ -53,6 +53,7 @@ public class SaleRepository : ISaleRepository
         return await _appDbContext.Sales
             .Include(s => s.SaleItems)
             .Include(s => s.SalePayments)
+            .Where(s => s.CreatedByUserId == userId)
             .ToListAsync();
     }
 

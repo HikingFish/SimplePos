@@ -21,11 +21,13 @@ public class Sale : AggregateRoot, ISoftDeletable
     public bool Void { get; private set; }
     public Guid? VoidedByUserId { get; private set; }
     public DateTime? DateTimeVoided { get; private set; }
+    public bool Closed { get; private set; }
+    public Guid? ClosedByUserId { get; private set; }
+    public DateTime? DateTimeClosed { get; private set; }
     public decimal TotalPaid { get; private set; }
     public decimal TotalChange { get; private set; }
     public decimal TotalOutstanding { get; private set; }
     public decimal TotalDiscount { get; private set; }
-    public bool IsFullyPaid => TotalOutstanding == 0;
     private readonly List<SaleItem> _saleItems  = new List<SaleItem>();
     public IReadOnlyCollection<SaleItem> SaleItems => _saleItems.AsReadOnly();
     private readonly List<SalePayment> _salePayments = new List<SalePayment>();
@@ -53,6 +55,9 @@ public class Sale : AggregateRoot, ISoftDeletable
         Void = false;
         VoidedByUserId = null;
         DateTimeVoided = null;
+        Closed = false;
+        ClosedByUserId = null;
+        DateTimeClosed = null;
     }
 
     public static Result<Sale> Create(Guid outletId, Guid createdByUserId, string invoiceNumber, DateTime? dateTimeCreated = null, Guid? saleId = null)
@@ -87,6 +92,13 @@ public class Sale : AggregateRoot, ISoftDeletable
             return notVoid;
         }
 
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (saleItem == null)
         {
             return Result.Failure(SaleError.SaleItemNull);
@@ -112,6 +124,13 @@ public class Sale : AggregateRoot, ISoftDeletable
             return notVoid;
         }
 
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (payment == null)
         {
             return Result.Failure(SaleError.SalePaymentNull);
@@ -132,6 +151,50 @@ public class Sale : AggregateRoot, ISoftDeletable
         return Result.Success();
     }
 
+    public Result EditSaleItemQuantity(Guid saleItemId, decimal quantity)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
+        }
+
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
+        if (saleItemId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.SaleItemNull);
+        }
+
+        SaleItem? saleItem = _saleItems.FirstOrDefault(si => si.SaleItemId == saleItemId);
+
+        if (saleItem == null)
+        {
+            return Result.Failure(SaleError.SaleItemNotFound);
+        }
+
+        var updateResult = saleItem.UpdateQuantity(quantity);
+        if (!updateResult.IsSuccess)
+        {
+            return updateResult;
+        }
+
+        CalculateTotals();
+        return Result.Success();
+    }
+
     public Result RemoveSaleItem(Guid saleItemId)
     {
         var statusResult = EnsureNotSoftDeleted();
@@ -147,14 +210,16 @@ public class Sale : AggregateRoot, ISoftDeletable
             return notVoid;
         }
 
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (saleItemId == Guid.Empty)
         {
             return Result.Failure(SaleError.SaleItemNull);
-        }
-
-        if (!_saleItems.Any(s => s.SaleItemId == saleItemId))
-        {
-            return Result.Failure(SaleError.SaleItemNotFound);
         }
 
         SaleItem? saleItem = _saleItems.FirstOrDefault(s => s.SaleItemId == saleItemId);
@@ -184,6 +249,13 @@ public class Sale : AggregateRoot, ISoftDeletable
             return notVoid;
         }
 
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (salePaymentId == Guid.Empty)
         {
             return Result.Failure(SaleError.SalePaymentNull);
@@ -192,11 +264,6 @@ public class Sale : AggregateRoot, ISoftDeletable
         SalePayment? salePayment = _salePayments.FirstOrDefault(s => s.SalePaymentId == salePaymentId);
 
         if (salePayment == null)
-        {
-            return Result.Failure(SaleError.SalePaymentNotFound);
-        }
-
-        if (!_salePayments.Contains(salePayment))
         {
             return Result.Failure(SaleError.SalePaymentNotFound);
         }
@@ -220,6 +287,13 @@ public class Sale : AggregateRoot, ISoftDeletable
         if (!notVoid.IsSuccess)
         {
             return notVoid;
+        }
+
+        var notClosed = EnsureNotClosed();
+
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
         }
 
         if (saleItemId == Guid.Empty)
@@ -288,6 +362,8 @@ public class Sale : AggregateRoot, ISoftDeletable
         NetAmount = netAmount;
         TotalDiscount = totalDiscount;
 
+        CalculatePaymentTotals();
+
         return Result.Success();
     }
 
@@ -332,6 +408,12 @@ public class Sale : AggregateRoot, ISoftDeletable
             return statusResult;
         }
 
+        var notClosed = EnsureNotClosed();
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (voidedByUserId == Guid.Empty)
         {
             return Result.Failure(SaleError.VoidedByUserIdEmpty);
@@ -356,6 +438,12 @@ public class Sale : AggregateRoot, ISoftDeletable
             return statusResult;
         }
 
+        var notClosed = EnsureNotClosed();
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (!Void)
         {
             return Result.Failure(SaleError.NotVoid);
@@ -364,6 +452,37 @@ public class Sale : AggregateRoot, ISoftDeletable
         Void = false;
         VoidedByUserId = null;
         DateTimeVoided = null;
+        return Result.Success();
+    }
+
+    public Result CloseSale(Guid closedByUserId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        var notVoid = EnsureNotVoid();
+        if (!notVoid.IsSuccess)
+        {
+            return notVoid;
+        }
+
+        var notClosed = EnsureNotClosed();
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
+        if (closedByUserId == Guid.Empty)
+        {
+            return Result.Failure(SaleError.ClosedByUserIdEmpty);
+        }
+
+        Closed = true;
+        ClosedByUserId = closedByUserId;
+        DateTimeClosed = DateTime.UtcNow;
         return Result.Success();
     }
 
@@ -379,6 +498,12 @@ public class Sale : AggregateRoot, ISoftDeletable
         if (!notVoid.IsSuccess)
         {
             return notVoid;
+        }
+
+        var notClosed = EnsureNotClosed();
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
         }
 
         if (saleItemId == Guid.Empty)
@@ -416,6 +541,12 @@ public class Sale : AggregateRoot, ISoftDeletable
             return notVoid;
         }
 
+        var notClosed = EnsureNotClosed();
+        if (!notClosed.IsSuccess)
+        {
+            return notClosed;
+        }
+
         if (saleItemId == Guid.Empty)
         {
             return Result.Failure(SaleError.SaleItemNull);
@@ -451,6 +582,15 @@ public class Sale : AggregateRoot, ISoftDeletable
         if (Void)
         {
             return Result.Failure(SaleError.Void);
+        }
+        return Result.Success();
+    }
+
+    private Result EnsureNotClosed()
+    {
+        if (Closed)
+        {
+            return Result.Failure(SaleError.Closed);
         }
         return Result.Success();
     }

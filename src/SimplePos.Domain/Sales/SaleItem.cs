@@ -222,6 +222,8 @@ public class SaleItem
             return Result.Failure(SaleItemError.UnitPriceNegative);
         }
 
+        List<SaleItemTax> newTaxes = new List<SaleItemTax>();
+
         if (taxes != null)
         {
             foreach (var tax in taxes)
@@ -239,6 +241,16 @@ public class SaleItem
                     return Result.Failure(SaleItemTaxError.TaxNameEmpty);
                 }
             }
+
+            foreach (var tax in taxes)
+            {
+                var taxResult = SaleItemTax.Create(SaleItemId, tax.TaxId, tax.TaxName, tax.TaxRate, 0);
+                if (taxResult.IsFailure || taxResult.Data == null)
+                {
+                    return Result.Failure(taxResult.Error);
+                }
+                newTaxes.Add(taxResult.Data);
+            }
         }
 
         Quantity = quantity;
@@ -247,18 +259,29 @@ public class SaleItem
         Remark = remark;
 
         _saleItemTaxes.Clear();
-        if (taxes != null)
+        foreach (var tax in newTaxes)
         {
-            foreach (var tax in taxes)
-            {
-                var taxResult = SaleItemTax.Create(SaleItemId, tax.TaxId, tax.TaxName, tax.TaxRate, 0);
-                if (taxResult.IsSuccess && taxResult.Data != null)
-                {
-                    _saleItemTaxes.Add(taxResult.Data);
-                }
-            }
+            _saleItemTaxes.Add(tax);
         }
 
+        CalculateLineTotal();
+
+        return Result.Success();
+    }
+
+    public Result UpdateQuantity(decimal quantity)
+    {
+        if (Void)
+        {
+            return Result.Failure(SaleItemError.Void);
+        }
+
+        if (quantity <= 0)
+        {
+            return Result.Failure(SaleItemError.QuantityZero);
+        }
+
+        Quantity = quantity;
         CalculateLineTotal();
 
         return Result.Success();

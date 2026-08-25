@@ -28,10 +28,10 @@ namespace SimplePos.Application.Companies.Queries
             CompanyResponse companyResponse = new CompanyResponse(
                 companyResult.CompanyId, 
                 companyResult.Name, 
+                companyResult.PhoneNumber, 
                 companyResult.CompanyAddress.Street, 
                 companyResult.CompanyAddress.City, 
                 companyResult.CompanyAddress.State, 
-                companyResult.CompanyAddress.PostalCode, 
                 companyResult.CompanyAddress.PostalCode,
                 companyResult.CompanyAddress.Country,
                 companyResult.Email.Value);

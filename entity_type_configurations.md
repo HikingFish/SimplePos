@@ -383,6 +383,9 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
 
         builder.Property(s => s.DateTimeCreated).IsRequired();
         builder.Property(s => s.Void).IsRequired();
+        builder.Property(s => s.DateTimeVoided);
+        builder.Property(s => s.Closed).IsRequired();
+        builder.Property(s => s.DateTimeClosed);
         builder.Property(s => s.SoftDeleted).IsRequired();
         builder.Property(s => s.DateTimeSoftDeleted);
 
@@ -393,6 +396,21 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
         builder.HasOne<Outlet>()
             .WithMany()
             .HasForeignKey(s => s.OutletId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(s => s.CreatedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(s => s.VoidedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(s => s.ClosedByUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Access back-field collections

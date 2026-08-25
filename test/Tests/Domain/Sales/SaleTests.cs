@@ -33,6 +33,9 @@ public class SaleTests
         Assert.False(sale.Void);
         Assert.Null(sale.VoidedByUserId);
         Assert.Null(sale.DateTimeVoided);
+        Assert.False(sale.Closed);
+        Assert.Null(sale.ClosedByUserId);
+        Assert.Null(sale.DateTimeClosed);
         Assert.NotEqual(Guid.Empty, sale.SaleId);
     }
 
@@ -204,5 +207,340 @@ public class SaleTests
         Assert.True(sale.SoftDeleted);
         Assert.NotNull(sale.DateTimeSoftDeleted);
         Assert.InRange(sale.DateTimeSoftDeleted.Value, beforeDelete, afterDelete);
+    }
+
+    [Fact]
+    public void CloseSale_ShouldSetClosedFlags_AndClosedByUserId()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var closingUserId = Guid.NewGuid();
+        var beforeClose = DateTime.UtcNow;
+
+        // Act
+        var result = sale.CloseSale(closingUserId);
+        var afterClose = DateTime.UtcNow;
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.True(sale.Closed);
+        Assert.Equal(closingUserId, sale.ClosedByUserId);
+        Assert.NotNull(sale.DateTimeClosed);
+        Assert.InRange(sale.DateTimeClosed.Value, beforeClose, afterClose);
+    }
+
+    [Fact]
+    public void CloseSale_ShouldFail_WhenSaleAlreadyClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        sale.CloseSale(Guid.NewGuid());
+
+        // Act
+        var result = sale.CloseSale(Guid.NewGuid());
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void CloseSale_ShouldFail_WhenUserIdIsEmpty()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+
+        // Act
+        var result = sale.CloseSale(Guid.Empty);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.ClosedByUserIdEmpty, result.Error);
+    }
+
+    [Fact]
+    public void CloseSale_ShouldFail_WhenSaleIsVoid()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        sale.VoidSale(UserId);
+
+        // Act
+        var result = sale.CloseSale(UserId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Void, result.Error);
+    }
+
+    [Fact]
+    public void CloseSale_ShouldFail_WhenSaleIsSoftDeleted()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        sale.SoftDelete();
+
+        // Act
+        var result = sale.CloseSale(UserId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.SoftDeleted, result.Error);
+    }
+
+    [Fact]
+    public void AddSaleItem_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        sale.CloseSale(UserId);
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 10m, 0m, "Item").Data!;
+
+        // Act
+        var result = sale.AddSaleItem(saleItem);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void AddPayment_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var item = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 100m, 0m, "Item").Data!;
+        sale.AddSaleItem(item);
+        sale.CloseSale(UserId);
+
+        var payment = SalePayment.Create(sale.SaleId, Guid.NewGuid(), UserId, 50m).Data!;
+
+        // Act
+        var result = sale.AddPayment(payment);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void RemoveSaleItem_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 10m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.RemoveSaleItem(saleItem.SaleItemId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void RemovePayment_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var item = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 100m, 0m, "Item").Data!;
+        sale.AddSaleItem(item);
+        var payment = SalePayment.Create(sale.SaleId, Guid.NewGuid(), UserId, 50m).Data!;
+        sale.AddPayment(payment);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.RemovePayment(payment.SalePaymentId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void UpdateSaleItem_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 10m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.UpdateSaleItem(saleItem.SaleItemId, 2, 15m, 0m, "Updated");
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void VoidSale_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.VoidSale(UserId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void UnvoidSale_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        // Direct close (cannot close a void sale, but testing guard against closed state)
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.UnvoidSale();
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void VoidSaleItem_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 10m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.VoidSaleItem(saleItem.SaleItemId, UserId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void UnvoidSaleItem_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 1, 10m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        sale.VoidSaleItem(saleItem.SaleItemId, UserId);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.UnvoidSaleItem(saleItem.SaleItemId);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void EditSaleItemQuantity_ShouldUpdateQuantityAndRecalculateTotals()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 2, 50m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        Assert.Equal(100m, sale.TotalAmount);
+
+        // Act
+        var result = sale.EditSaleItemQuantity(saleItem.SaleItemId, 4);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(4, saleItem.Quantity);
+        Assert.Equal(200m, sale.TotalAmount);
+        Assert.Equal(200m, sale.TotalOutstanding);
+    }
+
+    [Fact]
+    public void EditSaleItemQuantity_ShouldFail_WhenSaleIsClosed()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 2, 50m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+        sale.CloseSale(UserId);
+
+        // Act
+        var result = sale.EditSaleItemQuantity(saleItem.SaleItemId, 4);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.Closed, result.Error);
+    }
+
+    [Fact]
+    public void EditSaleItemQuantity_ShouldFail_WhenSaleItemNotFound()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+
+        // Act
+        var result = sale.EditSaleItemQuantity(Guid.NewGuid(), 4);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleError.SaleItemNotFound, result.Error);
+    }
+
+    [Fact]
+    public void EditSaleItemQuantity_ShouldFail_WhenQuantityIsZeroOrNegative()
+    {
+        // Arrange
+        var outletId = Guid.NewGuid();
+        var invoiceNumber = "INV-001";
+        var sale = Sale.Create(outletId, UserId, invoiceNumber).Data!;
+        var saleItem = SaleItem.Create(Guid.NewGuid(), sale.SaleId, UserId, 2, 50m, 0m, "Item").Data!;
+        sale.AddSaleItem(saleItem);
+
+        // Act
+        var result = sale.EditSaleItemQuantity(saleItem.SaleItemId, 0);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleItemError.QuantityZero, result.Error);
     }
 }

@@ -25,38 +25,36 @@ public class UserRepository : IUserRepository
 
     public Task<bool> ExistsByEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        return _appDbContext.DomainUsers.AnyAsync(u => u.Email.Value == email);
     }
 
     public Task<bool> ExistsByUsernameAsync(string username)
     {
-        throw new NotImplementedException();
+        return _appDbContext.DomainUsers.AnyAsync(u => u.Username == username);
     }
 
-    public Task<User?> GetUserByEmailAsync(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        throw new NotImplementedException();
+        return await _appDbContext.DomainUsers.FirstOrDefaultAsync(u => u.Email.Value == email);
     }
 
     public async Task<User?> GetUserByIdAsync(Guid userId)
     {
-        return await _appDbContext.DomainUsers
-            .Include(u => u.UserPermissions)
-            .FirstOrDefaultAsync(u => u.UserId == userId);
+        return await _appDbContext.DomainUsers.FirstOrDefaultAsync(u => u.UserId == userId);
     }
 
-    public Task<User?> GetUserByUsernameAsync(string username)
+    public async Task<User?> GetUserByUsernameAsync(string username)
     {
-        throw new NotImplementedException();
+        return await _appDbContext.DomainUsers.FirstOrDefaultAsync(u => u.Username == username);
     }
 
-    public Task<List<User>> GetUsersByOutletIdAsync(Guid outletId)
+    public async Task<List<User>> GetUsersByOutletIdAsync(Guid outletId)
     {
-        throw new NotImplementedException();
+        return await _appDbContext.DomainUsers.Where(u => u.OutletId == outletId).ToListAsync();
     }
 
     public void UpdateUser(User user)
     {
-        throw new NotImplementedException();
+        _appDbContext.DomainUsers.Update(user);
     }
 }

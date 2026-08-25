@@ -29,5 +29,9 @@ public static class SaleError
         "Sales.CreatedByUserIdEmpty", "Created by user ID cannot be empty.", ErrorType.Validation);
     public static readonly Error VoidedByUserIdEmpty = new Error(
         "Sales.VoidedByUserIdEmpty", "Voided by user ID cannot be empty.", ErrorType.Validation);
+    public static readonly Error Closed = new Error(
+        "Sales.Closed", "Operation cannot be performed on a closed sale.", ErrorType.Conflict);
+    public static readonly Error ClosedByUserIdEmpty = new Error(
+        "Sales.ClosedByUserIdEmpty", "Closed by user ID cannot be empty.", ErrorType.Validation);
 }
 

@@ -31,6 +31,16 @@ public class SaleConfiguration : IEntityTypeConfiguration<Sale>
 
         builder.Property(s => s.DateTimeVoided);
 
+        builder.HasOne<User>()
+            .WithMany()
+            .HasForeignKey(s => s.ClosedByUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Property(s => s.DateTimeClosed);
+
+        builder.Property(s => s.Closed)
+            .IsRequired();
+
         builder.Property(s => s.InvoiceNumber)
             .IsRequired()
             .HasMaxLength(50);

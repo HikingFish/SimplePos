@@ -187,4 +187,60 @@ public class SaleItemTests
         Assert.Equal(voidingUser, saleItem.VoidedByUserId);
         Assert.NotNull(saleItem.DateTimeVoided);
     }
+
+    [Fact]
+    public void UpdateQuantity_ShouldRecalculateTotals_WhenQuantityIsValid()
+    {
+        // Arrange
+        var taxes = new List<Tax> { Tax.Create(CompanyId, "VAT", 0.10M).Data! };
+        var saleItem = SaleItem.Create(Guid.NewGuid(), Guid.NewGuid(), UserId, 2, 50m, 0.10m, "Test item", taxes).Data!;
+        Assert.Equal(2, saleItem.Quantity);
+        Assert.Equal(90m, saleItem.NetAmount); // 2 * 45 = 90
+        Assert.Equal(9m, saleItem.TaxAmount);   // 10% of 90 = 9
+        Assert.Equal(99m, saleItem.TotalLineAmount);
+
+        // Act
+        var result = saleItem.UpdateQuantity(5);
+
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal(5, saleItem.Quantity);
+        Assert.Equal(250m, saleItem.GrossAmount); // 5 * 50 = 250
+        Assert.Equal(225m, saleItem.NetAmount);   // 5 * 45 = 225
+        Assert.Equal(22.5m, saleItem.TaxAmount);  // 10% of 225 = 22.5
+        Assert.Equal(247.5m, saleItem.TotalLineAmount);
+        Assert.Equal(22.5m, saleItem.SaleItemTaxes.First().TaxAmount);
+    }
+
+    [Fact]
+    public void UpdateQuantity_ShouldFail_WhenQuantityIsZeroOrNegative()
+    {
+        // Arrange
+        var saleItem = SaleItem.Create(Guid.NewGuid(), Guid.NewGuid(), UserId, 2, 50m, 0m, "Test item").Data!;
+
+        // Act
+        var zeroResult = saleItem.UpdateQuantity(0);
+        var negativeResult = saleItem.UpdateQuantity(-1);
+
+        // Assert
+        Assert.True(zeroResult.IsFailure);
+        Assert.Equal(SaleItemError.QuantityZero, zeroResult.Error);
+        Assert.True(negativeResult.IsFailure);
+        Assert.Equal(SaleItemError.QuantityZero, negativeResult.Error);
+    }
+
+    [Fact]
+    public void UpdateQuantity_ShouldFail_WhenSaleItemIsVoid()
+    {
+        // Arrange
+        var saleItem = SaleItem.Create(Guid.NewGuid(), Guid.NewGuid(), UserId, 2, 50m, 0m, "Test item").Data!;
+        saleItem.VoidSaleItem(UserId);
+
+        // Act
+        var result = saleItem.UpdateQuantity(5);
+
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(SaleItemError.Void, result.Error);
+    }
 }
