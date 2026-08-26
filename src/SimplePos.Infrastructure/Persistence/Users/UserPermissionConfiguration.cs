@@ -12,6 +12,7 @@ public class UserPermissionConfiguration : IEntityTypeConfiguration<UserPermissi
 {
     public void Configure(EntityTypeBuilder<UserPermission> builder)
     {
+        builder.ToTable("user_permissions");
         builder.HasKey(up => new { up.UserId, up.PermissionId });
 
         builder.HasOne<User>()
