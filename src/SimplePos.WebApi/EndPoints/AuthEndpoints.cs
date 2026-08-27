@@ -25,6 +25,8 @@ namespace SimplePos.WebApi.EndPoints
                     return Results.Problem(type: "blank", title: "Not Found", detail: result.Error.Description, statusCode: 404);
                 return Results.Problem(type: "blank", title: "Error", detail: result.Error.Description, statusCode: 500);
             });
+
+            group.MapPost("/me", async())
         }
     }
 }
