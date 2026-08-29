@@ -11,7 +11,7 @@ public record CurrentUserResponse(
     string? UserPosition,
     bool IsActive,
     CurrentCompany Company,
-    CurrentOutlet Outlet,
+    CurrentOutlet? Outlet,
     IReadOnlyCollection<string> Permissions
 );
 
