@@ -25,6 +25,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
+    public DbSet<UserOutletAccess> UserOutletAccesses => Set<UserOutletAccess>();
+    public DbSet<OutletProductAvailability> OutletProductAvailabilities => Set<OutletProductAvailability>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

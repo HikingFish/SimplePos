@@ -13,4 +13,10 @@ public static class OutletError
         "Outlets.AlreadyInactive", "Outlet is already inactive", ErrorType.Conflict);
     public static readonly Error SoftDeleted = new Error(
         "Outlets.SoftDeleted", "Operation cannot be performed on a soft deleted outlet", ErrorType.Conflict);
+    public static readonly Error OutletNotFound = new Error(
+        "Outlets.OutletNotFound", "Outlet not found", ErrorType.NotFound);
+    public static readonly Error CompanyMismatch = new Error(
+        "Outlets.CompanyMismatch", "Outlet does not belong to the user's company", ErrorType.Validation);
+    public static readonly Error AccessDenied = new Error(
+        "Outlets.AccessDenied", "User is not authorized to access this outlet", ErrorType.Forbidden);
 }

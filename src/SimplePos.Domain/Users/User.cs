@@ -18,6 +18,8 @@ public class User : ISoftDeletable
     public DateTime? DateTimeSoftDeleted { get; private set; }
     private readonly List<UserPermission> _userPermissions = new();
     public IReadOnlyCollection<UserPermission> UserPermissions => _userPermissions.AsReadOnly();
+    private readonly List<UserOutletAccess> _userOutletAccesses = new();
+    public IReadOnlyCollection<UserOutletAccess> UserOutletAccesses => _userOutletAccesses.AsReadOnly();
     private User() { }
     
     private User(Guid userId,Guid CompanyId, Guid? OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
@@ -140,6 +142,94 @@ public class User : ISoftDeletable
 
         _userPermissions.Remove(userPermission);
         return Result.Success();
+    }
+
+    public Result AssignOutletAccess(Guid outletId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        if (outletId == Guid.Empty)
+        {
+            return Result.Failure(UserOutletAccessError.OutletIdEmpty);
+        }
+
+        if (_userOutletAccesses.Any(uoa => uoa.OutletId == outletId))
+        {
+            return Result.Failure(UserOutletAccessError.OutletAlreadyAssigned);
+        }
+
+        var accessResult = UserOutletAccess.Create(UserId, outletId);
+        if (!accessResult.IsSuccess)
+        {
+            return Result.Failure(accessResult.Error);
+        }
+
+        _userOutletAccesses.Add(accessResult.Data!);
+        return Result.Success();
+    }
+
+    public Result RevokeOutletAccess(Guid outletId)
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        var access = _userOutletAccesses.FirstOrDefault(uoa => uoa.OutletId == outletId);
+        if (access == null)
+        {
+            return Result.Failure(UserOutletAccessError.OutletNotAssigned);
+        }
+
+        _userOutletAccesses.Remove(access);
+        return Result.Success();
+    }
+
+    public Result ClearOutletAccesses()
+    {
+        var statusResult = EnsureNotSoftDeleted();
+        if (!statusResult.IsSuccess)
+        {
+            return statusResult;
+        }
+
+        _userOutletAccesses.Clear();
+        return Result.Success();
+    }
+
+    public bool CanAccessOutlet(Guid targetOutletId, Guid targetOutletCompanyId)
+    {
+        if (SoftDeleted || !IsActive)
+        {
+            return false;
+        }
+
+        // Must belong to the same company
+        if (CompanyId != targetOutletCompanyId)
+        {
+            return false;
+        }
+
+        // 1. If user is explicitly assigned to a single outlet (cashier / branch staff)
+        if (OutletId.HasValue)
+        {
+            return OutletId.Value == targetOutletId;
+        }
+
+        // 2. If user is company-wide (OutletId == null)
+        // If they have specific outlet access entries (Regional Manager), they can only access those
+        if (_userOutletAccesses.Count > 0)
+        {
+            return _userOutletAccesses.Any(uoa => uoa.OutletId == targetOutletId);
+        }
+
+        // No outlet restrictions -> Full Company Admin (access all company outlets)
+        return true;
     }
 
     private Result EnsureNotSoftDeleted()

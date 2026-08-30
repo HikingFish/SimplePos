@@ -41,6 +41,15 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 | 🔲 | `PATCH` | `/api/outlets/{id}/last-online` | Update last online timestamp |
 | 🔲 | `DELETE` | `/api/outlets/{id}` | Soft-delete outlet |
 
+### Outlet Product Availability (sub-resource)
+
+| Status | Method | Endpoint | Description |
+|--------|--------|----------|-------------|
+| 🔲 | `GET` | `/api/outlets/{outletId}/product-availability` | Get product availability overrides for an outlet |
+| 🔲 | `PATCH` | `/api/outlets/{outletId}/products/{productId}/mark-unavailable` | Mark product as unavailable (86'd) at outlet |
+| 🔲 | `PATCH` | `/api/outlets/{outletId}/products/{productId}/mark-available` | Mark product as available at outlet |
+| 🔲 | `POST` | `/api/outlets/{outletId}/product-availability/reset` | Reset all product availabilities to available for outlet |
+
 ---
 
 ## 4. Categories (`/api/categories`)
@@ -129,6 +138,15 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 | 🔲 | `POST` | `/api/users/{id}/permissions` | Assign permission to user |
 | 🔲 | `DELETE` | `/api/users/{id}/permissions/{permissionId}` | Revoke permission from user |
 
+### User Outlet Access (sub-resource)
+
+| Status | Method | Endpoint | Description |
+|--------|--------|----------|-------------|
+| ✅ | `GET` | `/api/users/{id}/outlet-access` | Get accessible outlets for user |
+| ✅ | `POST` | `/api/users/{id}/outlet-access` | Grant access to a specific outlet |
+| ✅ | `PUT` | `/api/users/{id}/outlet-access` | Set/replace entire accessible outlets list (bulk) |
+| ✅ | `DELETE` | `/api/users/{id}/outlet-access/{outletId}` | Revoke access to an outlet |
+
 ---
 
 ## 9. Permissions (`/api/permissions`)
@@ -184,12 +202,12 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 |--------|:-----------:|:-------:|:-----:|
 | Auth & Registration | 2 | 1 | 3 |
 | Companies | 2 | 5 | 7 |
-| Outlets | 0 | 8 | 8 |
+| Outlets | 0 | 12 | 12 |
 | Categories | 0 | 7 | 7 |
 | Products | 0 | 11 | 11 |
 | Taxes | 0 | 8 | 8 |
 | Payment Methods | 0 | 8 | 8 |
-| Users | 0 | 9 | 9 |
+| Users | 4 | 9 | 13 |
 | Permissions | 0 | 2 | 2 |
 | Sales | 0 | 18 | 18 |
-| **Total** | **4** | **77** | **81** |
+| **Total** | **8** | **81** | **89** |
