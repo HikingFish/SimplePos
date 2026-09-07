@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimplePos.Application.Companies.Queries
+namespace SimplePos.Application.Companies.Queries.GetCompanyById
 {
     public record CompanyResponse(
         Guid CompanyId,

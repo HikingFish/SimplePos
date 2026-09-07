@@ -6,7 +6,6 @@ using SimplePos.Application.Outlets.Subscribers;
 using SimplePos.Application.Companies.Commands.CreateCompany;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Application.Abstractions;
-using SimplePos.Application.Companies.Queries;
 using SimplePos.Application.Registrations.Commands.RegisterBusiness;
 using SimplePos.Application.Auths.Commands.Login;
 using SimplePos.Application.Auths.Queries;
@@ -15,6 +14,8 @@ using SimplePos.Application.Users.Queries.GetOutletAccess;
 using SimplePos.Application.Users.Commands.GrantOutletAccess;
 using SimplePos.Application.Users.Commands.SetOutletAccess;
 using SimplePos.Application.Users.Commands.RevokeOutletAccess;
+using SimplePos.Application.Sales.Commands.CreateSale;
+using SimplePos.Application.Companies.Queries.GetCompanyById;
 
 namespace SimplePos.Application;
 
@@ -35,6 +36,9 @@ public static class DependencyInjection
 
         services.AddScoped<ICommandHandler<LoginCommand, Result<string>>, LoginCommandHandler>();
         services.AddScoped<IQueryHandler<GetCurrentUserQuery, Result<CurrentUserResponse>>, GetCurrentUserQueryHandler>();
+
+        //Sale Commands and Queries
+        services.AddScoped<ICommandHandler<CreateSaleCommand, Result<Guid>>, CreateCommandSaleCommandHandler>();
 
         // User Outlet Access Commands and Queries
         services.AddScoped<IQueryHandler<GetUserOutletAccessesQuery, Result<List<UserOutletAccessResponse>>>, GetUserOutletAccessesQueryHandler>();

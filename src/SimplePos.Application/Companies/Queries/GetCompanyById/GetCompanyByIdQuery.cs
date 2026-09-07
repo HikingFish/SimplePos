@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimplePos.Application.Companies.Queries
+namespace SimplePos.Application.Companies.Queries.GetCompanyById
 {
     public record GetCompanyByIdQuery(Guid companyId) : IQuery<Result<CompanyResponse>>;
 }

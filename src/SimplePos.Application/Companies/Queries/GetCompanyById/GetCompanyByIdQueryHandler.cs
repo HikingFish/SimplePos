@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace SimplePos.Application.Companies.Queries
+namespace SimplePos.Application.Companies.Queries.GetCompanyById
 {
     public class GetCompanyByIdQueryHandler : IQueryHandler<GetCompanyByIdQuery, Result<CompanyResponse>>
     {

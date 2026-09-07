@@ -8,6 +8,7 @@ public interface IProductRepository
     Task<List<Product>> GetProductsByCompanyIdAsync(Guid companyId);
     Task<List<Product>> GetProductsByCategoryIdAsync(Guid categoryId);
     Task<bool> ExistsBySkuAsync(string sku, Guid companyId);
+    Task<(List<Product> Products, int TotalCount)> GetPagedProductsByCompanyIdAsync(Guid companyId, int page, int pageSize, string? sortBy = null, bool isDescending = false);
     void UpdateProduct(Product product);
     void DeleteProduct(Product product);
 }

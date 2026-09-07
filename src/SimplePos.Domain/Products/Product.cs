@@ -9,7 +9,7 @@ public class Product : ISoftDeletable
     public Guid CategoryId { get; private set; }
     public string SKU { get; private set; } 
     public string ProductName { get; private set; } 
-    public decimal CostPrice { get; private set; }
+    public decimal? CostPrice { get; private set; }
     public decimal BasePrice { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
@@ -19,7 +19,7 @@ public class Product : ISoftDeletable
 
     private Product() { }
 
-    private Product(Guid productId, Guid companyId, Guid categoryId, string sku, string productName, decimal costPrice, decimal basePrice)
+    private Product(Guid productId, Guid companyId, Guid categoryId, string sku, string productName, decimal? costPrice, decimal basePrice, List<ProductTax>? productTaxes = null)
     {            
         ProductId = productId;
         CompanyId = companyId;
@@ -31,9 +31,11 @@ public class Product : ISoftDeletable
         IsActive = true;
         SoftDeleted = false;
         DateTimeSoftDeleted = null;
+        if (productTaxes != null)
+            _productTaxes = productTaxes;
     }
 
-    public static Result<Product> Create(Guid companyId, Guid categoryId, string sku, string productName, decimal costPrice, decimal basePrice)
+    public static Result<Product> Create(Guid companyId, Guid categoryId, string sku, string productName, decimal? costPrice, decimal basePrice, List<ProductTax>? productTaxes = null)
     {
         if (string.IsNullOrWhiteSpace(productName))
         {
@@ -60,7 +62,7 @@ public class Product : ISoftDeletable
             return Result<Product>.Failure(ProductError.CategoryIdEmpty);
         }
 
-        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, categoryId, sku, productName, costPrice, basePrice));
+        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, categoryId, sku ?? string.Empty, productName, costPrice, basePrice, productTaxes));
     }
 
     public Result UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)
