@@ -21,7 +21,8 @@ public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompa
     public async Task<Result<PagedList<ProductResponse>>> HandleAsync(GetProductByCompanyIdQuery query, CancellationToken cancellationToken)
     {
         List<Tax> taxResult = await _taxRepository.GetTaxesByCompanyIdAsync(query.CompanyId);
-        
-        foreach()
+        (List<Product> productsResult, int Count) = await _productRepository.GetPagedProductsByCompanyIdAsync(query.CompanyId, query.Page, query.PageSize, query.SortBy, query.IsDescending);
+
+        List<ProductResponse> ProductResponses = productsResult.Select
     }
 }
