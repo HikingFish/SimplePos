@@ -16,6 +16,8 @@ using SimplePos.Application.Users.Commands.SetOutletAccess;
 using SimplePos.Application.Users.Commands.RevokeOutletAccess;
 using SimplePos.Application.Sales.Commands.CreateSale;
 using SimplePos.Application.Companies.Queries.GetCompanyById;
+using SimplePos.Application.Products.Queries.ProductListByCompanyId;
+using SimplePos.Application.Common;
 
 namespace SimplePos.Application;
 
@@ -45,6 +47,9 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<GrantUserOutletAccessCommand, Result>, GrantUserOutletAccessCommandHandler>();
         services.AddScoped<ICommandHandler<SetUserOutletAccessesCommand, Result>, SetUserOutletAccessesCommandHandler>();
         services.AddScoped<ICommandHandler<RevokeUserOutletAccessCommand, Result>, RevokeUserOutletAccessCommandHandler>();
+
+        //Product Commands and Queries
+        services.AddScoped<IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductResponse>>>, GetProductByCompanyIdQueryHandler>();
 
         return services;
     }

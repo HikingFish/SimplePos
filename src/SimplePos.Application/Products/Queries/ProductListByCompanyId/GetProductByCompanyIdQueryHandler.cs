@@ -23,6 +23,26 @@ public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompa
         List<Tax> taxResult = await _taxRepository.GetTaxesByCompanyIdAsync(query.CompanyId);
         (List<Product> productsResult, int Count) = await _productRepository.GetPagedProductsByCompanyIdAsync(query.CompanyId, query.Page, query.PageSize, query.SortBy, query.IsDescending);
 
-        List<ProductResponse> ProductResponses = productsResult.Select
+        List<ProductResponse> ProductResponses = productsResult.Select(p =>
+        {
+            //decimal totalTaxPercentage = p.ProductTaxes.Sum(pt => taxResult.FirstOrDefault(t => t.TaxId == pt.TaxId)?.TaxRate ?? 0m);
+            decimal totalTaxPercentage = p.ProductTaxes.Sum(pt => taxResult.FirstOrDefault(t => t.TaxId == pt.TaxId)?.TaxRate ?? 0m);
+            decimal priceWithTax = p.BasePrice + (p.BasePrice * totalTaxPercentage);
+            return new ProductResponse(
+                p.ProductId,
+                p.CategoryId,
+                p.SKU,
+                p.ProductName,
+                p.BasePrice,
+                p.IsActive,
+                totalTaxPercentage,
+                priceWithTax
+            );
+        }).ToList();
+
+        int pages = (int)Math.Ceiling((double)Count / query.PageSize);
+
+        PagedList<ProductResponse> pagedListResponse = new PagedList<ProductResponse>(ProductResponses, query.Page, query.PageSize, Count, pages);
+        return Result<PagedList<ProductResponse>>.Success(pagedListResponse);
     }
 }

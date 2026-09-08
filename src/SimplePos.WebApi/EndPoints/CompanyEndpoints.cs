@@ -1,6 +1,6 @@
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Companies.Commands.CreateCompany;
-using SimplePos.Application.Companies.Queries;
+using SimplePos.Application.Companies.Queries.GetCompanyById;
 using SimplePos.Domain.Common.ResultPattern;
 
 namespace SimplePos.WebApi.Endpoints;
