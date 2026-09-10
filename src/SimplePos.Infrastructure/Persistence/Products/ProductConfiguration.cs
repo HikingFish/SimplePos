@@ -24,8 +24,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
 
         builder.HasOne<Category>()
             .WithMany()
-            .HasForeignKey(p => p.CategoryId)
-            .IsRequired();
+            .HasForeignKey(p => p.CategoryId);
 
         builder.Property(p => p.SKU)
             .HasMaxLength(50);
@@ -35,8 +34,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasMaxLength(200);
 
         builder.Property(p => p.CostPrice)
-            .HasPrecision(18, 2)
-            .IsRequired();
+            .HasPrecision(18, 2);
 
         builder.Property(p => p.BasePrice)
             .HasPrecision(18, 2)

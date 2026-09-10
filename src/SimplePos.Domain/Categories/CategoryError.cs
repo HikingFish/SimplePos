@@ -18,4 +18,7 @@ public static class CategoryError
     public static readonly Error AlreadyInactive = new Error(
         "Category.AlreadyInactive", "Category is already inactive", ErrorType.Conflict
     );
+    public static readonly Error NotExist = new Error(
+        "Category.NotExist", "Category does not exist", ErrorType.NotFound
+    );
 }

@@ -13,5 +13,7 @@ public static class TaxError
         "Tax.AlreadyActivated", "Tax is already activated.", ErrorType.Conflict);
     public static readonly Error SoftDeleted = new Error(
         "Tax.SoftDeleted", "Operation cannot be performed on a soft deleted tax rate.", ErrorType.Conflict);
+    public static readonly Error NotExist = new Error(
+        "Tax.NotExist", "Tax does not exist.", ErrorType.NotFound);
 }
 

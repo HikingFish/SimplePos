@@ -2,7 +2,7 @@ namespace SimplePos.Application.Products.Queries.ProductListByCompanyId;
 
 public record ProductResponse(
     Guid ProductId,
-    Guid CategoryId,
+    Guid? CategoryId,
     string SKU,
     string ProductName, 
     decimal BasePrice,

@@ -6,7 +6,7 @@ public class Product : ISoftDeletable
 {
     public Guid ProductId { get; private set; }
     public Guid CompanyId { get; private set; }
-    public Guid CategoryId { get; private set; }
+    public Guid? CategoryId { get; private set; }
     public string SKU { get; private set; } 
     public string ProductName { get; private set; } 
     public decimal? CostPrice { get; private set; }
@@ -19,7 +19,7 @@ public class Product : ISoftDeletable
 
     private Product() { }
 
-    private Product(Guid productId, Guid companyId, Guid categoryId, string sku, string productName, decimal? costPrice, decimal basePrice, List<ProductTax>? productTaxes = null)
+    private Product(Guid productId, Guid companyId, Guid? categoryId, string sku, string productName, decimal? costPrice, decimal basePrice)
     {            
         ProductId = productId;
         CompanyId = companyId;
@@ -31,11 +31,9 @@ public class Product : ISoftDeletable
         IsActive = true;
         SoftDeleted = false;
         DateTimeSoftDeleted = null;
-        if (productTaxes != null)
-            _productTaxes = productTaxes;
     }
 
-    public static Result<Product> Create(Guid companyId, Guid categoryId, string sku, string productName, decimal? costPrice, decimal basePrice, List<ProductTax>? productTaxes = null)
+    public static Result<Product> Create(Guid companyId, Guid? categoryId, string sku, string productName, decimal? costPrice, decimal basePrice)
     {
         if (string.IsNullOrWhiteSpace(productName))
         {
@@ -62,7 +60,7 @@ public class Product : ISoftDeletable
             return Result<Product>.Failure(ProductError.CategoryIdEmpty);
         }
 
-        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, categoryId, sku ?? string.Empty, productName, costPrice, basePrice, productTaxes));
+        return Result<Product>.Success(new Product(Guid.CreateVersion7(), companyId, categoryId, sku ?? string.Empty, productName, costPrice, basePrice));
     }
 
     public Result UpdateProductInfo(string newSKU, string newProductName, decimal newCostPrice, decimal newBasePrice)
@@ -134,7 +132,7 @@ public class Product : ISoftDeletable
         return Result.Success();
     }
 
-    public Result AddProductTax(ProductTax productTax)
+    public Result AddProductTax(Guid taxId)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
@@ -142,17 +140,31 @@ public class Product : ISoftDeletable
             return statusResult;
         }
 
-        if (productTax == null)
+        if (taxId == Guid.Empty)
         {
-            return Result.Failure(ProductError.ProductTaxNull);
+            return Result.Failure(ProductTaxError.TaxIdEmpty);
         }
 
-        if (_productTaxes.Any(pt => pt.TaxId == productTax.TaxId))
+        if (_productTaxes.Any(pt => pt.TaxId == taxId))
         {
             return Result.Failure(ProductError.TaxAlreadyAssociated);
         }
 
-        _productTaxes.Add(productTax);
+        var productTaxResult = ProductTax.Create(ProductId, taxId);
+
+        if (!productTaxResult.IsSuccess)
+        {
+            return Result.Failure(productTaxResult.Error);
+        }
+
+        //throw exception
+        if(productTaxResult.Data == null)
+        {
+            throw new InvalidOperationException("ProductTax creation failed but returned success. This should not happen.");
+        }
+
+        _productTaxes.Add(productTaxResult.Data);
+
         return Result.Success();
     }
 

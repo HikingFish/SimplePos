@@ -18,6 +18,7 @@ using SimplePos.Application.Sales.Commands.CreateSale;
 using SimplePos.Application.Companies.Queries.GetCompanyById;
 using SimplePos.Application.Products.Queries.ProductListByCompanyId;
 using SimplePos.Application.Common;
+using SimplePos.Application.Products.Commands.CreateProduct;
 
 namespace SimplePos.Application;
 
@@ -50,6 +51,7 @@ public static class DependencyInjection
 
         //Product Commands and Queries
         services.AddScoped<IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductResponse>>>, GetProductByCompanyIdQueryHandler>();
+        services.AddScoped<ICommandHandler<CreateProductCommand, Result<Guid>>, CreateProductCommandHandler>();
 
         return services;
     }

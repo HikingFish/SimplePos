@@ -1,5 +1,6 @@
 ﻿using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Common;
+using SimplePos.Application.Products.Commands.CreateProduct;
 using SimplePos.Application.Products.Queries.ProductListByCompanyId;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Users;
@@ -17,12 +18,12 @@ public static class ProductEndpoints
     );
 
     public record CreateProductQueryRequest(
-        Guid CategoryId,
-        string SKU,
+        Guid? CategoryId,
+        string? SKU,
         string ProductName,
         decimal? CostPrice,
-        decimal? BasePrice,
-        Guid[] TaxIds
+        decimal BasePrice,
+        Guid[]? TaxIds
      );
 
     public static void MapProductEndpoints(this IEndpointRouteBuilder app)
@@ -61,12 +62,24 @@ public static class ProductEndpoints
         .RequireAuthorization();
 
         group.MapPost("/", async(
-            [AsParameters] CreateProductQueryRequest request,
+            CreateProductQueryRequest request,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
+            string companyIdClaim = user.FindFirst("CompanyId")?.Value ?? string.Empty;
 
-        });
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                return Results.Unauthorized();
+            }
+
+            CreateProductCommand createProductCommand = new CreateProductCommand(companyId, request.CategoryId, request.SKU, request.ProductName, request.CostPrice, request.BasePrice, request.TaxIds);
+            Result<Guid> result = await dispatcher.SendAsync<CreateProductCommand, Result<Guid>>(createProductCommand, ct);
+
+            return Results.Created($"/api/products/{result.Data}",
+    new { id = result.Data });
+        })
+            .RequireAuthorization();
     }
 }
