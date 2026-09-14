@@ -17,8 +17,18 @@ using SimplePos.Application.Users.Commands.RevokeOutletAccess;
 using SimplePos.Application.Sales.Commands.CreateSale;
 using SimplePos.Application.Companies.Queries.GetCompanyById;
 using SimplePos.Application.Products.Queries.ProductListByCompanyId;
+using SimplePos.Application.Products.Queries.ProductByProductId;
 using SimplePos.Application.Common;
 using SimplePos.Application.Products.Commands.CreateProduct;
+using SimplePos.Application.Products.Commands.DeleteProduct;
+using SimplePos.Application.Categories.Commands.CreateCategory;
+using SimplePos.Application.Categories.Commands.UpdateCategory;
+using SimplePos.Application.Categories.Commands.DeleteCategory;
+using SimplePos.Application.Categories.Commands.ActivateCategory;
+using SimplePos.Application.Categories.Commands.DeactivateCategory;
+using SimplePos.Application.Categories.Queries.GetCategoriesByCompany;
+using SimplePos.Application.Categories.Queries.GetCategoryById;
+using SimplePos.Application.Categories.Common;
 
 namespace SimplePos.Application;
 
@@ -50,8 +60,19 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<RevokeUserOutletAccessCommand, Result>, RevokeUserOutletAccessCommandHandler>();
 
         //Product Commands and Queries
-        services.AddScoped<IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductResponse>>>, GetProductByCompanyIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductListItemResponse>>>, GetProductByCompanyIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetProductByProductIdQuery, Result<ProductResponse>>, GetProductByProductIdQueryHandler>();
         services.AddScoped<ICommandHandler<CreateProductCommand, Result<Guid>>, CreateProductCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteProductCommand, Result>, DeleteProductCommandHandler>();
+
+        //Category Commands and Queries
+        services.AddScoped<ICommandHandler<CreateCategoryCommand, Result<Guid>>, CreateCategoryCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateCategoryCommand, Result>, UpdateCategoryCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteCategoryCommand, Result>, DeleteCategoryCommandHandler>();
+        services.AddScoped<ICommandHandler<ActivateCategoryCommand, Result>, ActivateCategoryCommandHandler>();
+        services.AddScoped<ICommandHandler<DeactivateCategoryCommand, Result>, DeactivateCategoryCommandHandler>();
+        services.AddScoped<IQueryHandler<GetCategoriesByCompanyQuery, Result<List<CategoryResponse>>>, GetCategoriesByCompanyQueryHandler>();
+        services.AddScoped<IQueryHandler<GetCategoryByIdQuery, Result<CategoryResponse>>, GetCategoryByIdQueryHandler>();
 
         return services;
     }

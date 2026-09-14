@@ -7,7 +7,7 @@ using SimplePos.Domain.Taxes;
 
 namespace SimplePos.Application.Products.Queries.ProductListByCompanyId;
 
-public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductResponse>>>
+public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompanyIdQuery, Result<PagedList<ProductListItemResponse>>>
 {
     private readonly IProductRepository _productRepository;
     private readonly ITaxRepository _taxRepository;
@@ -18,17 +18,17 @@ public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompa
         _taxRepository = taxRepository;
     }
 
-    public async Task<Result<PagedList<ProductResponse>>> HandleAsync(GetProductByCompanyIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<PagedList<ProductListItemResponse>>> HandleAsync(GetProductByCompanyIdQuery query, CancellationToken cancellationToken)
     {
         List<Tax> taxResult = await _taxRepository.GetTaxesByCompanyIdAsync(query.CompanyId);
         (List<Product> productsResult, int Count) = await _productRepository.GetPagedProductsByCompanyIdAsync(query.CompanyId, query.Page, query.PageSize, query.SortBy, query.IsDescending);
 
-        List<ProductResponse> ProductResponses = productsResult.Select(p =>
+        List<ProductListItemResponse> ProductResponses = productsResult.Where(p => !p.SoftDeleted).Select(p =>
         {
             //decimal totalTaxPercentage = p.ProductTaxes.Sum(pt => taxResult.FirstOrDefault(t => t.TaxId == pt.TaxId)?.TaxRate ?? 0m);
             decimal totalTaxPercentage = p.ProductTaxes.Sum(pt => taxResult.FirstOrDefault(t => t.TaxId == pt.TaxId)?.TaxRate ?? 0m);
             decimal priceWithTax = p.BasePrice + (p.BasePrice * totalTaxPercentage);
-            return new ProductResponse(
+            return new ProductListItemResponse(
                 p.ProductId,
                 p.CategoryId,
                 p.SKU,
@@ -42,7 +42,7 @@ public class GetProductByCompanyIdQueryHandler : IQueryHandler<GetProductByCompa
 
         int pages = (int)Math.Ceiling((double)Count / query.PageSize);
 
-        PagedList<ProductResponse> pagedListResponse = new PagedList<ProductResponse>(ProductResponses, query.Page, query.PageSize, Count, pages);
-        return Result<PagedList<ProductResponse>>.Success(pagedListResponse);
+        PagedList<ProductListItemResponse> pagedListResponse = new PagedList<ProductListItemResponse>(ProductResponses, query.Page, query.PageSize, Count, pages);
+        return Result<PagedList<ProductListItemResponse>>.Success(pagedListResponse);
     }
 }

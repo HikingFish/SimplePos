@@ -32,6 +32,13 @@ public class TaxRepository : ITaxRepository
         return await _appDbContext.Taxes.FirstOrDefaultAsync(t => t.TaxId == taxId);
     }
 
+    public async Task<List<Tax>> GetTaxesByIdsAsync(IEnumerable<Guid> taxIds)
+    {
+        return await _appDbContext.Taxes
+            .Where(t => taxIds.Contains(t.TaxId))
+            .ToListAsync();
+    }
+
     public async Task<List<Tax>> GetTaxesByCompanyIdAsync(Guid companyId)
     {
         return await _appDbContext.Taxes.Where(t => t.CompanyId == companyId).ToListAsync();

@@ -27,5 +27,7 @@ public static class ProductError
         "Products.CompanyIdEmpty", "Company Id cannot be empty", ErrorType.Validation);
     public static readonly Error CategoryIdEmpty = new Error(
         "Products.CategoryIdEmpty", "Category Id cannot be empty", ErrorType.Validation);
+    public static readonly Error ProductNotExist = new Error(
+        "Products.ProductNotExist", "Product does not exist", ErrorType.NotFound);
 }
 

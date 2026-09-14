@@ -64,6 +64,7 @@ app.MapRegisterBusinessEndpoints();
 app.MapAuthEndpoints();
 app.MapUserOutletAccessEndpoints();
 app.MapProductEndpoints();
+app.MapCategoryEndpoints();
 
 app.Run();
 

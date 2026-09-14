@@ -3,6 +3,7 @@ namespace SimplePos.Domain.Taxes;
 public interface ITaxRepository
 {
     Task<Tax?> GetTaxByIdAsync(Guid taxId);
+    Task<List<Tax>> GetTaxesByIdsAsync(IEnumerable<Guid> taxIds);
     Task<List<Tax>> GetTaxesByCompanyIdAsync(Guid companyId);
     Task<List<Tax>> GetActiveTaxesByCompanyIdAsync(Guid companyId);
     void AddTax(Tax tax);

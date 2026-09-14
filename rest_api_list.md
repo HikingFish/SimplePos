@@ -56,13 +56,13 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/categories/` | Create category |
-| 🔲 | `GET` | `/api/categories/{id}` | Get category by ID |
-| 🔲 | `GET` | `/api/categories?companyId={companyId}` | Get categories by company |
-| 🔲 | `PUT` | `/api/categories/{id}` | Update category name |
-| 🔲 | `PATCH` | `/api/categories/{id}/activate` | Activate category |
-| 🔲 | `PATCH` | `/api/categories/{id}/deactivate` | Deactivate category |
-| 🔲 | `DELETE` | `/api/categories/{id}` | Soft-delete category |
+| ✅ | `POST` | `/api/categories/` | Create category |
+| ✅ | `GET` | `/api/categories/{id}` | Get category by ID |
+| ✅ | `GET` | `/api/categories?companyId={companyId}` | Get categories by company |
+| ✅ | `PUT` | `/api/categories/{id}` | Update category name |
+| ✅ | `PATCH` | `/api/categories/{id}/activate` | Activate category |
+| ✅ | `PATCH` | `/api/categories/{id}/deactivate` | Deactivate category |
+| ✅ | `DELETE` | `/api/categories/{id}` | Soft-delete category |
 
 ---
 
@@ -70,15 +70,15 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/products/` | Create product |
-| 🔲 | `GET` | `/api/products/{id}` | Get product by ID |
-| 🔲 | `GET` | `/api/products?companyId={companyId}` | Get products by company |
+| ✅ | `POST` | `/api/products/` | Create product |
+| ✅ | `GET` | `/api/products/{id}` | Get product by ID |
+| ✅ | `GET` | `/api/products?companyId={companyId}` | Get products by company |
 | 🔲 | `GET` | `/api/products?categoryId={categoryId}` | Get products by category |
 | 🔲 | `GET` | `/api/products/sku/{sku}?companyId={companyId}` | Get product by SKU |
 | 🔲 | `PUT` | `/api/products/{id}` | Update product info (SKU, name, cost, base price) |
 | 🔲 | `PATCH` | `/api/products/{id}/activate` | Activate product |
 | 🔲 | `PATCH` | `/api/products/{id}/deactivate` | Deactivate product |
-| 🔲 | `DELETE` | `/api/products/{id}` | Soft-delete product |
+| ✅ | `DELETE` | `/api/products/{id}` | Soft-delete product |
 
 ### Product Taxes (sub-resource)
 

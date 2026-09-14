@@ -1,6 +1,6 @@
 namespace SimplePos.Application.Products.Queries.ProductListByCompanyId;
 
-public record ProductResponse(
+public record ProductListItemResponse(
     Guid ProductId,
     Guid? CategoryId,
     string SKU,

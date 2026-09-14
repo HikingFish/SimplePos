@@ -1,11 +1,13 @@
-﻿using SimplePos.Application.Abstractions.Messaging;
+using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Common;
 using SimplePos.Application.Products.Commands.CreateProduct;
 using SimplePos.Application.Products.Queries.ProductListByCompanyId;
+using SimplePos.Application.Products.Queries.ProductByProductId;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Users;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using SimplePos.Application.Products.Commands.DeleteProduct;
 
 namespace SimplePos.WebApi.EndPoints;
 public static class ProductEndpoints
@@ -50,14 +52,14 @@ public static class ProductEndpoints
                 request.SortBy,
                 request.IsDescending
             );
-            var result = await dispatcher.QueryAsync<Result<PagedList<ProductResponse>>>(query, ct);
+            var result = await dispatcher.QueryAsync<Result<PagedList<ProductListItemResponse>>>(query, ct);
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
-        .Produces<PagedList<ProductResponse>>(StatusCodes.Status200OK)
+        .Produces<PagedList<ProductListItemResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
@@ -66,20 +68,74 @@ public static class ProductEndpoints
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
+            {
+                string companyIdClaim = user.FindFirst("CompanyId")?.Value ?? string.Empty;
+
+                if (!Guid.TryParse(companyIdClaim, out var companyId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                CreateProductCommand createProductCommand = new CreateProductCommand(companyId, request.CategoryId, request.SKU, request.ProductName, request.CostPrice, request.BasePrice, request.TaxIds);
+                Result<Guid> result = await dispatcher.SendAsync<CreateProductCommand, Result<Guid>>(createProductCommand, ct);
+
+                return Results.Created($"/api/products/{result.Data}",
+                new { id = result.Data });
+            })
+            .RequireAuthorization();
+
+        group.MapGet("/{id:guid}", async (
+            Guid id,
+            ClaimsPrincipal user,
+            ICqrsDispatcher dispatcher,
+            CancellationToken ct) =>
+            {
+                string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+
+                if (!Guid.TryParse(companyIdClaim, out var companyId))
+                {
+                    return Results.Unauthorized();
+                }
+
+                var query = new GetProductByProductIdQuery(id, companyId);
+                var result = await dispatcher.QueryAsync<Result<ProductResponse>>(query, ct);
+
+                if (result.IsSuccess)
+                    return Results.Ok(result.Data);
+
+                if (result.Error.Type == ErrorType.NotFound)
+                    return Results.NotFound(new { detail = result.Error.Description });
+
+                return Results.Problem(detail: result.Error.Description, statusCode: 500);
+            })
+            .Produces<ProductResponse>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .RequireAuthorization();
+
+        group.MapDelete("/{id:guid}", async (
+            Guid id,
+            ClaimsPrincipal user,
+            ICqrsDispatcher dispatcher,
+            CancellationToken ct) =>
         {
-            string companyIdClaim = user.FindFirst("CompanyId")?.Value ?? string.Empty;
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
 
             if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            CreateProductCommand createProductCommand = new CreateProductCommand(companyId, request.CategoryId, request.SKU, request.ProductName, request.CostPrice, request.BasePrice, request.TaxIds);
-            Result<Guid> result = await dispatcher.SendAsync<CreateProductCommand, Result<Guid>>(createProductCommand, ct);
+            var command = new DeleteProductCommand(id, companyId);
+            var result = await dispatcher.SendAsync<DeleteProductCommand, Result>(command, ct);
 
-            return Results.Created($"/api/products/{result.Data}",
-    new { id = result.Data });
+            if (result.IsSuccess)
+                return Results.NoContent();
+
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
-            .RequireAuthorization();
+        .RequireAuthorization();
     }
 }
