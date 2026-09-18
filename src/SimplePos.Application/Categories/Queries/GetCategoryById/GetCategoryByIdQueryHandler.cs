@@ -24,7 +24,7 @@ public class GetCategoryByIdQueryHandler : IQueryHandler<GetCategoryByIdQuery, R
             return Result<CategoryResponse>.Failure(CategoryError.NotExist);
         }
 
-        var response = new CategoryResponse(category.CategoryId, category.CompanyId, category.Name, category.IsActive);
+        var response = new CategoryResponse(category.CategoryId, category.Name, category.IsActive);
         return Result<CategoryResponse>.Success(response);
     }
 }

@@ -42,15 +42,18 @@ public class CreateProductCommandHandler : ICommandHandler<CreateProductCommand,
             throw new InvalidOperationException("Product creation failed, product data is null.");
         }
 
-        foreach (Guid taxId in command.Taxes)
+        if(command.Taxes != null)
         {
-            var tax = await _taxRepository.GetTaxByIdAsync(taxId);
-            if (tax is null)
+            foreach (Guid taxId in command.Taxes)
             {
-                return Result<Guid>.Failure(TaxError.NotExist);
-            }
+                var tax = await _taxRepository.GetTaxByIdAsync(taxId);
+                if (tax is null)
+                {
+                    return Result<Guid>.Failure(TaxError.NotExist);
+                }
 
-            productResult.Data.AddProductTax(tax.TaxId);
+                productResult.Data.AddProductTax(tax.TaxId);
+            }
         }
 
         if (!productResult.IsSuccess)

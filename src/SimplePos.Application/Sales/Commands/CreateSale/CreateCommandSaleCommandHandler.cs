@@ -68,7 +68,7 @@ public class CreateCommandSaleCommandHandler : ICommandHandler<CreateSaleCommand
 
             OutletProductAvailability? outletAvailability = await _outletProductAvailability.GetByOutletAndProductIdAsync(saleOutletId, product.ProductId);
 
-            if(outletAvailability == null)
+            if(outletAvailability != null)
                 return Result<Guid>.Failure(OutletProductAvailabilityError.ProductIdEmpty);
 
             decimal price = saleItem.price ?? product.BasePrice;

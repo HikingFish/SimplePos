@@ -1,13 +1,14 @@
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Common;
+using SimplePos.Application.Products.Commands.ActivateProduct;
 using SimplePos.Application.Products.Commands.CreateProduct;
-using SimplePos.Application.Products.Queries.ProductListByCompanyId;
+using SimplePos.Application.Products.Commands.DeleteProduct;
 using SimplePos.Application.Products.Queries.ProductByProductId;
+using SimplePos.Application.Products.Queries.ProductListByCompanyId;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Users;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using SimplePos.Application.Products.Commands.DeleteProduct;
 
 namespace SimplePos.WebApi.EndPoints;
 public static class ProductEndpoints
@@ -136,6 +137,39 @@ public static class ProductEndpoints
 
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
+        .RequireAuthorization();
+
+        group.MapPatch("/{id:guid}/activate", async (
+            Guid id,
+            ClaimsPrincipal user,
+            ICqrsDispatcher dispatcher,
+            CancellationToken ct) =>
+        {
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+
+            if(!Guid.TryParse(companyIdClaim, out var companyId))
+            {
+                return Results.Unauthorized();
+            }
+
+            var command = new ActivateProductCommand(id, companyId);
+            Result result = await dispatcher.SendAsync<ActivateProductCommand, Result>(command, ct);
+            
+            if (result.IsSuccess)
+                return Results.NoContent();
+
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
+        })
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
     }
 }

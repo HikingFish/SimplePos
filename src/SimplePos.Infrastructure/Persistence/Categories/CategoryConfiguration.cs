@@ -26,7 +26,6 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired();
         builder.Property(c => c.SoftDeleted)
             .IsRequired();
-        builder.Property(c => c.DateTimeSoftDeleted)
-            .IsRequired();
+        builder.Property(c => c.DateTimeSoftDeleted);
     }
 }

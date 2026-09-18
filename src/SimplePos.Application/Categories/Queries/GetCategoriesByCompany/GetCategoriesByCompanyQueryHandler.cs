@@ -24,7 +24,7 @@ public class GetCategoriesByCompanyQueryHandler : IQueryHandler<GetCategoriesByC
 
         List<CategoryResponse> responses = categories
             .Where(c => !c.SoftDeleted)
-            .Select(c => new CategoryResponse(c.CategoryId, c.CompanyId, c.Name, c.IsActive))
+            .Select(c => new CategoryResponse(c.CategoryId, c.Name, c.IsActive))
             .ToList();
 
         return Result<List<CategoryResponse>>.Success(responses);
