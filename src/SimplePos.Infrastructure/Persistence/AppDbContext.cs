@@ -22,6 +22,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Tax> Taxes => Set<Tax>();
     public DbSet<Sale> Sales => Set<Sale>();
+    public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+    public DbSet<SaleItemTax> SaleItemTaxes => Set<SaleItemTax>();
+    public DbSet<SalePayment> SalePayments => Set<SalePayment>();
     public DbSet<PaymentMethod> PaymentMethods => Set<PaymentMethod>();
     public DbSet<Permission> Permissions => Set<Permission>();
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();

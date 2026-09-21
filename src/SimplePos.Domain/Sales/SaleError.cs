@@ -33,5 +33,7 @@ public static class SaleError
         "Sales.Closed", "Operation cannot be performed on a closed sale.", ErrorType.Conflict);
     public static readonly Error ClosedByUserIdEmpty = new Error(
         "Sales.ClosedByUserIdEmpty", "Closed by user ID cannot be empty.", ErrorType.Validation);
+    public static readonly Error SaleNotFound = new Error(
+        "Sales.SaleNotFound", "Sale not found.", ErrorType.NotFound);
 }
 

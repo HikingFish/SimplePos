@@ -22,10 +22,36 @@ public class SaleRepository : ISaleRepository
         _appDbContext.Sales.Update(sale);
     }
 
+    public void AddSaleItem(SaleItem saleItem)
+    {
+        _appDbContext.SaleItems.Add(saleItem);
+    }
+
+    public void RemoveSaleItem(SaleItem saleItem)
+    {
+        _appDbContext.SaleItems.Remove(saleItem);
+    }
+
+    public void AddSaleItemTaxes(IEnumerable<SaleItemTax> taxes)
+    {
+        _appDbContext.SaleItemTaxes.AddRange(taxes);
+    }
+
+    public void AddPayment(SalePayment payment)
+    {
+        _appDbContext.SalePayments.Add(payment);
+    }
+
+    public void RemovePayment(SalePayment payment)
+    {
+        _appDbContext.SalePayments.Remove(payment);
+    }
+
     public async Task<Sale?> GetSaleByIdAsync(Guid saleId)
     {
         return await _appDbContext.Sales
             .Include(s => s.SaleItems)
+                .ThenInclude(si => si.SaleItemTaxes)
             .Include(s => s.SalePayments)
             .FirstOrDefaultAsync(s => s.SaleId == saleId);
     }
@@ -34,6 +60,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _appDbContext.Sales
             .Include(s => s.SaleItems)
+                .ThenInclude(si => si.SaleItemTaxes)
             .Include(s => s.SalePayments)
             .Where(s => s.OutletId == outletId)
             .ToListAsync();
@@ -43,6 +70,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _appDbContext.Sales
             .Include(s => s.SaleItems)
+                .ThenInclude(si => si.SaleItemTaxes)
             .Include(s => s.SalePayments)
             .Where(s => s.OutletId == outletId && s.DateTimeCreated >= from && s.DateTimeCreated <= to)
             .ToListAsync();
@@ -52,6 +80,7 @@ public class SaleRepository : ISaleRepository
     {
         return await _appDbContext.Sales
             .Include(s => s.SaleItems)
+                .ThenInclude(si => si.SaleItemTaxes)
             .Include(s => s.SalePayments)
             .Where(s => s.CreatedByUserId == userId)
             .ToListAsync();

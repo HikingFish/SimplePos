@@ -32,10 +32,10 @@ public class CreateCommandSaleCommandHandler : ICommandHandler<CreateSaleCommand
 
     public async Task<Result<Guid>> HandleAsync(CreateSaleCommand command, CancellationToken cancellationToken)
     {
-        Guid saleOutletId = new Guid();
-        if(command.OutletId is Guid outletIdExist)
+        Guid saleOutletId;
+        if (command.OutletId != Guid.Empty)
         {
-            saleOutletId = outletIdExist;
+            saleOutletId = command.OutletId;
         }
         else
         {
@@ -49,7 +49,8 @@ public class CreateCommandSaleCommandHandler : ICommandHandler<CreateSaleCommand
             saleOutletId = currentUser.OutletId.Value;
         }
 
-        Result<Sale> newSale = Sale.Create(saleOutletId, command.UserId, string.Empty, command.financialDate, null);
+        string invoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid().ToString("N")[..6].ToUpper()}";
+        Result<Sale> newSale = Sale.Create(saleOutletId, command.UserId, invoiceNumber, command.financialDate, null);
         if (newSale.IsFailure)
             return Result<Guid>.Failure(newSale.Error);
 
@@ -107,6 +108,28 @@ public class CreateCommandSaleCommandHandler : ICommandHandler<CreateSaleCommand
             if (addSaleItemResult.IsFailure)
                 return Result<Guid>.Failure(addSaleItemResult.Error);
         }
+
+        if (command.SalePayments != null && command.SalePayments.Count > 0)
+        {
+            foreach (var payment in command.SalePayments)
+            {
+                var paymentResult = SalePayment.Create(
+                    newSale.Data.SaleId,
+                    payment.paymentMethod,
+                    command.UserId,
+                    payment.amountPaid,
+                    payment.refereceNumber,
+                    payment.paymentDate);
+
+                if (paymentResult.IsFailure)
+                    return Result<Guid>.Failure(paymentResult.Error);
+
+                var addPaymentResult = newSale.Data.AddPayment(paymentResult.Data!);
+                if (addPaymentResult.IsFailure)
+                    return Result<Guid>.Failure(addPaymentResult.Error);
+            }
+        }
+
         _saleRepository.AddSale(newSale.Data);
 
         await _unitOfWork.SaveChangesAsync();

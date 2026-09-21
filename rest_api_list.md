@@ -165,34 +165,34 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/sales/` | Create a new sale |
-| 🔲 | `GET` | `/api/sales/{id}` | Get sale by ID (with items & payments) |
-| 🔲 | `GET` | `/api/sales?outletId={outletId}` | Get sales by outlet |
-| 🔲 | `GET` | `/api/sales?outletId={outletId}&from={date}&to={date}` | Get sales by date range |
-| 🔲 | `GET` | `/api/sales?userId={userId}` | Get sales by user |
-| 🔲 | `PATCH` | `/api/sales/{id}/void` | Void a sale |
-| 🔲 | `PATCH` | `/api/sales/{id}/unvoid` | Unvoid a sale |
-| 🔲 | `PATCH` | `/api/sales/{id}/close` | Close a sale |
-| 🔲 | `DELETE` | `/api/sales/{id}` | Soft-delete sale |
+| ✅ | `POST` | `/api/sales/` | Create a new sale |
+| ✅ | `GET` | `/api/sales/{id}` | Get sale by ID (with items & payments) |
+| ✅ | `GET` | `/api/sales?outletId={outletId}` | Get sales by outlet |
+| ✅ | `GET` | `/api/sales?outletId={outletId}&from={date}&to={date}` | Get sales by date range |
+| ✅ | `GET` | `/api/sales?userId={userId}` | Get sales by user |
+| ✅ | `PATCH` | `/api/sales/{id}/void` | Void a sale |
+| ✅ | `PATCH` | `/api/sales/{id}/unvoid` | Unvoid a sale |
+| ✅ | `PATCH` | `/api/sales/{id}/close` | Close a sale |
+| ✅ | `DELETE` | `/api/sales/{id}` | Soft-delete sale |
 
 ### Sale Items (sub-resource)
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/sales/{id}/items` | Add item to sale |
-| 🔲 | `PUT` | `/api/sales/{saleId}/items/{itemId}` | Update sale item (qty, price, discount, remark, taxes) |
-| 🔲 | `PATCH` | `/api/sales/{saleId}/items/{itemId}/quantity` | Update sale item quantity |
-| 🔲 | `PATCH` | `/api/sales/{saleId}/items/{itemId}/void` | Void a sale item |
-| 🔲 | `PATCH` | `/api/sales/{saleId}/items/{itemId}/unvoid` | Unvoid a sale item |
-| 🔲 | `DELETE` | `/api/sales/{saleId}/items/{itemId}` | Remove item from sale |
+| ✅ | `POST` | `/api/sales/{id}/items` | Add item to sale |
+| ✅ | `PUT` | `/api/sales/{saleId}/items/{itemId}` | Update sale item (qty, price, discount, remark, taxes) |
+| ✅ | `PATCH` | `/api/sales/{saleId}/items/{itemId}/quantity` | Update sale item quantity |
+| ✅ | `PATCH` | `/api/sales/{saleId}/items/{itemId}/void` | Void a sale item |
+| ✅ | `PATCH` | `/api/sales/{saleId}/items/{itemId}/unvoid` | Unvoid a sale item |
+| ✅ | `DELETE` | `/api/sales/{saleId}/items/{itemId}` | Remove item from sale |
 
 ### Sale Payments (sub-resource)
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/sales/{id}/payments` | Add payment to sale |
-| 🔲 | `GET` | `/api/sales/{id}/payments` | Get payments for a sale |
-| 🔲 | `DELETE` | `/api/sales/{saleId}/payments/{paymentId}` | Remove payment from sale |
+| ✅ | `POST` | `/api/sales/{id}/payments` | Add payment to sale |
+| ✅ | `GET` | `/api/sales/{id}/payments` | Get payments for a sale |
+| ✅ | `DELETE` | `/api/sales/{saleId}/payments/{paymentId}` | Remove payment from sale |
 
 ---
 
@@ -209,5 +209,5 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 | Payment Methods | 0 | 8 | 8 |
 | Users | 4 | 9 | 13 |
 | Permissions | 0 | 2 | 2 |
-| Sales | 0 | 18 | 18 |
-| **Total** | **8** | **81** | **89** |
+| Sales | 18 | 0 | 18 |
+| **Total** | **26** | **63** | **89** |
