@@ -45,6 +45,26 @@ using SimplePos.Application.Categories.Commands.DeactivateCategory;
 using SimplePos.Application.Categories.Queries.GetCategoriesByCompany;
 using SimplePos.Application.Categories.Queries.GetCategoryById;
 using SimplePos.Application.Categories.Common;
+using SimplePos.Application.Products.Commands.AddProductTax;
+using SimplePos.Application.Products.Commands.RemoveProductTax;
+using SimplePos.Application.Taxes.Commands.CreateTax;
+using SimplePos.Application.Taxes.Commands.UpdateTax;
+using SimplePos.Application.Taxes.Commands.DeleteTax;
+using SimplePos.Application.Taxes.Commands.ActivateTax;
+using SimplePos.Application.Taxes.Commands.DeactivateTax;
+using SimplePos.Application.Taxes.Queries.GetTaxById;
+using SimplePos.Application.Taxes.Queries.GetTaxesByCompany;
+using SimplePos.Application.Taxes.Queries.GetActiveTaxesByCompany;
+using SimplePos.Application.Taxes.Common;
+using SimplePos.Application.PaymentMethods.Commands.CreatePaymentMethod;
+using SimplePos.Application.PaymentMethods.Commands.UpdatePaymentMethod;
+using SimplePos.Application.PaymentMethods.Commands.DeletePaymentMethod;
+using SimplePos.Application.PaymentMethods.Commands.ActivatePaymentMethod;
+using SimplePos.Application.PaymentMethods.Commands.DeactivatePaymentMethod;
+using SimplePos.Application.PaymentMethods.Queries.GetPaymentMethodById;
+using SimplePos.Application.PaymentMethods.Queries.GetPaymentMethodsByCompany;
+using SimplePos.Application.PaymentMethods.Queries.GetActivePaymentMethodsByCompany;
+using SimplePos.Application.PaymentMethods.Common;
 
 namespace SimplePos.Application;
 
@@ -104,6 +124,30 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<DeactivateCategoryCommand, Result>, DeactivateCategoryCommandHandler>();
         services.AddScoped<IQueryHandler<GetCategoriesByCompanyQuery, Result<List<CategoryResponse>>>, GetCategoriesByCompanyQueryHandler>();
         services.AddScoped<IQueryHandler<GetCategoryByIdQuery, Result<CategoryResponse>>, GetCategoryByIdQueryHandler>();
+
+        //Product Tax Commands
+        services.AddScoped<ICommandHandler<AddProductTaxCommand, Result>, AddProductTaxCommandHandler>();
+        services.AddScoped<ICommandHandler<RemoveProductTaxCommand, Result>, RemoveProductTaxCommandHandler>();
+
+        //Tax Commands and Queries
+        services.AddScoped<ICommandHandler<CreateTaxCommand, Result<Guid>>, CreateTaxCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateTaxCommand, Result>, UpdateTaxCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteTaxCommand, Result>, DeleteTaxCommandHandler>();
+        services.AddScoped<ICommandHandler<ActivateTaxCommand, Result>, ActivateTaxCommandHandler>();
+        services.AddScoped<ICommandHandler<DeactivateTaxCommand, Result>, DeactivateTaxCommandHandler>();
+        services.AddScoped<IQueryHandler<GetTaxByIdQuery, Result<TaxResponse>>, GetTaxByIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetTaxesByCompanyQuery, Result<List<TaxResponse>>>, GetTaxesByCompanyQueryHandler>();
+        services.AddScoped<IQueryHandler<GetActiveTaxesByCompanyQuery, Result<List<TaxResponse>>>, GetActiveTaxesByCompanyQueryHandler>();
+
+        //PaymentMethod Commands and Queries
+        services.AddScoped<ICommandHandler<CreatePaymentMethodCommand, Result<Guid>>, CreatePaymentMethodCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdatePaymentMethodCommand, Result>, UpdatePaymentMethodCommandHandler>();
+        services.AddScoped<ICommandHandler<DeletePaymentMethodCommand, Result>, DeletePaymentMethodCommandHandler>();
+        services.AddScoped<ICommandHandler<ActivatePaymentMethodCommand, Result>, ActivatePaymentMethodCommandHandler>();
+        services.AddScoped<ICommandHandler<DeactivatePaymentMethodCommand, Result>, DeactivatePaymentMethodCommandHandler>();
+        services.AddScoped<IQueryHandler<GetPaymentMethodByIdQuery, Result<PaymentMethodResponse>>, GetPaymentMethodByIdQueryHandler>();
+        services.AddScoped<IQueryHandler<GetPaymentMethodsByCompanyQuery, Result<List<PaymentMethodResponse>>>, GetPaymentMethodsByCompanyQueryHandler>();
+        services.AddScoped<IQueryHandler<GetActivePaymentMethodsByCompanyQuery, Result<List<PaymentMethodResponse>>>, GetActivePaymentMethodsByCompanyQueryHandler>();
 
         return services;
     }

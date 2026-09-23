@@ -17,5 +17,8 @@ public static class PaymentMethodError
 
     public static readonly Error SoftDeleted = new Error(
         "PaymentMethod.SoftDeleted", "Operation cannot be performed on a soft-deleted payment method", ErrorType.Conflict);
+
+    public static readonly Error NotExist = new Error(
+        "PaymentMethod.NotExist", "Payment method does not exist", ErrorType.NotFound);
 }
 

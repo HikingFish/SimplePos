@@ -65,6 +65,8 @@ app.MapAuthEndpoints();
 app.MapUserOutletAccessEndpoints();
 app.MapProductEndpoints();
 app.MapCategoryEndpoints();
+app.MapTaxEndpoints();
+app.MapPaymentMethodEndpoints();
 app.MapSaleEndpoints();
 
 app.Run();

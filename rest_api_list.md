@@ -84,8 +84,8 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/products/{id}/taxes` | Add tax to product |
-| 🔲 | `DELETE` | `/api/products/{id}/taxes/{taxId}` | Remove tax from product |
+| ✅ | `POST` | `/api/products/{id}/taxes` | Add tax to product |
+| ✅ | `DELETE` | `/api/products/{id}/taxes/{taxId}` | Remove tax from product |
 
 ---
 
@@ -93,14 +93,14 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/taxes/` | Create tax |
-| 🔲 | `GET` | `/api/taxes/{id}` | Get tax by ID |
-| 🔲 | `GET` | `/api/taxes?companyId={companyId}` | Get taxes by company |
-| 🔲 | `GET` | `/api/taxes/active?companyId={companyId}` | Get active taxes by company |
-| 🔲 | `PUT` | `/api/taxes/{id}` | Update tax info (name, rate) |
-| 🔲 | `PATCH` | `/api/taxes/{id}/activate` | Activate tax |
-| 🔲 | `PATCH` | `/api/taxes/{id}/deactivate` | Deactivate tax |
-| 🔲 | `DELETE` | `/api/taxes/{id}` | Soft-delete tax |
+| ✅ | `POST` | `/api/taxes/` | Create tax |
+| ✅ | `GET` | `/api/taxes/{id}` | Get tax by ID |
+| ✅ | `GET` | `/api/taxes?companyId={companyId}` | Get taxes by company |
+| ✅ | `GET` | `/api/taxes/active?companyId={companyId}` | Get active taxes by company |
+| ✅ | `PUT` | `/api/taxes/{id}` | Update tax info (name, rate) |
+| ✅ | `PATCH` | `/api/taxes/{id}/activate` | Activate tax |
+| ✅ | `PATCH` | `/api/taxes/{id}/deactivate` | Deactivate tax |
+| ✅ | `DELETE` | `/api/taxes/{id}` | Soft-delete tax |
 
 ---
 
@@ -108,14 +108,14 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| 🔲 | `POST` | `/api/payment-methods/` | Create payment method |
-| 🔲 | `GET` | `/api/payment-methods/{id}` | Get payment method by ID |
-| 🔲 | `GET` | `/api/payment-methods?companyId={companyId}` | Get payment methods by company |
-| 🔲 | `GET` | `/api/payment-methods/active?companyId={companyId}` | Get active payment methods by company |
-| 🔲 | `PUT` | `/api/payment-methods/{id}` | Update payment method name |
-| 🔲 | `PATCH` | `/api/payment-methods/{id}/activate` | Activate payment method |
-| 🔲 | `PATCH` | `/api/payment-methods/{id}/deactivate` | Deactivate payment method |
-| 🔲 | `DELETE` | `/api/payment-methods/{id}` | Soft-delete payment method |
+| ✅ | `POST` | `/api/payment-methods/` | Create payment method |
+| ✅ | `GET` | `/api/payment-methods/{id}` | Get payment method by ID |
+| ✅ | `GET` | `/api/payment-methods?companyId={companyId}` | Get payment methods by company |
+| ✅ | `GET` | `/api/payment-methods/active?companyId={companyId}` | Get active payment methods by company |
+| ✅ | `PUT` | `/api/payment-methods/{id}` | Update payment method name |
+| ✅ | `PATCH` | `/api/payment-methods/{id}/activate` | Activate payment method |
+| ✅ | `PATCH` | `/api/payment-methods/{id}/deactivate` | Deactivate payment method |
+| ✅ | `DELETE` | `/api/payment-methods/{id}` | Soft-delete payment method |
 
 ---
 
@@ -203,11 +203,11 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 | Auth & Registration | 2 | 1 | 3 |
 | Companies | 2 | 5 | 7 |
 | Outlets | 0 | 12 | 12 |
-| Categories | 0 | 7 | 7 |
-| Products | 0 | 11 | 11 |
-| Taxes | 0 | 8 | 8 |
-| Payment Methods | 0 | 8 | 8 |
+| Categories | 7 | 0 | 7 |
+| Products | 6 | 5 | 11 |
+| Taxes | 8 | 0 | 8 |
+| Payment Methods | 8 | 0 | 8 |
 | Users | 4 | 9 | 13 |
 | Permissions | 0 | 2 | 2 |
 | Sales | 18 | 0 | 18 |
-| **Total** | **26** | **63** | **89** |
+| **Total** | **55** | **34** | **89** |
