@@ -95,8 +95,8 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 |--------|--------|----------|-------------|
 | ✅ | `POST` | `/api/taxes/` | Create tax |
 | ✅ | `GET` | `/api/taxes/{id}` | Get tax by ID |
-| ✅ | `GET` | `/api/taxes?companyId={companyId}` | Get taxes by company |
-| ✅ | `GET` | `/api/taxes/active?companyId={companyId}` | Get active taxes by company |
+| ✅ | `GET` | `/api/taxes` | Get taxes for company (from token) |
+| ✅ | `GET` | `/api/taxes/active` | Get active taxes for company (from token) |
 | ✅ | `PUT` | `/api/taxes/{id}` | Update tax info (name, rate) |
 | ✅ | `PATCH` | `/api/taxes/{id}/activate` | Activate tax |
 | ✅ | `PATCH` | `/api/taxes/{id}/deactivate` | Deactivate tax |
@@ -110,8 +110,8 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 |--------|--------|----------|-------------|
 | ✅ | `POST` | `/api/payment-methods/` | Create payment method |
 | ✅ | `GET` | `/api/payment-methods/{id}` | Get payment method by ID |
-| ✅ | `GET` | `/api/payment-methods?companyId={companyId}` | Get payment methods by company |
-| ✅ | `GET` | `/api/payment-methods/active?companyId={companyId}` | Get active payment methods by company |
+| ✅ | `GET` | `/api/payment-methods` | Get payment methods for company (from token) |
+| ✅ | `GET` | `/api/payment-methods/active` | Get active payment methods for company (from token) |
 | ✅ | `PUT` | `/api/payment-methods/{id}` | Update payment method name |
 | ✅ | `PATCH` | `/api/payment-methods/{id}/activate` | Activate payment method |
 | ✅ | `PATCH` | `/api/payment-methods/{id}/deactivate` | Deactivate payment method |

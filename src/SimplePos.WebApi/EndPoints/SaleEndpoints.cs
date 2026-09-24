@@ -74,7 +74,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Created($"/api/sales/{result.Data}", new { id = result.Data });
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -94,7 +101,10 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<SaleResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -148,7 +158,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<SaleResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -169,7 +184,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -190,7 +212,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -213,7 +240,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -234,7 +268,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -271,7 +310,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Created($"/api/sales/{id}/items/{result.Data}", new { id = result.Data });
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -306,7 +352,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -329,7 +382,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -353,7 +413,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -375,7 +440,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -397,7 +467,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -430,7 +505,14 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Created($"/api/sales/{id}/payments/{result.Data}", new { id = result.Data });
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -451,7 +533,10 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<SalePaymentResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -471,7 +556,12 @@ public static class SaleEndpoints
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -490,16 +580,5 @@ public static class SaleEndpoints
     {
         string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
         return Guid.TryParse(companyIdClaim, out var companyGuid) ? companyGuid : Guid.Empty;
-    }
-
-    private static IResult ToProblemResult(Error error)
-    {
-        return error.Type switch
-        {
-            ErrorType.NotFound => Results.NotFound(new { detail = error.Description }),
-            ErrorType.Validation => Results.BadRequest(new { detail = error.Description }),
-            ErrorType.Conflict => Results.Conflict(new { detail = error.Description }),
-            _ => Results.Problem(detail: error.Description, statusCode: 500)
-        };
     }
 }

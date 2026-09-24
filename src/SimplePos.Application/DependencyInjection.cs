@@ -65,6 +65,7 @@ using SimplePos.Application.PaymentMethods.Queries.GetPaymentMethodById;
 using SimplePos.Application.PaymentMethods.Queries.GetPaymentMethodsByCompany;
 using SimplePos.Application.PaymentMethods.Queries.GetActivePaymentMethodsByCompany;
 using SimplePos.Application.PaymentMethods.Common;
+using SimplePos.Application.Products.Commands.ActivateProduct;
 
 namespace SimplePos.Application;
 
@@ -115,6 +116,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetProductByProductIdQuery, Result<ProductResponse>>, GetProductByProductIdQueryHandler>();
         services.AddScoped<ICommandHandler<CreateProductCommand, Result<Guid>>, CreateProductCommandHandler>();
         services.AddScoped<ICommandHandler<DeleteProductCommand, Result>, DeleteProductCommandHandler>();
+        services.AddScoped<ICommandHandler<ActivateProductCommand, Result>, ActivateProductCommandHandler>();
 
         //Category Commands and Queries
         services.AddScoped<ICommandHandler<CreateCategoryCommand, Result<Guid>>, CreateCategoryCommandHandler>();

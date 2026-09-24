@@ -8,11 +8,10 @@ using SimplePos.Application.Products.Commands.RemoveProductTax;
 using SimplePos.Application.Products.Queries.ProductByProductId;
 using SimplePos.Application.Products.Queries.ProductListByCompanyId;
 using SimplePos.Domain.Common.ResultPattern;
-using SimplePos.Domain.Users;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
 
 namespace SimplePos.WebApi.EndPoints;
+
 public static class ProductEndpoints
 {
     public record GetProductsQueryRequest(
@@ -29,7 +28,7 @@ public static class ProductEndpoints
         decimal? CostPrice,
         decimal BasePrice,
         Guid[]? TaxIds
-     );
+    );
 
     public record AddProductTaxRequest(Guid TaxId);
 
@@ -37,15 +36,15 @@ public static class ProductEndpoints
     {
         var group = app.MapGroup("/api/products").WithTags("Products");
 
+        // 1. GET /api/products - Get paged products for company from token
         group.MapGet("/", async (
-                [AsParameters] GetProductsQueryRequest request,
-                ClaimsPrincipal user,
-                ICqrsDispatcher dispatcher,
-                CancellationToken ct) =>
+            [AsParameters] GetProductsQueryRequest request,
+            ClaimsPrincipal user,
+            ICqrsDispatcher dispatcher,
+            CancellationToken ct) =>
         {
-            string? CompanyIdClaim = user.FindFirst("CompanyId")?.Value;
-
-            if(!Guid.TryParse(CompanyIdClaim, out var companyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
@@ -60,62 +59,85 @@ public static class ProductEndpoints
             var result = await dispatcher.QueryAsync<Result<PagedList<ProductListItemResponse>>>(query, ct);
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
+
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
+
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<PagedList<ProductListItemResponse>>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
-        group.MapPost("/", async(
+        group.MapPost("/", async (
             CreateProductQueryRequest request,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
+        {
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
-                string companyIdClaim = user.FindFirst("CompanyId")?.Value ?? string.Empty;
+                return Results.Unauthorized();
+            }
 
-                if (!Guid.TryParse(companyIdClaim, out var companyId))
-                {
-                    return Results.Unauthorized();
-                }
+            var createProductCommand = new CreateProductCommand(
+                companyId,
+                request.CategoryId,
+                request.SKU ?? string.Empty,
+                request.ProductName,
+                request.CostPrice,
+                request.BasePrice,
+                request.TaxIds);
 
-                CreateProductCommand createProductCommand = new CreateProductCommand(companyId, request.CategoryId, request.SKU, request.ProductName, request.CostPrice, request.BasePrice, request.TaxIds);
-                Result<Guid> result = await dispatcher.SendAsync<CreateProductCommand, Result<Guid>>(createProductCommand, ct);
+            var result = await dispatcher.SendAsync<CreateProductCommand, Result<Guid>>(createProductCommand, ct);
 
-                return Results.Created($"/api/products/{result.Data}",
-                new { id = result.Data });
-            })
-            .RequireAuthorization();
+            if (result.IsSuccess)
+            {
+                return Results.Created($"/api/products/{result.Data}", new { id = result.Data });
+            }
+
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
+        })
+        .Produces(StatusCodes.Status201Created)
+        .ProducesProblem(StatusCodes.Status400BadRequest)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status409Conflict)
+        .RequireAuthorization();
 
         group.MapGet("/{id:guid}", async (
             Guid id,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
+        {
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
-                string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+                return Results.Unauthorized();
+            }
 
-                if (!Guid.TryParse(companyIdClaim, out var companyId))
-                {
-                    return Results.Unauthorized();
-                }
+            var query = new GetProductByProductIdQuery(id, companyId);
+            var result = await dispatcher.QueryAsync<Result<ProductResponse>>(query, ct);
 
-                var query = new GetProductByProductIdQuery(id, companyId);
-                var result = await dispatcher.QueryAsync<Result<ProductResponse>>(query, ct);
+            if (result.IsSuccess)
+                return Results.Ok(result.Data);
 
-                if (result.IsSuccess)
-                    return Results.Ok(result.Data);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
 
-                if (result.Error.Type == ErrorType.NotFound)
-                    return Results.NotFound(new { detail = result.Error.Description });
-
-                return Results.Problem(detail: result.Error.Description, statusCode: 500);
-            })
-            .Produces<ProductResponse>(StatusCodes.Status200OK)
-            .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequireAuthorization();
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
+        })
+        .Produces<ProductResponse>(StatusCodes.Status200OK)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
+        .RequireAuthorization();
 
         group.MapDelete("/{id:guid}", async (
             Guid id,
@@ -124,7 +146,6 @@ public static class ProductEndpoints
             CancellationToken ct) =>
         {
             string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
-
             if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
@@ -141,6 +162,9 @@ public static class ProductEndpoints
 
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
+        .Produces(StatusCodes.Status204NoContent)
+        .ProducesProblem(StatusCodes.Status401Unauthorized)
+        .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
         group.MapPatch("/{id:guid}/activate", async (
@@ -150,21 +174,19 @@ public static class ProductEndpoints
             CancellationToken ct) =>
         {
             string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
-
-            if(!Guid.TryParse(companyIdClaim, out var companyId))
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
             var command = new ActivateProductCommand(id, companyId);
-            Result result = await dispatcher.SendAsync<ActivateProductCommand, Result>(command, ct);
-            
+            var result = await dispatcher.SendAsync<ActivateProductCommand, Result>(command, ct);
+
             if (result.IsSuccess)
                 return Results.NoContent();
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Conflict)
                 return Results.Conflict(new { detail = result.Error.Description });
 
@@ -176,7 +198,6 @@ public static class ProductEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
 
-        // 6. POST /api/products/{id:guid}/taxes - Add tax to product
         group.MapPost("/{id:guid}/taxes", async (
             Guid id,
             AddProductTaxRequest request,
@@ -191,17 +212,15 @@ public static class ProductEndpoints
             }
 
             var command = new AddProductTaxCommand(id, companyId, request.TaxId);
-            Result result = await dispatcher.SendAsync<AddProductTaxCommand, Result>(command, ct);
+            var result = await dispatcher.SendAsync<AddProductTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Conflict)
                 return Results.Conflict(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Validation)
                 return Results.BadRequest(new { detail = result.Error.Description });
 
@@ -214,7 +233,6 @@ public static class ProductEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
 
-        // 7. DELETE /api/products/{id:guid}/taxes/{taxId:guid} - Remove tax from product
         group.MapDelete("/{id:guid}/taxes/{taxId:guid}", async (
             Guid id,
             Guid taxId,
@@ -229,7 +247,7 @@ public static class ProductEndpoints
             }
 
             var command = new RemoveProductTaxCommand(id, companyId, taxId);
-            Result result = await dispatcher.SendAsync<RemoveProductTaxCommand, Result>(command, ct);
+            var result = await dispatcher.SendAsync<RemoveProductTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();

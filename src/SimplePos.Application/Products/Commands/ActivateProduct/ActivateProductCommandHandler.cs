@@ -28,7 +28,12 @@ public class ActivateProductCommandHandler : ICommandHandler<ActivateProductComm
         if (productResult.CompanyId != command.CompanyId)
             return Result.Failure(ProductError.ProductNotExist);
 
-        productResult.UpdateToNotActiveStatus();
+        Result updateResult = productResult.UpdateToActiveStatus();
+
+        if (updateResult.IsFailure)
+        {
+            return Result.Failure(updateResult.Error);
+        }
 
         await _unitOfWork.SaveChangesAsync();
 

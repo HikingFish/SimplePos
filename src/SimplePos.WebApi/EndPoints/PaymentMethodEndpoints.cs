@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.PaymentMethods.Commands.ActivatePaymentMethod;
 using SimplePos.Application.PaymentMethods.Commands.CreatePaymentMethod;
@@ -16,100 +15,114 @@ namespace SimplePos.WebApi.EndPoints;
 
 public static class PaymentMethodEndpoints
 {
-    public record CreatePaymentMethodRequest(string Name, Guid? CompanyId = null);
+    public record CreatePaymentMethodRequest(string Name);
     public record UpdatePaymentMethodRequest(string Name);
 
     public static void MapPaymentMethodEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/payment-methods").WithTags("Payment Methods");
 
-        // 1. GET /api/payment-methods - Get all payment methods for company
+        // 1. GET /api/payment-methods - Get all payment methods for company from token
         group.MapGet("/", async (
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetPaymentMethodsByCompanyQuery(targetCompanyId);
+            var query = new GetPaymentMethodsByCompanyQuery(companyId);
             var result = await dispatcher.QueryAsync<Result<List<PaymentMethodResponse>>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<PaymentMethodResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
 
-        // 2. GET /api/payment-methods/active - Get active payment methods for company
+        // 2. GET /api/payment-methods/active - Get active payment methods for company from token
         group.MapGet("/active", async (
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetActivePaymentMethodsByCompanyQuery(targetCompanyId);
+            var query = new GetActivePaymentMethodsByCompanyQuery(companyId);
             var result = await dispatcher.QueryAsync<Result<List<PaymentMethodResponse>>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<PaymentMethodResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
 
-        // 3. GET /api/payment-methods/{id:guid} - Get payment method by ID
+        // 3. GET /api/payment-methods/{id:guid} - Get payment method by ID (scoped to company in token)
         group.MapGet("/{id:guid}", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetPaymentMethodByIdQuery(id, targetCompanyId);
+            var query = new GetPaymentMethodByIdQuery(id, companyId);
             var result = await dispatcher.QueryAsync<Result<PaymentMethodResponse>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<PaymentMethodResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
-        // 4. POST /api/payment-methods - Create payment method
+        // 4. POST /api/payment-methods - Create payment method (scoped to company in token)
         group.MapPost("/", async (
             CreatePaymentMethodRequest request,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, request.CompanyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new CreatePaymentMethodCommand(targetCompanyId, request.Name);
+            var command = new CreatePaymentMethodCommand(companyId, request.Name);
             var result = await dispatcher.SendAsync<CreatePaymentMethodCommand, Result<Guid>>(command, ct);
 
             if (result.IsSuccess)
@@ -117,34 +130,46 @@ public static class PaymentMethodEndpoints
                 return Results.Created($"/api/payment-methods/{result.Data}", new { id = result.Data });
             }
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
 
-        // 5. PUT /api/payment-methods/{id:guid} - Update payment method name
+        // 5. PUT /api/payment-methods/{id:guid} - Update payment method name (scoped to company in token)
         group.MapPut("/{id:guid}", async (
             Guid id,
             UpdatePaymentMethodRequest request,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new UpdatePaymentMethodCommand(id, targetCompanyId, request.Name);
+            var command = new UpdatePaymentMethodCommand(id, companyId, request.Name);
             var result = await dispatcher.SendAsync<UpdatePaymentMethodCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -152,26 +177,31 @@ public static class PaymentMethodEndpoints
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
-        // 6. PATCH /api/payment-methods/{id:guid}/activate - Activate payment method
+        // 6. PATCH /api/payment-methods/{id:guid}/activate - Activate payment method (scoped to company in token)
         group.MapPatch("/{id:guid}/activate", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new ActivatePaymentMethodCommand(id, targetCompanyId);
+            var command = new ActivatePaymentMethodCommand(id, companyId);
             var result = await dispatcher.SendAsync<ActivatePaymentMethodCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -179,26 +209,31 @@ public static class PaymentMethodEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
 
-        // 7. PATCH /api/payment-methods/{id:guid}/deactivate - Deactivate payment method
+        // 7. PATCH /api/payment-methods/{id:guid}/deactivate - Deactivate payment method (scoped to company in token)
         group.MapPatch("/{id:guid}/deactivate", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new DeactivatePaymentMethodCommand(id, targetCompanyId);
+            var command = new DeactivatePaymentMethodCommand(id, companyId);
             var result = await dispatcher.SendAsync<DeactivatePaymentMethodCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -206,54 +241,36 @@ public static class PaymentMethodEndpoints
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
 
-        // 8. DELETE /api/payment-methods/{id:guid} - Soft delete payment method
+        // 8. DELETE /api/payment-methods/{id:guid} - Soft delete payment method (scoped to company in token)
         group.MapDelete("/{id:guid}", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new DeletePaymentMethodCommand(id, targetCompanyId);
+            var command = new DeletePaymentMethodCommand(id, companyId);
             var result = await dispatcher.SendAsync<DeletePaymentMethodCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
-    }
-
-    private static bool TryGetCompanyId(ClaimsPrincipal user, Guid? queryCompanyId, out Guid companyId)
-    {
-        if (queryCompanyId.HasValue && queryCompanyId.Value != Guid.Empty)
-        {
-            companyId = queryCompanyId.Value;
-            return true;
-        }
-
-        string? claim = user.FindFirst("CompanyId")?.Value;
-        return Guid.TryParse(claim, out companyId);
-    }
-
-    private static IResult ToProblemResult(Error error)
-    {
-        return error.Type switch
-        {
-            ErrorType.NotFound => Results.NotFound(new { detail = error.Description }),
-            ErrorType.Validation => Results.BadRequest(new { detail = error.Description }),
-            ErrorType.Conflict => Results.Conflict(new { detail = error.Description }),
-            _ => Results.Problem(detail: error.Description, statusCode: 500)
-        };
     }
 }

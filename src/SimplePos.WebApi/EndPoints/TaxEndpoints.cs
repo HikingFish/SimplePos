@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Taxes.Commands.ActivateTax;
 using SimplePos.Application.Taxes.Commands.CreateTax;
@@ -16,100 +15,114 @@ namespace SimplePos.WebApi.EndPoints;
 
 public static class TaxEndpoints
 {
-    public record CreateTaxRequest(string TaxName, decimal TaxRate, Guid? CompanyId = null);
+    public record CreateTaxRequest(string TaxName, decimal TaxRate);
     public record UpdateTaxRequest(string TaxName, decimal TaxRate);
 
     public static void MapTaxEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/taxes").WithTags("Taxes");
 
-        // 1. GET /api/taxes - Get all taxes for company
+        // 1. GET /api/taxes - Get all taxes for company from token
         group.MapGet("/", async (
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetTaxesByCompanyQuery(targetCompanyId);
+            var query = new GetTaxesByCompanyQuery(companyId);
             var result = await dispatcher.QueryAsync<Result<List<TaxResponse>>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<TaxResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
 
-        // 2. GET /api/taxes/active - Get active taxes for company
+        // 2. GET /api/taxes/active - Get active taxes for company from token
         group.MapGet("/active", async (
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetActiveTaxesByCompanyQuery(targetCompanyId);
+            var query = new GetActiveTaxesByCompanyQuery(companyId);
             var result = await dispatcher.QueryAsync<Result<List<TaxResponse>>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<List<TaxResponse>>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .RequireAuthorization();
 
-        // 3. GET /api/taxes/{id:guid} - Get tax by ID
+        // 3. GET /api/taxes/{id:guid} - Get tax by ID (scoped to company in token)
         group.MapGet("/{id:guid}", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var query = new GetTaxByIdQuery(id, targetCompanyId);
+            var query = new GetTaxByIdQuery(id, companyId);
             var result = await dispatcher.QueryAsync<Result<TaxResponse>>(query, ct);
 
             if (result.IsSuccess)
                 return Results.Ok(result.Data);
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces<TaxResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .RequireAuthorization();
 
-        // 4. POST /api/taxes - Create tax
+        // 4. POST /api/taxes - Create tax (scoped to company in token)
         group.MapPost("/", async (
             CreateTaxRequest request,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, request.CompanyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new CreateTaxCommand(targetCompanyId, request.TaxName, request.TaxRate);
+            var command = new CreateTaxCommand(companyId, request.TaxName, request.TaxRate);
             var result = await dispatcher.SendAsync<CreateTaxCommand, Result<Guid>>(command, ct);
 
             if (result.IsSuccess)
@@ -117,7 +130,12 @@ public static class TaxEndpoints
                 return Results.Created($"/api/taxes/{result.Data}", new { id = result.Data });
             }
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -128,23 +146,30 @@ public static class TaxEndpoints
         group.MapPut("/{id:guid}", async (
             Guid id,
             UpdateTaxRequest request,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new UpdateTaxCommand(id, targetCompanyId, request.TaxName, request.TaxRate);
+            var command = new UpdateTaxCommand(id, companyId, request.TaxName, request.TaxRate);
             var result = await dispatcher.SendAsync<UpdateTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Validation)
+                return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status400BadRequest)
@@ -155,23 +180,28 @@ public static class TaxEndpoints
         // 6. PATCH /api/taxes/{id:guid}/activate - Activate tax
         group.MapPatch("/{id:guid}/activate", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new ActivateTaxCommand(id, targetCompanyId);
+            var command = new ActivateTaxCommand(id, companyId);
             var result = await dispatcher.SendAsync<ActivateTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -182,23 +212,28 @@ public static class TaxEndpoints
         // 7. PATCH /api/taxes/{id:guid}/deactivate - Deactivate tax
         group.MapPatch("/{id:guid}/deactivate", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new DeactivateTaxCommand(id, targetCompanyId);
+            var command = new DeactivateTaxCommand(id, companyId);
             var result = await dispatcher.SendAsync<DeactivateTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
@@ -209,51 +244,33 @@ public static class TaxEndpoints
         // 8. DELETE /api/taxes/{id:guid} - Soft delete tax
         group.MapDelete("/{id:guid}", async (
             Guid id,
-            [FromQuery] Guid? companyId,
             ClaimsPrincipal user,
             ICqrsDispatcher dispatcher,
             CancellationToken ct) =>
         {
-            if (!TryGetCompanyId(user, companyId, out var targetCompanyId))
+            string? companyIdClaim = user.FindFirst("CompanyId")?.Value;
+            if (!Guid.TryParse(companyIdClaim, out var companyId))
             {
                 return Results.Unauthorized();
             }
 
-            var command = new DeleteTaxCommand(id, targetCompanyId);
+            var command = new DeleteTaxCommand(id, companyId);
             var result = await dispatcher.SendAsync<DeleteTaxCommand, Result>(command, ct);
 
             if (result.IsSuccess)
                 return Results.NoContent();
 
-            return ToProblemResult(result.Error);
+            if (result.Error.Type == ErrorType.NotFound)
+                return Results.NotFound(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
+
+            return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
         .Produces(StatusCodes.Status204NoContent)
         .ProducesProblem(StatusCodes.Status401Unauthorized)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status409Conflict)
         .RequireAuthorization();
-    }
-
-    private static bool TryGetCompanyId(ClaimsPrincipal user, Guid? queryCompanyId, out Guid companyId)
-    {
-        if (queryCompanyId.HasValue && queryCompanyId.Value != Guid.Empty)
-        {
-            companyId = queryCompanyId.Value;
-            return true;
-        }
-
-        string? claim = user.FindFirst("CompanyId")?.Value;
-        return Guid.TryParse(claim, out companyId);
-    }
-
-    private static IResult ToProblemResult(Error error)
-    {
-        return error.Type switch
-        {
-            ErrorType.NotFound => Results.NotFound(new { detail = error.Description }),
-            ErrorType.Validation => Results.BadRequest(new { detail = error.Description }),
-            ErrorType.Conflict => Results.Conflict(new { detail = error.Description }),
-            _ => Results.Problem(detail: error.Description, statusCode: 500)
-        };
     }
 }

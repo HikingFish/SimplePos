@@ -97,6 +97,8 @@ public static class CategoryEndpoints
 
             if (result.Error.Type == ErrorType.Validation)
                 return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
 
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
@@ -127,9 +129,10 @@ public static class CategoryEndpoints
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Validation)
                 return Results.BadRequest(new { detail = result.Error.Description });
+            if (result.Error.Type == ErrorType.Conflict)
+                return Results.Conflict(new { detail = result.Error.Description });
 
             return Results.Problem(detail: result.Error.Description, statusCode: 500);
         })
@@ -160,7 +163,6 @@ public static class CategoryEndpoints
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Conflict)
                 return Results.Conflict(new { detail = result.Error.Description });
 
@@ -193,7 +195,6 @@ public static class CategoryEndpoints
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Conflict)
                 return Results.Conflict(new { detail = result.Error.Description });
 
@@ -226,7 +227,6 @@ public static class CategoryEndpoints
 
             if (result.Error.Type == ErrorType.NotFound)
                 return Results.NotFound(new { detail = result.Error.Description });
-
             if (result.Error.Type == ErrorType.Conflict)
                 return Results.Conflict(new { detail = result.Error.Description });
 
