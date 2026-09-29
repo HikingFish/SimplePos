@@ -36,7 +36,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
                 .HasMaxLength(256);
         });
 
-        builder.Property(u => u.PhoneNumber).HasMaxLength(20);
+        builder.OwnsOne(u => u.PhoneNumber, phoneBuilder =>
+        {
+            phoneBuilder.Property(p => p.Value)
+                .HasColumnName("PhoneNumber")
+                .HasMaxLength(20);
+        });
         builder.Property(u => u.UserPosition).HasMaxLength(100);
         builder.Property(u => u.IsActive).IsRequired();
         builder.Property(u => u.DateTimeLastLogin);

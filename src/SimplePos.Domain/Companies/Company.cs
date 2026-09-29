@@ -9,7 +9,7 @@ public class Company : AggregateRoot, ISoftDeletable
     public string Name { get; private set; } 
     public Address CompanyAddress { get; private set; } 
     public EmailAddress Email { get; private set; }
-    public string PhoneNumber { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
     public DateTime DateTimeCreated { get; private set; }
     public DateTime DateTimeLastOnline { get; private set; }
     public bool IsActive{ get; private set; }
@@ -17,7 +17,7 @@ public class Company : AggregateRoot, ISoftDeletable
     public DateTime? DateTimeSoftDeleted { get; private set; }
 
     private Company() { }
-    private Company(Guid companyId, string name, Address companyAddress, EmailAddress email, string phoneNumber, DateTime dateTimeCreated, DateTime dateTimeLastOnline, bool isActive, bool softDeleted)
+    private Company(Guid companyId, string name, Address companyAddress, EmailAddress email, PhoneNumber phoneNumber, DateTime dateTimeCreated, DateTime dateTimeLastOnline, bool isActive, bool softDeleted)
     {
         CompanyId = companyId;
         Name = name;
@@ -31,7 +31,7 @@ public class Company : AggregateRoot, ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<Company> Create(string name, Address companyAddress, string phoneNumber, EmailAddress email)
+    public static Result<Company> Create(string name, Address companyAddress, PhoneNumber phoneNumber, EmailAddress email)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -41,6 +41,11 @@ public class Company : AggregateRoot, ISoftDeletable
         if (companyAddress == null)
         {
             return Result<Company>.Failure(CompanyError.CompanyAddressNull);
+        }
+
+        if (phoneNumber == null)
+        {
+            return Result<Company>.Failure(CompanyError.CompanyPhoneNumberNull);
         }
 
         if (email == null)
@@ -68,7 +73,7 @@ public class Company : AggregateRoot, ISoftDeletable
         return Result<Company>.Success(company);
     }
 
-    public Result UpdateCompanyInfo(string newName, Address newAddress, string newPhoneNumber)
+    public Result UpdateCompanyInfo(string newName, Address newAddress, PhoneNumber newPhoneNumber)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
@@ -84,6 +89,11 @@ public class Company : AggregateRoot, ISoftDeletable
         if (newAddress == null)
         {
             return Result.Failure(CompanyError.CompanyAddressNull);
+        }
+
+        if (newPhoneNumber == null)
+        {
+            return Result.Failure(CompanyError.CompanyPhoneNumberNull);
         }
 
         Name = newName;

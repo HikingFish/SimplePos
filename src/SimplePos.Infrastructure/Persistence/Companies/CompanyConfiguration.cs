@@ -21,8 +21,14 @@ public class CompanyConfiguration : IEntityTypeConfiguration<Company>
             .IsRequired()           // NOT NULL in PostgreSQL
             .HasMaxLength(200);     // VARCHAR(200) — always set a max length
 
-        builder.Property(c => c.PhoneNumber)
-            .HasMaxLength(20);
+        // OWNED VALUE OBJECT: PhoneNumber
+        builder.OwnsOne(c => c.PhoneNumber, phoneBuilder =>
+        {
+            phoneBuilder.Property(p => p.Value)
+                .HasColumnName("PhoneNumber")
+                .IsRequired()
+                .HasMaxLength(20);
+        });
 
         builder.Property(c => c.IsActive)
             .IsRequired();

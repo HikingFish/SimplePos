@@ -7,6 +7,8 @@ public static class OutletError
         "Outlets.OutletNameEmpty", "Outlet name cannot be empty", ErrorType.Validation);
     public static readonly Error OutletAddressNull = new Error(
         "Outlets.OutletAddressNull", "Outlet address cannot be null", ErrorType.Validation);
+    public static readonly Error OutletPhoneNumberNull = new Error(
+        "Outlets.OutletPhoneNumberNull", "Outlet phone number cannot be null", ErrorType.Validation);
     public static readonly Error AlreadyActive = new Error(
         "Outlets.AlreadyActive", "Outlet is already active", ErrorType.Conflict);
     public static readonly Error AlreadyInactive = new Error(

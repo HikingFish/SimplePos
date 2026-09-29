@@ -919,7 +919,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("CompanyId");
 
-                            b1.ToTable("companies");
+                            b1.ToTable("companies", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CompanyId");
@@ -938,7 +938,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("CompanyId");
 
-                            b1.ToTable("companies");
+                            b1.ToTable("companies", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CompanyId");
@@ -996,7 +996,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("OutletId");
 
-                            b1.ToTable("outlets");
+                            b1.ToTable("outlets", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("OutletId");
@@ -1185,7 +1185,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("users");
+                            b1.ToTable("users", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

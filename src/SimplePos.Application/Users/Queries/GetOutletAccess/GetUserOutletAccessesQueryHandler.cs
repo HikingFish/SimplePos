@@ -42,7 +42,7 @@ public class GetUserOutletAccessesQueryHandler : IQueryHandler<GetUserOutletAcce
                 response.Add(new UserOutletAccessResponse(
                     outlet.OutletId,
                     outlet.Name,
-                    outlet.PhoneNumber,
+                    outlet.PhoneNumber.Value,
                     outlet.OutletAddress.City,
                     outlet.OutletAddress.State
                 ));

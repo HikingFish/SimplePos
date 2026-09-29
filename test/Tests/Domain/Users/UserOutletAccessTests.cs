@@ -10,7 +10,8 @@ public class UserOutletAccessTests
     private User CreateTestUser(Guid companyId, Guid? outletId = null)
     {
         var email = EmailAddress.Create("user@example.com").Data!;
-        return User.Create(outletId, companyId, "testuser", email, "1234567890", "Manager").Data!;
+        var phone = PhoneNumber.Create("1234567890").Data!;
+        return User.Create(outletId, companyId, "testuser", email, phone, "Manager").Data!;
     }
 
     [Fact]

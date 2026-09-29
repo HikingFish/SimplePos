@@ -9,7 +9,7 @@ public class User : ISoftDeletable
     public Guid CompanyId { get; private set; }
     public string Username { get; private set; }
     public EmailAddress Email { get; private set; } 
-    public string? PhoneNumber { get; private set; } 
+    public PhoneNumber? PhoneNumber { get; private set; } 
     public string? UserPosition { get; private set; } 
     public bool IsActive { get; private set; }
     public DateTime? DateTimeLastLogin { get; private set; }
@@ -22,7 +22,7 @@ public class User : ISoftDeletable
     public IReadOnlyCollection<UserOutletAccess> UserOutletAccesses => _userOutletAccesses.AsReadOnly();
     private User() { }
     
-    private User(Guid userId,Guid CompanyId, Guid? OutletId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
+    private User(Guid userId,Guid CompanyId, Guid? OutletId, string Username, EmailAddress Email, PhoneNumber? PhoneNumber, string? UserPosition)
     {
         UserId = userId;
         this.CompanyId = CompanyId;
@@ -38,7 +38,7 @@ public class User : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<User> Create(Guid? OutletId,Guid CompanyId, string Username, EmailAddress Email, string? PhoneNumber, string? UserPosition)
+    public static Result<User> Create(Guid? OutletId,Guid CompanyId, string Username, EmailAddress Email, PhoneNumber? PhoneNumber, string? UserPosition)
     {
         if (string.IsNullOrWhiteSpace(Username))
         {
@@ -65,7 +65,7 @@ public class User : ISoftDeletable
         return Result.Success();
     }
 
-    public Result UpdateUserInfo(EmailAddress newEmail, string newPhoneNumber, string newUserPosition, bool newIsActive)
+    public Result UpdateUserInfo(EmailAddress newEmail, PhoneNumber? newPhoneNumber, string newUserPosition, bool newIsActive)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)

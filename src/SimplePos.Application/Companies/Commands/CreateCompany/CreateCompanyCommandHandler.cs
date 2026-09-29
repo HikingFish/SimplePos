@@ -29,6 +29,8 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
 
         Result<EmailAddress> resultEmail = EmailAddress.Create(command.Email);
 
+        Result<PhoneNumber> resultPhone = PhoneNumber.Create(command.PhoneNumber);
+
         if (resultAddress.IsFailure)
             return resultAddress;
 
@@ -46,7 +48,13 @@ public class CreateCompanyCommandHandler : ICommandHandler<CreateCompanyCommand,
         if (resultEmail.Data is null)
             return Result.Failure(EmailAddressError.EmailAddressNotFound);
 
-        Result<Company> companyResult = Company.Create(command.Name, resultAddress.Data, command.PhoneNumber, resultEmail.Data);
+        if (resultPhone.IsFailure)
+            return resultPhone;
+
+        if (resultPhone.Data is null)
+            return Result.Failure(PhoneNumberError.PhoneNumberNotFound);
+
+        Result<Company> companyResult = Company.Create(command.Name, resultAddress.Data, resultPhone.Data, resultEmail.Data);
 
         if (companyResult.IsFailure)
             return companyResult;

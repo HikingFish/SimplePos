@@ -9,6 +9,8 @@ public static class CompanyError
         "Companies.CompanyAddressNull", "Company address cannot be null", ErrorType.Validation);
     public static readonly Error CompanyEmailNull = new Error(
         "Companies.CompanyEmailNull", "Company email cannot be null", ErrorType.Validation);
+    public static readonly Error CompanyPhoneNumberNull = new Error(
+        "Companies.CompanyPhoneNumberNull", "Company phone number cannot be null", ErrorType.Validation);
     public static readonly Error AlreadyActive = new Error(
         "Companies.AlreadyActive", "Company is already active", ErrorType.Conflict);
     public static readonly Error AlreadyInactive = new Error(

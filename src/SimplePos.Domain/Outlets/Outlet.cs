@@ -8,14 +8,14 @@ public class Outlet : ISoftDeletable
     public Guid CompanyId { get; private set; }
     public string Name { get; private set; } 
     public Address OutletAddress { get; private set; } 
-    public string PhoneNumber { get; private set; } 
+    public PhoneNumber PhoneNumber { get; private set; } 
     public DateTime DateTimeCreated { get; private set; }
     public DateTime? DateTimeLastOnline { get; private set; }
     public bool IsActive { get; private set; }
     public bool SoftDeleted { get; private set; }
     public DateTime? DateTimeSoftDeleted { get; private set; }
     private Outlet() { }
-    private Outlet(Guid outletId, Guid companyId, string name, Address outletAddress, string phoneNumber, bool isActive, bool softDeleted)
+    private Outlet(Guid outletId, Guid companyId, string name, Address outletAddress, PhoneNumber phoneNumber, bool isActive, bool softDeleted)
     {
         OutletId = outletId;
         CompanyId = companyId;
@@ -29,7 +29,7 @@ public class Outlet : ISoftDeletable
         DateTimeSoftDeleted = null;
     }
 
-    public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, string phoneNumber)
+    public static Result<Outlet> Create(Guid companyId, string name, Address outletAddress, PhoneNumber phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -41,10 +41,15 @@ public class Outlet : ISoftDeletable
             return Result<Outlet>.Failure(OutletError.OutletAddressNull);
         }
 
+        if (phoneNumber == null)
+        {
+            return Result<Outlet>.Failure(OutletError.OutletPhoneNumberNull);
+        }
+
         return Result<Outlet>.Success(new Outlet(Guid.CreateVersion7(), companyId, name, outletAddress, phoneNumber, true, false));
     }
 
-    public Result UpdateOutletInfo(string newName, Address newAddress, string newPhoneNumber)
+    public Result UpdateOutletInfo(string newName, Address newAddress, PhoneNumber newPhoneNumber)
     {
         var statusResult = EnsureNotSoftDeleted();
         if (!statusResult.IsSuccess)
@@ -60,6 +65,11 @@ public class Outlet : ISoftDeletable
         if (newAddress == null)
         {
             return Result.Failure(OutletError.OutletAddressNull);
+        }
+
+        if (newPhoneNumber == null)
+        {
+            return Result.Failure(OutletError.OutletPhoneNumberNull);
         }
 
         Name = newName;

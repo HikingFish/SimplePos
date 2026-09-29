@@ -1,4 +1,4 @@
-﻿using SimplePos.Application.Abstractions.Messaging;
+using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using SimplePos.Domain.Outlets;
@@ -59,13 +59,13 @@ public class GetCurrentUserQueryHandler : IQueryHandler<GetCurrentUserQuery, Res
             }
         }
 
-        CurrentCompany currentCompany = new CurrentCompany(companyResult.Name, companyResult.Email.Value, companyResult.PhoneNumber);
+        CurrentCompany currentCompany = new CurrentCompany(companyResult.Name, companyResult.Email.Value, companyResult.PhoneNumber.Value);
 
         CurrentOutlet? currentOutlet = null;
         if(outletResult != null)
-            currentOutlet = new CurrentOutlet(outletResult.Name, outletResult?.PhoneNumber);
+            currentOutlet = new CurrentOutlet(outletResult.Name, outletResult?.PhoneNumber.Value);
 
-        CurrentUserResponse currentUserResponse = new CurrentUserResponse(userResult.Username, userResult.Email.Value, userResult.PhoneNumber, userResult.UserPosition, userResult.IsActive, currentCompany, currentOutlet, permissionNameResult);
+        CurrentUserResponse currentUserResponse = new CurrentUserResponse(userResult.Username, userResult.Email.Value, userResult.PhoneNumber?.Value, userResult.UserPosition, userResult.IsActive, currentCompany, currentOutlet, permissionNameResult);
         return Result<CurrentUserResponse>.Success(currentUserResponse);
     }
 }

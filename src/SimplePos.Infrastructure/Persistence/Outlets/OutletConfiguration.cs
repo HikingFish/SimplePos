@@ -23,8 +23,14 @@ public class OutletConfiguration : IEntityTypeConfiguration<Outlet>
             .IsRequired()
             .HasMaxLength(200);
 
-        builder.Property(o => o.PhoneNumber)
-            .HasMaxLength(20);
+        // Owned Value Object: PhoneNumber
+        builder.OwnsOne(o => o.PhoneNumber, phoneBuilder =>
+        {
+            phoneBuilder.Property(p => p.Value)
+                .HasColumnName("PhoneNumber")
+                .IsRequired()
+                .HasMaxLength(20);
+        });
 
         builder.Property(o => o.DateTimeCreated)
             .IsRequired();

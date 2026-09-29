@@ -39,7 +39,11 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         if (!companyEmail.IsSuccess || companyEmail.Data == null)
             return Result.Failure(companyEmail.Error);
 
-        var companyResult = Company.Create(command.CompanyName, companyAddress.Data, command.CompanyPhoneNumber, companyEmail.Data);
+        var companyPhone = PhoneNumber.Create(command.CompanyPhoneNumber);
+        if (!companyPhone.IsSuccess || companyPhone.Data == null)
+            return Result.Failure(companyPhone.Error);
+
+        var companyResult = Company.Create(command.CompanyName, companyAddress.Data, companyPhone.Data, companyEmail.Data);
         if (!companyResult.IsSuccess || companyResult.Data == null)
             return Result.Failure(companyResult.Error);
 
@@ -47,7 +51,7 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         if (!outletAddress.IsSuccess || outletAddress.Data == null)
             return Result.Failure(outletAddress.Error);
 
-        var outletResult = Outlet.Create(companyResult.Data.CompanyId,command.CompanyName + "HQ", outletAddress.Data, command.CompanyPhoneNumber);
+        var outletResult = Outlet.Create(companyResult.Data.CompanyId, command.CompanyName + "HQ", outletAddress.Data, companyPhone.Data);
         if (!outletResult.IsSuccess || outletResult.Data == null)
             return Result.Failure(outletResult.Error);
 
@@ -55,7 +59,16 @@ public class RegisterBusinessCommandHandler : ICommandHandler<RegisterBusinessCo
         if (!userEmailAddress.IsSuccess || userEmailAddress.Data == null)
             return Result.Failure(userEmailAddress.Error);
 
-        var userResult = User.Create(outletResult.Data.OutletId, companyResult.Data.CompanyId, command.Username, userEmailAddress.Data, command.PhoneNumber, "Administrator");
+        PhoneNumber? userPhone = null;
+        if (!string.IsNullOrWhiteSpace(command.PhoneNumber))
+        {
+            var userPhoneResult = PhoneNumber.Create(command.PhoneNumber);
+            if (!userPhoneResult.IsSuccess || userPhoneResult.Data == null)
+                return Result.Failure(userPhoneResult.Error);
+            userPhone = userPhoneResult.Data;
+        }
+
+        var userResult = User.Create(outletResult.Data.OutletId, companyResult.Data.CompanyId, command.Username, userEmailAddress.Data, userPhone, "Administrator");
         if (!userResult.IsSuccess || userResult.Data == null)
             return Result.Failure(userResult.Error);
 

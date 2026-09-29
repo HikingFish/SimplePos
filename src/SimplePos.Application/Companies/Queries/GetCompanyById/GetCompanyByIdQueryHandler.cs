@@ -1,4 +1,4 @@
-﻿using SimplePos.Application.Abstractions.Messaging;
+using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using System;
@@ -28,7 +28,7 @@ namespace SimplePos.Application.Companies.Queries.GetCompanyById
             CompanyResponse companyResponse = new CompanyResponse(
                 companyResult.CompanyId, 
                 companyResult.Name, 
-                companyResult.PhoneNumber, 
+                companyResult.PhoneNumber.Value, 
                 companyResult.CompanyAddress.Street, 
                 companyResult.CompanyAddress.City, 
                 companyResult.CompanyAddress.State, 

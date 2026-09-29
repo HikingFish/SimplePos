@@ -1,21 +1,24 @@
 using SimplePos.Application.Abstractions;
 using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Application.Companies.Commands.CreateCompany;
+using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.DomainEvent;
 using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Domain.Companies;
 using SimplePos.Domain.Companies.Events;
-using SimplePos.Domain.Common.DomainEvent;
 using Xunit;
 using NSubstitute;
 
-public class CreateCompanyCommandHandlerTests
+namespace Tests.Application.Companies.Commands.CreateCompany;
+
+public class CreateCommandHandlerTests
 {
     private readonly IDomainEventDispatcher _domainEventDispatcherMock;
     private readonly ICompanyRepository _companyRepositoryMock;
     private readonly IUnitOfWork _unitOfWorkMock;
     private readonly CreateCompanyCommandHandler _handler;
 
-    public CreateCompanyCommandHandlerTests()
+    public CreateCommandHandlerTests()
     {
         _domainEventDispatcherMock = Substitute.For<IDomainEventDispatcher>();
         _companyRepositoryMock = Substitute.For<ICompanyRepository>();
@@ -27,6 +30,7 @@ public class CreateCompanyCommandHandlerTests
             _unitOfWorkMock
         );
     }
+
     [Fact]
     public async Task HandleAsync_ShouldReturnSuccess_AndPublishEvent_WhenCommandIsValid()
     {
@@ -51,6 +55,7 @@ public class CreateCompanyCommandHandlerTests
             Arg.Any<CancellationToken>()
         );
     }
+
     [Fact]
     public async Task HandleAsync_ShouldReturnFailure_WhenEmailIsInvalid()
     {
@@ -69,6 +74,33 @@ public class CreateCompanyCommandHandlerTests
         Result result = await _handler.HandleAsync(command, CancellationToken.None);
         // Assert
         Assert.True(result.IsFailure);
+        
+        // Verify: Event dispatcher was NOT called because validation failed early
+        await _domainEventDispatcherMock.DidNotReceive().PublishAsync(
+            Arg.Any<IDomainEvent>(),
+            Arg.Any<CancellationToken>()
+        );
+    }
+
+    [Fact]
+    public async Task HandleAsync_ShouldReturnFailure_WhenPhoneNumberIsInvalid()
+    {
+        // Arrange
+        var command = new CreateCompanyCommand(
+            Name: "Acme Corp",
+            PhoneNumber: "invalid-phone",
+            Street: "123 Main St",
+            City: "Kuala Lumpur",
+            State: "WP",
+            PostalCode: "50450",
+            Country: "Malaysia",
+            Email: "info@acme.com"
+        );
+        // Act
+        Result result = await _handler.HandleAsync(command, CancellationToken.None);
+        // Assert
+        Assert.True(result.IsFailure);
+        Assert.Equal(PhoneNumberError.InvalidFormat, result.Error);
         
         // Verify: Event dispatcher was NOT called because validation failed early
         await _domainEventDispatcherMock.DidNotReceive().PublishAsync(

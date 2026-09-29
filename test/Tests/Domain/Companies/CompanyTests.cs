@@ -13,6 +13,9 @@ public class CompanyTests
     private EmailAddress CreateValidEmail() => 
         EmailAddress.Create("John@gmail.com").Data!;
 
+    private PhoneNumber CreateValidPhone() => 
+        PhoneNumber.Create("012345678").Data!;
+
     [Fact]
     public void Create_ShouldReturnCompany_WhenInputIsValid()
     {
@@ -20,7 +23,7 @@ public class CompanyTests
         string name = "John's Food";
         Address address = CreateValidAddress();
         EmailAddress emailAddress = CreateValidEmail();
-        string phoneNumber = "012345678";
+        PhoneNumber phoneNumber = CreateValidPhone();
         var before = DateTime.UtcNow;
 
         // Act
@@ -52,7 +55,7 @@ public class CompanyTests
         // Arrange
         Address address = CreateValidAddress();
         EmailAddress emailAddress = CreateValidEmail();
-        string phoneNumber = "012345678";
+        PhoneNumber phoneNumber = CreateValidPhone();
 
         // Act
         Result<Company> result = Company.Create(name!, address, phoneNumber, emailAddress);
@@ -68,7 +71,7 @@ public class CompanyTests
     {
         // Arrange
         EmailAddress emailAddress = CreateValidEmail();
-        string phoneNumber = "012345678";
+        PhoneNumber phoneNumber = CreateValidPhone();
         string name = "John's Food";
 
         // Act
@@ -85,7 +88,7 @@ public class CompanyTests
     {
         // Arrange
         Address address = CreateValidAddress();
-        string phoneNumber = "012345678";
+        PhoneNumber phoneNumber = CreateValidPhone();
         string name = "John's Food";
 
         // Act
@@ -98,20 +101,37 @@ public class CompanyTests
     }
 
     [Fact]
+    public void Create_ShouldFail_WhenCompanyPhoneNumberNull()
+    {
+        // Arrange
+        Address address = CreateValidAddress();
+        EmailAddress emailAddress = CreateValidEmail();
+        string name = "John's Food";
+
+        // Act
+        Result<Company> result = Company.Create(name, address, null!, emailAddress);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.Data);
+        Assert.Equal(CompanyError.CompanyPhoneNumberNull, result.Error);
+    }
+
+    [Fact]
     public void UpdateCompanyInfo_ShouldReturnSuccess_WhenInputIsValid()
     {
         // Arrange
         string name = "John's Food";
         Address address = CreateValidAddress();
         EmailAddress emailAddress = CreateValidEmail();
-        string phoneNumber = "012345678";
+        PhoneNumber phoneNumber = CreateValidPhone();
         Result<Company> companyResult = Company.Create(name, address, phoneNumber, emailAddress);
         Assert.True(companyResult.IsSuccess);
         var company = companyResult.Data!;
 
         string newName = "Jack's Food";
         Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia").Data!;
-        string newPhoneNumber = "012987654";
+        PhoneNumber newPhoneNumber = PhoneNumber.Create("012987654").Data!;
 
         // Act
         Result result = company.UpdateCompanyInfo(newName, newAddress, newPhoneNumber);
@@ -130,11 +150,11 @@ public class CompanyTests
     public void UpdateCompanyInfo_ShouldFail_WhenNameEmpty(string? newName)
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         Address newAddress = Address.Create("Jalan 2", "Batu Caves", "Selangor", "12567", "Malaysia").Data!;
 
         // Act
-        Result result = company.UpdateCompanyInfo(newName!, newAddress, "012987654");
+        Result result = company.UpdateCompanyInfo(newName!, newAddress, CreateValidPhone());
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -145,10 +165,10 @@ public class CompanyTests
     public void UpdateCompanyInfo_ShouldFail_WhenAddressNull()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
 
         // Act
-        Result result = company.UpdateCompanyInfo("Jack's Food", null!, "012987654");
+        Result result = company.UpdateCompanyInfo("Jack's Food", null!, CreateValidPhone());
 
         // Assert
         Assert.False(result.IsSuccess);
@@ -156,10 +176,24 @@ public class CompanyTests
     }
 
     [Fact]
+    public void UpdateCompanyInfo_ShouldFail_WhenPhoneNumberNull()
+    {
+        // Arrange
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
+
+        // Act
+        Result result = company.UpdateCompanyInfo("Jack's Food", CreateValidAddress(), null!);
+
+        // Assert
+        Assert.False(result.IsSuccess);
+        Assert.Equal(CompanyError.CompanyPhoneNumberNull, result.Error);
+    }
+
+    [Fact]
     public void UpdateEmail_ShouldReturnSuccess_WhenEmailIsValid()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         var newEmail = EmailAddress.Create("jack@gmail.com").Data!;
 
         // Act
@@ -174,7 +208,7 @@ public class CompanyTests
     public void UpdateEmail_ShouldFail_WhenEmailNull()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
 
         // Act
         Result result = company.UpdateEmail(null!);
@@ -188,7 +222,7 @@ public class CompanyTests
     public void UpdateToNotActiveStatus_ShouldReturnSuccess_WhenActive()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         Assert.True(company.IsActive);
 
         // Act
@@ -203,7 +237,7 @@ public class CompanyTests
     public void UpdateToNotActiveStatus_ShouldFail_WhenAlreadyInactive()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         company.UpdateToNotActiveStatus();
         Assert.False(company.IsActive);
 
@@ -219,7 +253,7 @@ public class CompanyTests
     public void UpdateToActiveStatus_ShouldReturnSuccess_WhenInactive()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         company.UpdateToNotActiveStatus();
         Assert.False(company.IsActive);
 
@@ -235,7 +269,7 @@ public class CompanyTests
     public void UpdateToActiveStatus_ShouldFail_WhenAlreadyActive()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         Assert.True(company.IsActive);
 
         // Act
@@ -250,7 +284,7 @@ public class CompanyTests
     public void UpdateLastOnline_ShouldReturnSuccess_AndUpdateTimestamp()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         var beforeUpdate = DateTime.UtcNow;
 
         // Act
@@ -266,7 +300,7 @@ public class CompanyTests
     public void SoftDelete_ShouldReturnSuccess_AndSetFlags()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         var beforeDelete = DateTime.UtcNow;
 
         // Act
@@ -285,11 +319,11 @@ public class CompanyTests
     public void Operations_ShouldFail_WhenCompanyIsSoftDeleted()
     {
         // Arrange
-        var company = Company.Create("John's Food", CreateValidAddress(), "012345678", CreateValidEmail()).Data!;
+        var company = Company.Create("John's Food", CreateValidAddress(), CreateValidPhone(), CreateValidEmail()).Data!;
         company.SoftDelete();
 
         // Act & Assert
-        Result updateInfoResult = company.UpdateCompanyInfo("New Name", CreateValidAddress(), "123");
+        Result updateInfoResult = company.UpdateCompanyInfo("New Name", CreateValidAddress(), CreateValidPhone());
         Assert.False(updateInfoResult.IsSuccess);
         Assert.Equal(CompanyError.SoftDeleted, updateInfoResult.Error);
 
