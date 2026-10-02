@@ -1,5 +1,6 @@
 ﻿using SimplePos.Application.Abstractions.Messaging;
 using SimplePos.Domain.Common;
+using SimplePos.Domain.Common.ResultPattern;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,5 +16,5 @@ namespace SimplePos.Application.Outlets.Commands.CreateOutlet
         string PostalCode,
         string Country,
         string phoneNumber
-        ) : ICommand;
+        ) : ICommand<Result<Guid>>;
 }
