@@ -8,7 +8,9 @@ Full list of REST APIs derived from the domain model. Endpoints marked with ✅ 
 
 | Status | Method | Endpoint | Description |
 |--------|--------|----------|-------------|
-| ✅ | `POST` | `/api/auth/login` | Login (returns JWT token) |
+| ✅ | `POST` | `/api/auth/login` | Login (returns JWT token + refresh token) |
+| ✅ | `POST` | `/api/auth/refresh` | Refresh access token using refresh token (with token rotation) |
+| ✅ | `POST` | `/api/auth/revoke` | Revoke a refresh token (logout) |
 | 🔲 | `GET` | `/api/auth/me` | Get current logged-in user profile, company/outlet info, and permissions |
 | ✅ | `POST` | `/api/register-business/` | Register a new business (company + admin user) |
 

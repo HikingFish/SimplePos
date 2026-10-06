@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SimplePos.Application.Abstractions.Identity;
 using SimplePos.Domain.Companies;
@@ -48,6 +48,14 @@ namespace SimplePos.Infrastructure.Identity
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
+        }
+
+        public string GenerateRefreshToken()
+        {
+            var randomBytes = new byte[64];
+            using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+            rng.GetBytes(randomBytes);
+            return Convert.ToBase64String(randomBytes);
         }
     }
 }

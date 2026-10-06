@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SimplePos.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using SimplePos.Infrastructure.Persistence;
 namespace SimplePos.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20261006074523_AddRefreshToken")]
+    partial class AddRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -942,7 +945,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("CompanyId");
 
-                            b1.ToTable("companies", (string)null);
+                            b1.ToTable("companies");
 
                             b1.WithOwner()
                                 .HasForeignKey("CompanyId");
@@ -961,7 +964,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("CompanyId");
 
-                            b1.ToTable("companies", (string)null);
+                            b1.ToTable("companies");
 
                             b1.WithOwner()
                                 .HasForeignKey("CompanyId");
@@ -980,7 +983,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("CompanyId");
 
-                            b1.ToTable("companies", (string)null);
+                            b1.ToTable("companies");
 
                             b1.WithOwner()
                                 .HasForeignKey("CompanyId");
@@ -1041,7 +1044,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("OutletId");
 
-                            b1.ToTable("outlets", (string)null);
+                            b1.ToTable("outlets");
 
                             b1.WithOwner()
                                 .HasForeignKey("OutletId");
@@ -1060,7 +1063,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("OutletId");
 
-                            b1.ToTable("outlets", (string)null);
+                            b1.ToTable("outlets");
 
                             b1.WithOwner()
                                 .HasForeignKey("OutletId");
@@ -1252,7 +1255,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("users", (string)null);
+                            b1.ToTable("users");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");
@@ -1271,7 +1274,7 @@ namespace SimplePos.Infrastructure.Migrations
 
                             b1.HasKey("UserId");
 
-                            b1.ToTable("users", (string)null);
+                            b1.ToTable("users");
 
                             b1.WithOwner()
                                 .HasForeignKey("UserId");

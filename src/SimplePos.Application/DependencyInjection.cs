@@ -8,6 +8,9 @@ using SimplePos.Domain.Common.ResultPattern;
 using SimplePos.Application.Abstractions;
 using SimplePos.Application.Registrations.Commands.RegisterBusiness;
 using SimplePos.Application.Auths.Commands.Login;
+using SimplePos.Application.Auths.Commands.RefreshToken;
+using SimplePos.Application.Auths.Commands.RevokeToken;
+using SimplePos.Application.Auths.Common;
 using SimplePos.Application.Auths.Queries;
 
 using SimplePos.Application.Users.Queries.GetOutletAccess;
@@ -84,7 +87,9 @@ public static class DependencyInjection
 
         services.AddScoped<ICommandHandler<RegisterBusinessCommand, Result>, RegisterBusinessCommandHandler>();
 
-        services.AddScoped<ICommandHandler<LoginCommand, Result<string>>, LoginCommandHandler>();
+        services.AddScoped<ICommandHandler<LoginCommand, Result<AuthResponse>>, LoginCommandHandler>();
+        services.AddScoped<ICommandHandler<RefreshTokenCommand, Result<AuthResponse>>, RefreshTokenCommandHandler>();
+        services.AddScoped<ICommandHandler<RevokeTokenCommand, Result>, RevokeTokenCommandHandler>();
         services.AddScoped<IQueryHandler<GetCurrentUserQuery, Result<CurrentUserResponse>>, GetCurrentUserQueryHandler>();
 
         //Sale Commands and Queries

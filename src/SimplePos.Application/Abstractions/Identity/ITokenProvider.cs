@@ -1,4 +1,4 @@
-﻿using SimplePos.Domain.Companies;
+using SimplePos.Domain.Companies;
 using SimplePos.Domain.Users;
 using System;
 using System.Collections.Generic;
@@ -8,4 +8,5 @@ namespace SimplePos.Application.Abstractions.Identity;
 public interface ITokenProvider
 {
     string CreateToken(User user);
+    string GenerateRefreshToken();
 }

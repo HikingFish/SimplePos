@@ -10,6 +10,7 @@ using SimplePos.Domain.Products;
 using SimplePos.Domain.Sales;
 using SimplePos.Domain.Taxes;
 using SimplePos.Domain.Users;
+using SimplePos.Infrastructure.Identity;
 
 namespace SimplePos.Infrastructure.Persistence;
 
@@ -30,6 +31,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
     public DbSet<UserOutletAccess> UserOutletAccesses => Set<UserOutletAccess>();
     public DbSet<OutletProductAvailability> OutletProductAvailabilities => Set<OutletProductAvailability>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
